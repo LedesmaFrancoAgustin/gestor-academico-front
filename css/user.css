@@ -1,0 +1,1665 @@
+@charset "UTF-8";
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+.docente-home-content {
+  max-width: 1400px;
+  padding-top: 90px; /* ajustá según la altura real del header */
+}
+
+/* =========================
+   BIENVENIDA
+========================= */
+.docente-welcome {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: #fff;
+  padding: 2rem 1rem;
+  border-radius: 16px;
+}
+
+.docente-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.docente-subtitle {
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+/* =========================
+   ESTADÍSTICAS
+========================= */
+.docente-stats {
+  justify-content: space-between;
+}
+
+.docente-stat-card {
+  flex: 1;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.docente-stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.docente-stat-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.docente-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.stat-warning .docente-stat-number {
+  color: #f59e0b;
+}
+
+/* =========================
+   ACCIONES RÁPIDAS
+========================= */
+.docente-actions {
+  justify-content: space-between;
+}
+
+.docente-action-card {
+  flex: 1;
+  min-width: 180px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.2rem;
+  text-align: center;
+  text-decoration: none;
+  color: #212529;
+  transition: all 0.2s ease;
+}
+
+.docente-action-card i {
+  font-size: 1.8rem;
+  color: #1e3a8a;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.docente-action-card p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.docente-action-card:hover {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.docente-action-card:hover i {
+  color: #fff;
+}
+
+/* =========================
+   MATERIAS
+========================= */
+.docente-materias h3 {
+  font-weight: 600;
+}
+
+.docente-materia-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  height: 100%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.docente-materia-card:hover {
+  transform: translateY(-4px);
+}
+
+.docente-materia-card h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.docente-materia-card p {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.docente-materia-card .badge {
+  font-size: 0.75rem;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .docente-home-content {
+    padding-top: 120px;
+  }
+  .docente-stats,
+  .docente-actions {
+    gap: 1rem;
+  }
+  .docente-action-card,
+  .docente-stat-card {
+    min-width: 100%;
+  }
+  .docente-welcome {
+    padding: 1.5rem 1rem;
+  }
+}
+/* =========================
+   SIDEBAR DOCENTE
+========================= */
+.teacher-sidebar-container {
+  position: fixed;
+  top: 90px;
+  bottom: 90px;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+}
+
+.teacher-sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #f8fafc, #e0f2fe);
+  height: 100%;
+  padding: 1.2rem 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #cbd5e1;
+  border-radius: 0 12px 12px 0;
+}
+
+/* User info */
+.teacher-sidebar-user {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.teacher-sidebar-avatar {
+  font-size: 3rem;
+  margin-right: 0.8rem;
+  color: #2563eb;
+  transition: transform 0.2s ease;
+}
+
+.teacher-sidebar-avatar:hover {
+  transform: scale(1.1);
+}
+
+.teacher-sidebar-user-info h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.teacher-sidebar-user-info span {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Navigation */
+.teacher-sidebar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  color: #1e293b;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.teacher-sidebar-nav .nav-link i {
+  margin-right: 0.75rem;
+  color: #253B56;
+  transition: transform 0.2s ease;
+}
+
+.teacher-sidebar-nav .nav-link:hover i {
+  transform: translateX(3px);
+}
+
+.teacher-sidebar-nav .nav-link:hover,
+.teacher-sidebar-nav .nav-item.active .nav-link {
+  background: #bae6fd;
+  color: #1e40af;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+}
+
+/* Toggle desktop */
+.teacher-sidebar-toggle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -20px;
+  width: 30px;
+  background: #253B56;
+  color: #fff;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.teacher-sidebar-toggle:hover {
+  background: #0F5793;
+}
+
+/* Collapsed */
+.teacher-sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.teacher-sidebar.collapsed .teacher-sidebar-user-info,
+.teacher-sidebar.collapsed .teacher-sidebar-nav {
+  display: none;
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  .teacher-sidebar {
+    position: fixed;
+    top: 90px;
+    bottom: 90px;
+    left: -260px;
+    width: 260px;
+    transition: left 0.3s ease;
+    height: auto;
+  }
+  .teacher-sidebar.open {
+    left: 0;
+  }
+  .teacher-sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: 2px;
+    width: 35px;
+    height: 60px;
+    border-radius: 8px;
+    z-index: 1100;
+    transition: left 0.3s ease;
+  }
+  .teacher-sidebar.open + .teacher-sidebar-toggle {
+    left: 260px;
+  }
+}
+/* =========================
+   Layout general
+========================= */
+.courses-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7ff, #eef1ff);
+  padding: 2rem;
+  padding-top: 90px !important; /* ajustá según la altura real del header */
+}
+
+/* =========================
+   Centrado del contenido
+========================= */
+.courses-wrapper {
+  max-width: 1200px; /* ancho cómodo tipo dashboard */
+  margin: 0 auto; /* centra horizontal */
+}
+
+/* =========================
+   Header
+========================= */
+.courses-header {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #10b981; /* verde profesional */
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(52, 211, 153, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Título */
+.courses-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #065f46; /* verde profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Subtítulo */
+.courses-header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+.courses-header {
+  animation: fadeSlideIn 0.4s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* =========================
+   Grid cursos
+========================= */
+.courses-container {
+  width: 100%;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* =========================
+   Card curso
+========================= */
+.course-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(96, 165, 250, 0.04));
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  border-radius: 16px;
+  padding: 1.4rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================
+   Card header
+========================= */
+.course-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.course-badge {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.course-year {
+  font-size: 0.8rem;
+  color: #475569; /* slate */
+}
+
+/* =========================
+   Título
+========================= */
+.course-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f3a5f;
+  margin-bottom: 0.8rem;
+}
+
+/* =========================
+   Info
+========================= */
+.course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-bottom: 1.2rem;
+}
+
+/* =========================
+   Botón
+========================= */
+.course-btn {
+  border: none;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: #ffffff;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.25);
+  transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.course-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(59, 130, 246, 0.35);
+}
+
+.course-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 576px) {
+  .courses-page {
+    padding: 1.2rem;
+  }
+  .courses-header h1 {
+    font-size: 1.5rem;
+  }
+}
+/* =========================
+   Card students
+========================= */
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.student-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  word-break: break-word; /* 🔹 hace que el texto largo se rompa */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.student-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.student-card h4 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.1rem;
+}
+
+.student-card p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.student-card .status {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.student-card .status.active {
+  color: green;
+}
+
+.student-card .status.inactive {
+  color: red;
+}
+
+/* Responsive: móvil */
+@media (max-width: 600px) {
+  .student-card {
+    padding: 0.8rem;
+  }
+  .student-card h4 {
+    font-size: 1rem;
+  }
+}
+/* =========================
+   Modal Student - Mobile
+========================= */
+/* Fondo del modal */
+.students-modal {
+  display: none; /* 🔹 siempre oculto al inicio */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  overflow-y: auto;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
+}
+
+/* Contenido del modal */
+.students-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  padding: 1.5rem 1.6rem;
+  margin-top: 2rem; /* espacio desde arriba */
+  box-shadow: 0 30px 70px rgba(59, 130, 246, 0.18);
+  animation: modalFadeUp 0.35s ease;
+  position: relative; /* para colocar botón de cerrar */
+}
+
+/* Botón de cerrar */
+.close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+
+/* Grid de alumnos */
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/*-------------------Card Mobile--------------------------*/
+.student-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Header */
+.student-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.student-index {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #5a3df0;
+}
+
+/* Nombre */
+.student-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* DNI */
+.student-dni {
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: #374151;
+}
+
+/* Email */
+.student-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Estado */
+.status.active {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.status.inactive {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/*---------------------------------------------------------*/
+.close-btn {
+  border: none;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.close-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: rotate(90deg) scale(1.05);
+}
+
+/* Responsive móvil */
+@media (max-width: 600px) {
+  .student-card {
+    padding: 0.8rem;
+  }
+  .student-card h4 {
+    font-size: 1rem;
+  }
+}
+/* =========================
+   Modal Student - desktop
+========================= */
+/* =========================
+   Tabla alumnos – dashboard
+========================= */
+.students-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  position: relative;
+}
+
+.students-modal-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 48px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.08);
+}
+
+.students-table thead th {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: #ffffff;
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+}
+
+.students-table tbody td {
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.students-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.students-table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.06);
+}
+
+.student-index {
+  text-align: center;
+  font-weight: 600;
+  color: #3b82f6;
+  width: 50px;
+}
+
+.student-index {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.students-table tr:hover .student-index {
+  color: #1d4ed8;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.student-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.student-dni {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.student-dni {
+  font-family: "JetBrains Mono", monospace;
+  color: #1f2937;
+}
+
+.student-dni:contains("-") {
+  color: #9ca3af;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.status.inactive {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+/* Cards móviles */
+@media (max-width: 768px) {
+  .students-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+}
+/* Header Materias*/
+.subject-header {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #22c55e; /* verde principal */
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(74, 222, 128, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Título */
+.subject-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #14532d; /* verde profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Subtítulo */
+.subject-header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+/*------------------ Card Materias------------------*/
+.subjects-container {
+  margin-top: 1.5rem;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.subject-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(96, 165, 250, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.subject-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.subject-card-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.6rem;
+}
+
+.subject-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #1e3a8a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.subject-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+@media (max-width: 480px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+  .subject-card {
+    padding: 1rem;
+  }
+}
+/* =========================
+   Página Cargar Notas
+========================= */
+.grades-page {
+  padding: 1.5rem;
+  padding-top: 90px;
+}
+
+.grades-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================
+   Header
+========================= */
+.grades-header {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Título */
+.grades-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e3a8a; /* azul profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Subtítulo */
+.grades-header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+/* =========================
+   Selector de curso
+========================= */
+/* Contenedor general */
+.grades-selector {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.12));
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Label moderno */
+.select-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  padding-left: 0.2rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Select */
+.grades-select {
+  appearance: none;
+  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  font-size: 0.95rem;
+  background: #fff;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Flecha */
+.select-group::after {
+  content: "▾";
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.65rem;
+  font-size: 0.9rem;
+  color: #3b82f6;
+  pointer-events: none;
+}
+
+/* Hover */
+.grades-select:hover {
+  border-color: #3b82f6;
+}
+
+/* Focus */
+.grades-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* Disabled */
+.grades-select:disabled {
+  background-color: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .grades-selector {
+    padding: 0.8rem;
+    gap: 0.8rem;
+  }
+  .select-group {
+    width: 100%;
+  }
+}
+/* =========================
+   Contenedor de notas
+========================= */
+#gradesContainer {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+
+/* =========================
+   Tabla (Desktop)
+========================= */
+.grades-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.grades-table thead {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.grades-table thead th {
+  padding: 0.9rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.grades-table thead th:first-child {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.grades-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.grades-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.grades-table tbody tr:hover {
+  background: #eef2ff;
+}
+
+.grades-table td {
+  padding: 0.7rem 0.6rem;
+  font-size: 0.85rem;
+  color: #1e293b;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.grades-table td:first-child {
+  font-weight: 600;
+  text-align: left;
+  padding-left: 1rem;
+  color: #0f172a;
+}
+
+.grades-table td:nth-child(2) {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.grade-input {
+  width: 56px;
+  padding: 0.35rem 0.4rem;
+  font-size: 0.85rem;
+  text-align: center;
+  border-radius: 8px;
+  border: 1.5px solid #c7d2fe;
+  background: #ffffff;
+  color: #1e3a8a;
+  transition: all 0.15s ease;
+}
+
+.grade-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.grade-readonly {
+  display: inline-block;
+  min-width: 60px;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  background: #e2e8f0;
+  text-align: center;
+}
+
+/* Columna índice */
+.col-index {
+  width: 42px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+/* Header del índice */
+.grades-table thead .col-index {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Body del índice */
+.grades-table tbody .col-index {
+  background: #f1f5f9;
+  color: #334155;
+  border-right: 1px solid #e5e7eb;
+}
+
+/*Indicador visual de cambios*/
+.grade-input.modified {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.grade-input.input-error {
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.08);
+}
+
+.grade-input.modified:not(.input-error) {
+  border: 2px solid #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* =========================
+   Cards (Mobile)
+========================= */
+/* Contenedor general */
+.grades-cards {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Card */
+.grade-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Header alumno */
+.grade-card-header {
+  margin-bottom: 0.8rem;
+}
+
+.grade-card-header h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.grade-card-header .dni {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Body */
+.grade-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Fila nota */
+.grade-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Label izquierda */
+.grade-field label {
+  font-size: 0.85rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Estado modificado (clave visual) */
+.grade-input.modified {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+/* Mejor toque táctil */
+@media (max-width: 480px) {
+  .grade-input {
+    width: 60px;
+  }
+}
+/* Base */
+.grade-input,
+.mobile-grade-input {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* 🔴 1 a 4 */
+.grade-low {
+  background-color: rgba(239, 68, 68, 0.12); /* rojo suave */
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* 🟡 5 a 6 */
+.grade-mid {
+  background-color: rgba(234, 179, 8, 0.15); /* amarillo suave */
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+/* 🟢 7 a 10 */
+.grade-high {
+  background-color: rgba(34, 197, 94, 0.15); /* verde suave */
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+/* =========================
+   Acciones
+========================= */
+.grades-actions {
+  margin-top: 2rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #3b82f6; /* mismo azul */
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Contenido */
+.actions-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Título */
+.grades-actions h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e3a8a; /* mismo azul profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Texto */
+.grades-actions p {
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+/* Botón */
+.grades-actions button {
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+#saveGradesBtn {
+  padding: 0.65rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+#saveGradesBtn:not(:disabled):hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
+}
+
+#saveGradesBtn:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+#saveGradesBtn:disabled {
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #cbd5f5, #e0e7ff);
+  color: #64748b;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .grades-actions button {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  .grades-header h1 {
+    font-size: 1.6rem;
+  }
+  .grades-actions {
+    text-align: center;
+  }
+  /*
+    .grade-input {
+      width: 100%;
+    }
+      */
+}
+/* =========================
+   CONTENEDOR PRINCIPAL
+========================= */
+.config-page {
+  padding: 2rem 1rem;
+  padding-top: 90px;
+  background: #f8fafc; /* gris muy suave de fondo */
+}
+
+.config-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* =========================
+   HEADER CONFIGURACIÓN
+========================= */
+.config-header {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.5rem;
+  border-left: 5px solid #94a3b8; /* gris medio, reemplaza el azul */
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.05));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+.config-header h1 {
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.config-header p {
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* =========================
+   SECCIONES CONFIGURACIÓN
+========================= */
+.config-section {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.06), rgba(148, 163, 184, 0.03)); /* degradé gris suave */
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* BORDER BOTTOM DE TITULOS */
+.config-section h2 {
+  margin-bottom: 1rem;
+  color: #475569; /* gris oscuro para títulos */
+  font-weight: 600;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+/* =========================
+   GRUPOS DE FORMULARIO
+========================= */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.config-input {
+  width: 100%;
+}
+
+.inline-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Contenedor input + botón alineado a la derecha */
+.input-with-btn {
+  display: flex;
+  justify-content: space-between; /* input ocupa todo el espacio posible */
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input-with-btn input {
+  flex: 1; /* input ocupa todo el espacio disponible */
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.input-with-btn input:focus {
+  outline: none;
+  border-color: #94a3b8; /* gris medio al focus */
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+}
+
+.input-with-btn .btn {
+  flex-shrink: 0; /* no se encoge */
+  padding: 0.35rem 0.75rem; /* compacto */
+  font-size: 0.85rem;
+  background: #64748b; /* gris azulado */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* espacio entre icono y texto */
+  transition: background 0.2s;
+}
+
+.input-with-btn .btn:hover {
+  background: #475569; /* gris azulado más oscuro al hover */
+}
+
+.input-with-btn .btn i {
+  font-size: 0.9rem; /* icono proporcional al texto */
+}
+
+/* =========================
+   SELECTS
+========================= */
+.config-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.config-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* =========================
+   password section
+========================= */
+.password-section {
+  background: linear-gradient(135deg, rgba(230, 235, 240, 0.9), rgba(210, 220, 230, 0.8));
+  padding: 1.8rem 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.password-section h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1f2937; /* gris oscuro */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-section .form-group {
+  margin-bottom: 1rem;
+}
+
+.password-section .input-with-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-section .config-input {
+  flex: 1;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.password-section .config-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+.password-section .btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.password-section .input-with-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem; /* espacio entre input y botón */
+}
+
+.password-section .btn-secondary {
+  background-color: #64748b; /* gris azulado */
+  color: #fff;
+  font-size: 1rem; /* un poco más grande */
+  padding: 0.55rem 1rem; /* más alto y ancho */
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.1s;
+  flex-shrink: 0; /* evita que se achique si el input crece */
+}
+
+.btnPassword {
+  font-size: 0.8rem !important;
+  padding: 0.45rem 0.85rem !important; /* más alto y ancho */
+}
+
+.password-section .btn-secondary:hover {
+  background-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+/* =========================
+   SWITCHES PREMIUM
+========================= */
+.switch-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.05), rgba(148, 163, 184, 0.02)); /* sutil degradé gris */
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  transition: background 0.3s, border 0.3s;
+}
+
+/* SWITCH REAL (checkbox) */
+.switch-group input[type=checkbox] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 20px;
+  background: #cbd5e1; /* gris claro */
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.switch-group input[type=checkbox]::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.switch-group input[type=checkbox]:checked {
+  background: #94a3b8; /* gris medio al activar */
+}
+
+.switch-group input[type=checkbox]:checked::before {
+  transform: translateX(20px); /* mueve el círculo */
+}
+
+/* LABEL */
+.switch-group label {
+  font-weight: 500;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Iconos en labels */
+.config-section label i {
+  margin-right: 0.5rem;
+  color: #64748b; /* gris azulado suave, profesional */
+  vertical-align: middle;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 576px) {
+  .input-with-btn {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .input-with-btn .btn {
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=user.css.map */

@@ -1,0 +1,827 @@
+@charset "UTF-8";
+/* Content general */
+.content-indexSuperUser {
+  padding: 2rem;
+}
+
+/* Bienvenida */
+.dashboard-welcome h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.3rem;
+  color: #1f3a5f;
+}
+
+.dashboard-welcome p {
+  color: #475569;
+}
+
+/* Estadísticas rápidas */
+.dashboard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  flex: 1 1 200px;
+  padding: 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f3a5f;
+}
+
+/* Acciones rápidas */
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.action-card {
+  background: #ffffff;
+  flex: 1 1 150px;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.action-card i {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.action-card:hover {
+  background: #e0ecff;
+  transform: translateY(-2px);
+}
+
+/* Últimas notificaciones */
+.dashboard-notifications h3 {
+  margin-bottom: 0.5rem;
+  color: #1f3a5f;
+}
+
+.list-group-item {
+  background: #ffffff;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+/*------------------------ Seccion de PANEL CONTROL -------------------------*/
+/* Contenedor principal */
+.dashboard-welcome {
+  padding: 2rem 0;
+  background: #f5f7fa; /* fondo muy suave */
+}
+
+/* Caja interna con sombra y bordes redondeados */
+.dashboard-welcome-container {
+  display: inline-block;
+  background: #ffffff; /* blanco para que destaque sobre el fondo */
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* sombra sutil */
+  text-align: center;
+  width: 100%;
+}
+
+/* Título */
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0d6efd; /* azul elegante */
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem; /* espacio entre icono y texto */
+}
+
+/* Subtítulo */
+.dashboard-subtitle {
+  font-size: 1rem;
+  color: #6c757d; /* gris suave */
+  margin: 0;
+}
+
+/* Icono opcional */
+.dashboard-title i {
+  font-size: 2.2rem;
+  vertical-align: middle;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.overlay-content {
+  background-color: rgb(255, 255, 255);
+  width: 100%;
+  max-width: 520px;
+  padding: 1rem;
+  border-radius: 20px;
+}
+
+.select-Page {
+  width: auto !important;
+}
+
+/* Card principal */
+.overlay-card {
+  width: 90%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Header azul */
+.overlay-header-blue {
+  background: #d0e7ff;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.overlay-header-blue h5 {
+  margin: 0;
+  font-weight: 600;
+  color: #0d3b66;
+}
+
+/* Botón cerrar */
+.btn-close-soft {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #0d3b66;
+  cursor: pointer;
+}
+
+.btn-close-soft:hover {
+  opacity: 0.7;
+}
+
+/* Body */
+.overlay-body {
+  padding: 1.25rem;
+}
+
+/* Inputs */
+.overlay-input {
+  border-radius: 10px;
+  border: 1px solid #ced4da;
+}
+
+/* Tabla personalizada */
+.overlay-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.overlay-table thead {
+  background: #f1f3f5;
+}
+
+.overlay-table th {
+  font-weight: 600;
+  color: #495057;
+  padding: 0.6rem;
+}
+
+.overlay-table td {
+  padding: 0.55rem;
+  font-size: 0.95rem;
+}
+
+.overlay-table tbody tr:nth-child(odd) {
+  background: #f8f9fa;
+}
+
+.overlay-table tbody tr:hover {
+  background: #e9ecef;
+}
+
+/* Tabla chica */
+.overlay-table-sm th,
+.overlay-table-sm td {
+  font-size: 0.9rem;
+}
+
+/* Scroll elegante */
+.overlay-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overlay-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
+
+/*--------------------------------------------------------------------*/
+/* Overlay oscuro semi-transparente */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  backdrop-filter: blur(4px); /* efecto blur elegante */
+  transition: opacity 0.3s ease;
+}
+
+/* Panel centrado */
+.overlay-content {
+  max-width: 900px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff; /* blanco elegante */
+  border-radius: 16px; /* más redondeado */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* sombra suave */
+  padding: 2rem;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(-10px);
+}
+
+/* Animación de apertura */
+.overlay.d-none .overlay-content {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* Títulos */
+.overlay-content h3 {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+.overlay-content h5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #495057;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilo elegante para el título del overlay */
+.overlay-title {
+  background-color: #2d4a72; /* azul claro suave */
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #ecf0f5; /* azul más oscuro para el texto */
+}
+
+.overlay-title h3 {
+  color: #ffffff; /* azul más oscuro para el texto */
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Estilo elegante para títulos de secciones (h5) */
+.overlay-section-title {
+  width: 100%;
+  background-color: #d0e7ff; /* azul claro suave */
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: inline-block;
+}
+
+.overlay-section-title h5 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #0d3b66; /* azul más oscuro para el texto */
+}
+
+/* Tablas suaves y elegantes */
+/* Tablas suaves y elegantes del overlay */
+.overlay-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.overlay-table thead {
+  background-color: #f1f3f5;
+  color: #495057;
+  font-weight: 600;
+}
+
+.overlay-table tbody tr:nth-of-type(odd) {
+  background-color: #f8f9fa; /* gris muy suave */
+}
+
+.overlay-table tbody tr:hover {
+  background-color: #e9ecef; /* gris suave al pasar el mouse */
+  transition: background-color 0.2s ease;
+}
+
+.overlay-table td,
+.overlay-table th {
+  vertical-align: middle;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+/* Botón cerrar */
+#closeCourseOverlay {
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  color: #495057;
+  border-color: #ced4da;
+  transition: all 0.2s ease;
+}
+
+#closeCourseOverlay:hover {
+  background-color: #f1f3f5;
+  border-color: #adb5bd;
+}
+
+/* Scroll elegante */
+.overlay-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overlay-content::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.3);
+  border-radius: 4px;
+}
+
+.overlay-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/*------------------------Boton---------------------------------*/
+/*
+a i {
+  cursor: pointer;
+}
+
+*/
+/* Contenedor de cada selector */
+.selector-col {
+  margin-bottom: 1rem;
+}
+
+/* Etiquetas */
+.selector-col label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Select moderno usando Bootstrap */
+.selector-col select.form-select {
+  width: 100%;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1); /* fondo vidrio oscuro */
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px); /* efecto glassmorphism */
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover y focus */
+.selector-col select.form-select:hover,
+.selector-col select.form-select:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+/* Opciones internas */
+.selector-col select.form-select option {
+  color: #000; /* opciones legibles */
+  background-color: #fff;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* para leer de abajo hacia arriba */
+  height: 200px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.grade-red {
+  background-color: #f8d7da !important; /* rojo claro */
+  color: #721c24;
+}
+
+.grade-yellow {
+  background-color: #fff3cd !important; /* amarillo claro */
+  color: #856404;
+}
+
+.grade-green {
+  background-color: #d4edda !important; /* verde claro */
+  color: #155724;
+}
+
+/* Toda la fila se resalta con borde azul */
+tr.resaltado {
+  border: 3px solid #3498db; /* Azul claro */
+  transition: border 0.2s ease;
+}
+
+/* Solo la columna del nombre se resalta */
+.resaltado-nombre {
+  background-color: #f9f871; /* amarillo claro */
+  font-weight: 600;
+  color: #2c3e50; /* azul oscuro */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.settings-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  background-color: #f0f7f5; /* verde muy suave */
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.settings-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* permite que los tabs bajen de línea en pantallas pequeñas */
+  margin-bottom: 1.5rem;
+  gap: 0.5rem; /* un poco menos de gap en mobile */
+}
+
+.tab-button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  background: #f1f1f1;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background: #55ac75;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2fa84f;
+}
+
+.btn-save {
+  background: #55ac75;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  background: #28a141;
+}
+
+.btn-warning {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: #e03b3b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Card de configuracion de perfil*/
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.settings-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.card-header i:first-child {
+  margin-right: 0.5rem;
+  color: #4caf71;
+}
+
+.card-body {
+  display: none;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mini-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* espacio vertical entre inputs */
+}
+
+.mini-form input {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mini-form input:focus {
+  border-color: #4caf71;
+  outline: none;
+}
+
+.mini-form button.btn-save-sm {
+  align-self: flex-end; /* botón a la derecha */
+  margin-top: 0.3rem;
+}
+
+.btn-save-sm {
+  background: #55ac75;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-save-sm:hover {
+  background: #439664;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.settings-card.active .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.settings-card.active .card-body {
+  display: block;
+}
+
+/* Modal centrado */
+.modal {
+  display: none; /* oculto por defecto */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* fondo semi-transparente */
+}
+
+/* Modal centrado */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.current-email {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f7;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.current-email span {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Botones del modal */
+.modal-buttons {
+  display: flex;
+  justify-content: center; /* centrado horizontal */
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel {
+  background: #e05a55;
+}
+
+.btn-cancel:hover {
+  background: #e03b3b;
+}
+
+.btn-edit {
+  background: #4caf71;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+  background: #439664;
+}
+
+.current-password {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f7;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.current-password span {
+  font-weight: 500;
+  color: #333;
+}
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 1rem;
+  }
+  .settings-title {
+    font-size: 1.5rem;
+  }
+  .tab-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .current-email,
+  .current-password {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .current-email span,
+  .current-password span {
+    font-weight: 500;
+    color: #333;
+    overflow: hidden; /* recorta el texto si es muy largo */
+    text-overflow: ellipsis; /* agrega "..." al final */
+    white-space: nowrap; /* evita que el texto haga wrap */
+    max-width: 100%; /* no exceda el contenedor */
+    display: inline-block; /* necesario para que funcione text-overflow */
+    vertical-align: middle;
+  }
+  .btn-edit {
+    width: 100%;
+    justify-content: center;
+  }
+  .modal-content {
+    padding: 1.5rem;
+  }
+}
+
+/*# sourceMappingURL=superAdmin.css.map */

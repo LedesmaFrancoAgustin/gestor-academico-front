@@ -1,0 +1,85 @@
+/* Contenedor de cada selector */
+.selector-col {
+  margin-bottom: 1rem;
+}
+
+/* Etiquetas */
+.selector-col label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Select moderno usando Bootstrap */
+.selector-col select.form-select {
+  width: 100%;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1); /* fondo vidrio oscuro */
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px); /* efecto glassmorphism */
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover y focus */
+.selector-col select.form-select:hover,
+.selector-col select.form-select:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+/* Opciones internas */
+.selector-col select.form-select option {
+  color: #000; /* opciones legibles */
+  background-color: #fff;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* para leer de abajo hacia arriba */
+  height: 200px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.grade-red {
+  background-color: #f8d7da !important; /* rojo claro */
+  color: #721c24;
+}
+
+.grade-yellow {
+  background-color: #fff3cd !important; /* amarillo claro */
+  color: #856404;
+}
+
+.grade-green {
+  background-color: #d4edda !important; /* verde claro */
+  color: #155724;
+}
+
+/* Toda la fila se resalta con borde azul */
+tr.resaltado {
+  border: 3px solid #3498db; /* Azul claro */
+  transition: border 0.2s ease;
+}
+
+/* Solo la columna del nombre se resalta */
+.resaltado-nombre {
+  background-color: #f9f871; /* amarillo claro */
+  font-weight: 600;
+  color: #2c3e50; /* azul oscuro */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/*# sourceMappingURL=grade.css.map */

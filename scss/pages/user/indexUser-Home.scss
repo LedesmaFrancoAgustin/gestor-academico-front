@@ -1,0 +1,326 @@
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+.docente-home-content {
+  max-width: 1400px;
+  padding-top: 90px; /* ajustá según la altura real del header */
+}
+
+/* =========================
+   BIENVENIDA
+========================= */
+.docente-welcome {
+  background: linear-gradient(135deg, #1e293b, #334155); 
+
+  color: #fff;
+  padding: 2rem 1rem;
+  border-radius: 16px;
+}
+
+.docente-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+
+.docente-subtitle {
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+/* =========================
+   ESTADÍSTICAS
+========================= */
+.docente-stats {
+  justify-content: space-between;
+}
+
+.docente-stat-card {
+  flex: 1;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.docente-stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.docente-stat-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.docente-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.stat-warning .docente-stat-number {
+  color: #f59e0b;
+}
+
+/* =========================
+   ACCIONES RÁPIDAS
+========================= */
+.docente-actions {
+  justify-content: space-between;
+}
+
+.docente-action-card {
+  flex: 1;
+  min-width: 180px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.2rem;
+  text-align: center;
+  text-decoration: none;
+  color: #212529;
+  transition: all 0.2s ease;
+}
+
+.docente-action-card i {
+  font-size: 1.8rem;
+  color: #1e3a8a;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.docente-action-card p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.docente-action-card:hover {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.docente-action-card:hover i {
+  color: #fff;
+}
+
+/* =========================
+   MATERIAS
+========================= */
+.docente-materias h3 {
+  font-weight: 600;
+}
+
+.docente-materia-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  height: 100%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.docente-materia-card:hover {
+  transform: translateY(-4px);
+}
+
+.docente-materia-card h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.docente-materia-card p {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.docente-materia-card .badge {
+  font-size: 0.75rem;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+
+     .docente-home-content {
+    padding-top: 120px;
+  }
+
+  .docente-stats,
+  .docente-actions {
+    gap: 1rem;
+  }
+
+  .docente-action-card,
+  .docente-stat-card {
+    min-width: 100%;
+  }
+
+  .docente-welcome {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* =========================
+   SIDEBAR DOCENTE
+========================= */
+.teacher-sidebar-container {
+  position: fixed;
+  top: 90px;
+  bottom: 90px;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+}
+
+.teacher-sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #f8fafc, #e0f2fe);
+  height: 100%;
+  padding: 1.2rem 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #cbd5e1;
+  border-radius: 0 12px 12px 0;
+}
+
+/* User info */
+.teacher-sidebar-user {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: #ffffff33;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.teacher-sidebar-avatar {
+  font-size: 3rem;
+  margin-right: 0.8rem;
+  color: #2563eb;
+  transition: transform 0.2s ease;
+}
+
+.teacher-sidebar-avatar:hover {
+  transform: scale(1.1);
+}
+
+.teacher-sidebar-user-info h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.teacher-sidebar-user-info span {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Navigation */
+.teacher-sidebar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  color: #1e293b;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.teacher-sidebar-nav .nav-link i {
+  margin-right: 0.75rem;
+  color: #253B56;
+  transition: transform 0.2s ease;
+}
+
+.teacher-sidebar-nav .nav-link:hover i {
+  transform: translateX(3px);
+}
+
+.teacher-sidebar-nav .nav-link:hover,
+.teacher-sidebar-nav .nav-item.active .nav-link {
+  background: #bae6fd;
+  color: #1e40af;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+}
+
+/* Toggle desktop */
+.teacher-sidebar-toggle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -20px;
+  width: 30px;
+  background: #253B56;
+  color: #fff;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.teacher-sidebar-toggle:hover {
+  background: #0F5793;
+}
+
+/* Collapsed */
+.teacher-sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.teacher-sidebar.collapsed .teacher-sidebar-user-info,
+.teacher-sidebar.collapsed .teacher-sidebar-nav {
+  display: none;
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+
+  .teacher-sidebar {
+    position: fixed;
+    top: 90px;
+    bottom: 90px;
+    left: -260px;
+    width: 260px;
+    transition: left 0.3s ease;
+    height: auto;
+  }
+
+  .teacher-sidebar.open {
+    left: 0;
+  }
+
+  .teacher-sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: 2px;
+    width: 35px;
+    height: 60px;
+    border-radius: 8px;
+    z-index: 1100;
+    transition: left 0.3s ease;
+  }
+
+  .teacher-sidebar.open + .teacher-sidebar-toggle {
+    left: 260px;
+  }
+}
+
+

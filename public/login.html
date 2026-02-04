@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title> Gestor Académico | Login </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+</head>
+<body class="body-login">
+
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="row login-card w-100" >
+        
+        <!-- IZQUIERDA -->
+        <div class="col-md-6 login-left d-flex align-items-center justify-content-center p-5">
+            <img src="../assets/Logo/logoGestorAcademico-transparente.png" alt="Gestor Académico">
+        </div>
+
+        <!-- DERECHA -->
+        <div class="col-md-6 login-right p-2 p-lg-5 d-flex flex-column justify-content-center">
+            <h4 class="mb-4 fw-semibold text-center">Iniciar Sesión</h4>
+
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="form-label text-white">Email</label>
+
+                    <div class="position-relative">
+                        <!-- Icono email -->
+                        <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-white">
+                        <i class="bi bi-envelope"></i>
+                        </span>
+
+                        <!-- Input -->
+                        <input
+                        id="emailUser"
+                        type="email"
+                        class="form-control bg-transparent text-white ps-5"
+                        placeholder="usuario@email.com"
+                        />
+                    </div>
+                    </div>
+
+
+                <div class="mb-4">
+                    <label class="form-label text-white">Contraseña</label>
+
+                    <div class="position-relative">
+                        <!-- Icono lock -->
+                        <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-white">
+                        <i class="bi bi-lock"></i>
+                        </span>
+
+                        <!-- Input -->
+                        <input
+                        type="password"
+                        class="form-control bg-transparent text-white ps-5 pe-5"
+                        id="passwordUser"
+                        placeholder="••••••••"
+                        />
+
+                        <!-- Ojito dentro del input -->
+                        <button
+                        type="button"
+                        class="btn btn-eye-inside position-absolute top-50 end-0 translate-middle-y me-2"
+                        id="togglePassword"
+                        >
+                        <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    </div>
+
+
+                <button type="submit" class="btn btn-light w-100 btn-login mt-3">
+                    INICIAR SESIÓN <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="social-icons text-center mt-4">
+                <i class="bi bi-instagram"></i>
+                <i class="bi bi-facebook"></i>
+                <i class="bi bi-twitter-x"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="login-footer text-center">
+    <small> &copy; <span id="year"></span> Gestor Académico · Todos los derechos reservados</small>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="../js/ui-feedback.js"  ></script>
+
+ <script src="../js/login.js"></script>
+ <script src="../js/global.js"></script>
+</body>
+</html>

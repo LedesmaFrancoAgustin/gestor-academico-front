@@ -1,0 +1,22 @@
+/* ===============================
+   RESET TOTAL (PDF FRIENDLY)
+=============================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ⚠️ CONTENEDOR REAL */
+.boletin-container {
+  width: calc(297mm - 16mm);
+  height: calc(210mm - 16mm);
+
+  margin: 8mm;          /* margen externo */
+  overflow: hidden;     /* 🔥 CLAVE */
+}
