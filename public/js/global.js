@@ -1,5 +1,5 @@
 // Actualizacion del año copy
-const API_URL = "http://localhost:8080";
+const API_URL = process.env.API_URL;
 const token = localStorage.getItem("token");
 const WARNING_TIME = 60 * 1000;
 
