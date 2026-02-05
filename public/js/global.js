@@ -1,5 +1,5 @@
 // Actualizacion del año copy
-const API_URL = "https://gestor-academico-back.vercel.app";
+const API_URL = "http://localhost:8080";
 const token = localStorage.getItem("token");
 const WARNING_TIME = 60 * 1000;
 
