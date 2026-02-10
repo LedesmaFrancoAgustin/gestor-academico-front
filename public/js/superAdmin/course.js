@@ -23,6 +23,8 @@ let confirmAddUserPressed = false;
 let confirmAddStudentPressed = false;
 let confirmAddSubjectPressed = false;
 
+let courseUsers = []; // Array global - los usuarios del curso
+
 // ===================== CARGAR CURSOS =====================
 async function loadCourses(page = 1, query = "") {
   currentPage = page;
@@ -452,13 +454,14 @@ function renderUsers(users) {
   const tbody = document.getElementById("usersSearchResults");
   tbody.innerHTML = "";
 
-  users.forEach(user => {
+  users.forEach((user , index ) => {
     // 🔹 Verificar si el usuario ya está en el curso
     const alreadyInCourse = courseUsersIds.includes(user._id);
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
+      <td>${index + 1}</td>
       <td>${user.nombre} ${user.apellido}</td>
       <td>${user.email}</td>
       <td>${user.dni}</td>
@@ -640,13 +643,14 @@ function renderStudents(students) {
   const tbody = document.getElementById("studentsSearchResults");
   tbody.innerHTML = "";
 
-  students.forEach(student => {
+  students.forEach((student,index) => {
     // Verificar si el alumno ya está en el curso
     const alreadyInCourse = courseStudentsIds.includes(student._id);
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
+      <td>${index + 1}</td>
       <td>${student.nombre} ${student.apellido}</td>
       <td>${student.email}</td>
       <td>${student.dni}</td>
@@ -816,11 +820,12 @@ function renderSubjects(subjects) {
   const tbody = document.getElementById("subjectsSearchResults");
   tbody.innerHTML = "";
 
-  subjects.forEach(subject => {
+  subjects.forEach((subject,index) => {
     const alreadyInCourse = courseSubjectsIds.includes(subject._id);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
+      <td>${index + 1}</td>
       <td>${subject.name}</td>
       <td>${subject.code || "-"}</td>
       <td>${subject.academicYear || "-"}</td>
@@ -940,6 +945,9 @@ async function loadCourseUsersInfo(courseId) {
 
     const data = await res.json();
     const users = data.data || [];
+
+    // Guardamos en variable global para usar al asignar materias
+    courseUsers = users;
     // 🔤 Ordenar alfabéticamente
     sortUsers(users, { by: "apellido" });
 
@@ -1102,21 +1110,20 @@ async function loadCourseStudentsInfo(courseId) {
 // 🔹 Traer y renderizar materias del curso
 async function loadCourseSubjectsInfo(courseId) {
   try {
-    const res = await fetch(`${API_URL}/api/course/${courseId}/subjects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const data = await res.json();
+    const data = await fetchSubjetcByCourse(courseId);
     const subjects = data.data || [];
+
+    const teacher = await fetchTeacherBySubjetc(courseId);
+    console.log("teacher: ", teacher);
+
     sortUsers(subjects, { by: "name" });
     const tbody = document.getElementById("courseSubjectsList");
-
-    tbody.innerHTML = ""; // Limpiar tabla
+    tbody.innerHTML = "";
 
     if (subjects.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="text-center text-muted py-4">
+          <td colspan="7" class="text-center text-muted py-4">
             No se encontraron materias
           </td>
         </tr>
@@ -1125,24 +1132,70 @@ async function loadCourseSubjectsInfo(courseId) {
     }
 
     subjects.forEach((sub, index) => {
-      const { subject, teacher } = sub;
-
+      const { subject } = sub;
       const tr = document.createElement("tr");
 
       const subjectId = subject?._id || "-";
       const name = subject?.name || "-";
       const code = subject?.code || "-";
       const type = subject?.type === "mandatory" ? "Obligatoria" : "Optativa";
-      const teacherName = teacher ? `${teacher.nombre} ${teacher.apellido}` : "No asignado";
       const status = subject?.active ? "Activo" : "Inactiva";
       const badgeClass = subject?.active ? "bg-success" : "bg-danger";
 
+      /* ⛔ NO ponemos "Sin docente" acá */
+      const teacherHtml = `
+        <div class="teacher-cell d-flex align-items-center gap-2">
+          
+          <select
+            class="form-select form-select-sm teacher-select"
+            data-subject-id="${subjectId}"
+            data-course-id="${courseId}"
+          ></select>
+
+          <!-- 🔹 Estado -->
+          <span
+            class="teacher-status badge status-inactive"
+            title="Estado del docente en la materia"
+          >
+            Inactivo
+          </span>
+
+
+          <div class="teacher-actions d-flex gap-2">
+            <a href="#"
+              class="addTeacherByCourse text-success"
+              data-subject-id="${subjectId}"
+              title="Asignar docente">
+              <i class="fa fa-plus"></i>
+            </a>
+
+            <a href="#"
+              class="activateTeacherFromSubject text-primary"
+              data-subject-id="${subjectId}"
+              title="Activar docente">
+              <i class="fa fa-check-circle"></i>
+            </a>
+
+
+            <a href="#"
+              class="removeTeacherFromSubject text-danger"
+              data-subject-id="${subjectId}"
+              title="Quitar docente">
+              <i class="fa fa-trash"></i>
+            </a>
+          </div>
+
+        </div>
+      `;
+
+
+      /* 🔹 Render fila */
       tr.innerHTML = `
         <td>${index + 1}</td>
         <td>${name}</td>
         <td>${code}</td>
         <td>${type}</td>
-        <td>${teacherName}</td>
+        <td class="teacher-column-cell" >${teacherHtml}</td>
         <td>
           <span class="badge ${badgeClass}">
             ${status}
@@ -1151,18 +1204,78 @@ async function loadCourseSubjectsInfo(courseId) {
         <td class="text-center">
           ${
             subject
-              ? `
-            <a href="#"
-              class="removeSubjectFromCourse text-danger"
-              data-subject-id="${subjectId}"
-              title="Quitar materia">
-              <i class="fa fa-trash"></i>
-            </a>
-            `
+              ? `<a href="#"
+                  class="removeSubjectFromCourse text-danger"
+                  data-subject-id="${subjectId}"
+                  title="Quitar materia">
+                  <i class="fa fa-trash"></i>
+                </a>`
               : `<span class="text-muted">Materia no disponible</span>`
           }
         </td>
       `;
+
+      /* 🔹 Cargar docentes */
+      const select = tr.querySelector(".teacher-select");
+      const removeBtn = tr.querySelector(".removeTeacher");
+      const statusSpan = tr.querySelector(".teacher-status");
+
+
+      const teachersBySubject = Array.isArray(teacher?.data)
+        ? teacher.data.filter(t => t.subjectId === subjectId)
+        : [];
+
+      if (teachersBySubject.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Sin docente";
+        select.appendChild(opt);
+        select.disabled = true;
+      } else {
+        // Activo primero
+        teachersBySubject.sort((a, b) => {
+          return Number(b.teacherStatusSubject) - Number(a.teacherStatusSubject);
+        });
+
+        let activeStatus = "inactive";
+
+        teachersBySubject.forEach(t => {
+          const option = document.createElement("option");
+          option.value = t.teacherId;
+
+          const isActive = Boolean(t.teacherStatusSubject);
+
+          option.textContent = isActive
+            ? `${t.teacherApellido} ${t.teacherNombre} (Actual)`
+            : `${t.teacherApellido} ${t.teacherNombre}`;
+
+          option.dataset.status = isActive ? "active" : "inactive";
+          option.dataset.academicYear = t.academicYearCourse;
+
+          if (isActive) {
+            option.selected = true;
+            activeStatus = "active";
+          }
+
+          select.appendChild(option);
+        });
+
+        // 🔹 FORZAMOS el badge con el estado real
+        updateTeacherStatusBadge(statusSpan, activeStatus);
+
+        // 🔹 Cambio manual
+        select.addEventListener("change", e => {
+          const option = e.target.options[e.target.selectedIndex];
+          updateTeacherStatusBadge(
+            statusSpan,
+            option?.dataset.status || "inactive"
+          );
+        });
+
+
+
+
+      }
 
       tbody.appendChild(tr);
     });
@@ -1170,6 +1283,169 @@ async function loadCourseSubjectsInfo(courseId) {
   } catch (err) {
     console.error("Error cargando materias del curso", err);
     uiToast("Error cargando materias del curso", "error");
+  }
+}
+
+function updateTeacherStatusBadge(span, status) {
+  if (status === "active") {
+    span.textContent = "Activo";
+    span.classList.remove("status-inactive");
+    span.classList.add("status-active");
+  } else {
+    span.textContent = "Inactivo";
+    span.classList.remove("status-active");
+    span.classList.add("status-inactive");
+  }
+}
+
+// ==================================================
+// Fetch obtener materia del curso
+//==================================================
+
+async function fetchSubjetcByCourse(courseId) {
+  try {
+    const res = await fetch(`${API_URL}/api/course/${courseId}/subjects`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error(result.message || "Error al actualizar usuario");
+    
+    const result = await res.json();
+    return result;
+
+  } catch (err) {
+    console.error("Error al actualizar usuario:", err);
+    throw err;
+  }
+}
+
+// ==================================================
+// Fetch obtener materia del curso
+//==================================================
+
+async function fetchTeacherBySubjetc(courseId) {
+  try {
+    const res = await fetch(`${API_URL}/api/TeachingAssignment/teachers/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error(result.message || "Error al actualizar usuario");
+    
+    const result = await res.json();
+    return result;
+
+  } catch (err) {
+    console.error("Error al actualizar usuario:", err);
+    throw err;
+  }
+}
+
+// ==================================================
+// Fetch Asignar docente a materia del curso
+//==================================================
+
+async function fetchTeacherAssignSubject(courseId, subjectId, teacherId) {
+  try {
+    console.log(courseId,subjectId,teacherId)
+    const res = await fetch(`${API_URL}/api/TeachingAssignment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        teacher: teacherId,
+        subject: subjectId,
+        course: courseId,
+        academicYear: new Date().getFullYear()
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || "Error al asignar docente");
+    }
+
+    return result;
+
+  } catch (err) {
+    console.error("Error al asignar docente:", err);
+    throw err;
+  }
+}
+
+// ==================================================
+// Fetch Borrar docente de la materia del curso
+//==================================================
+
+async function fetchDeleteTeacherAssignSubject(courseId, subjectId, teacherId ,academicYear) {
+  try {
+    console.log(courseId,subjectId,teacherId)
+    const res = await fetch(`${API_URL}/api/TeachingAssignment/hardDelete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        teacherId: teacherId,
+        subjectId: subjectId,
+        courseId: courseId,
+        academicYear: academicYear
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || "Error al eliminar docente de la materia");
+    }
+
+     return {
+        ok: res.ok,
+        data
+      };
+
+  } catch (err) {
+    console.error("Error al eliminar docente:", err);
+    throw err;
+  }
+}
+// ==================================================
+// Fetch Cambiar estado docente en la materia del curso
+//==================================================
+async function fetchActivateTeacherAssignSubject(courseId,subjectId,teacherId,academicYear) {
+try {
+    console.log(courseId,subjectId,teacherId)
+    const res = await fetch(`${API_URL}/api/TeachingAssignment/state`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        teacherId: teacherId,
+        subjectId: subjectId,
+        courseId: courseId,
+        academicYear: academicYear
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || "Error al actualizar estado del docente en la materia");
+    }
+
+     return {
+        ok: res.ok,
+        data
+      };
+
+  } catch (err) {
+    console.error("Error al actualizar estado:", err);
+    throw err;
   }
 }
 
@@ -1198,6 +1474,230 @@ document.getElementById("btnAddSubject")?.addEventListener("click", async () => 
   const courseName = document.querySelector("#courseOverlay .overlay-title h3")?.textContent;
   await openAddSubjectPanel(selectedCourseId, courseName);
 });
+
+// ===================== Boton de agregar Docentes A las materias=====================
+// Delegar click en toda la tabla
+document.getElementById("courseSubjectsList").addEventListener("click", async (e) => {
+  const target = e.target.closest(".addTeacherByCourse");
+  if (!target) return;
+
+  const subjectId = target.dataset.subjectId;
+  const courseName = document.querySelector("#courseOverlay .overlay-title h3")?.textContent;
+
+  await openAddTeacherByCoursePanel(selectedCourseId,subjectId, courseName);
+});
+
+// Abrir modal
+async function openAddTeacherByCoursePanel(courseId, subjectId, courseName) {
+  if (!courseId || !subjectId) {
+    uiToast("Faltan datos del curso o materia", "info");
+    return;
+  }
+
+  console.log("courseUsers: ", courseUsers);
+
+  document.getElementById("teacherModalCourseName").textContent = courseName;
+
+  const select = document.getElementById("teacherModalSelect");
+
+  // 👉 Guardamos subjectId en el select
+  select.dataset.subjectId = subjectId;
+  select.dataset.courseId = courseId; // ya que estamos 😉
+
+  // Limpiar opciones
+  select.innerHTML = '<option value="">-- Selecciona un docente --</option>';
+
+  courseUsers.forEach(cu => {
+    if (cu.role === "docente" && cu.status === "activo") {
+      const option = document.createElement("option");
+      option.value = cu.user._id;
+      option.textContent =
+        `${cu.user.apellido} ${cu.user.nombre}` || cu.user.dni;
+      select.appendChild(option);
+    }
+  });
+
+  document
+    .getElementById("addTeacherBySubjetcModal")
+    .classList.remove("d-none");
+}
+
+
+//asignar docente a materia + curso
+document.getElementById("confirmAddTeacher").addEventListener("click", async () => {
+  const select = document.getElementById("teacherModalSelect");
+
+  const teacherId = select.value;
+  const subjectId = select.dataset.subjectId;
+  const courseId = select.dataset.courseId;
+
+  if (!teacherId) {
+    uiToast("Seleccioná un docente", "info");
+    return;
+  }
+
+  try {
+    await fetchTeacherAssignSubject(courseId, subjectId, teacherId);
+    loadCourseSubjectsInfo(courseId)
+    uiToast("Docente asignado correctamente", "success");
+  } catch (err) {
+    uiToast(err.message, "error");
+  }
+});
+
+// Cerrar modal con botón Cancelar
+document.getElementById("cancelAddTeacher").addEventListener("click", () => {
+  document.getElementById("addTeacherBySubjetcModal").classList.add("d-none");
+});
+
+// Cerrar modal con botón ✕
+document.getElementById("closeTeacherModal").addEventListener("click", () => {
+  document.getElementById("addTeacherBySubjetcModal").classList.add("d-none");
+});
+
+// Cerrar modal al hacer click fuera del contenido
+document.getElementById("addTeacherBySubjetcModal").addEventListener("click", (e) => {
+  if (e.target.id === "addTeacherBySubjetcModal") {
+    e.currentTarget.classList.add("d-none");
+  }
+});
+
+// ===================== Boton de Elimminar Docentes A las materias=====================
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".removeTeacherFromSubject");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const row = btn.closest("tr");
+  const select = row.querySelector(".teacher-select");
+
+  if (!select) {
+    uiToast("No se pudo identificar el docente asignado", "error");
+    return;
+  }
+
+
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (!selectedOption) {
+    uiToast("No se pudo identificar la asignación", "error");
+    return;
+  }
+
+  const teacherId = selectedOption.value;
+  const academicYear = selectedOption.dataset.academicYear;
+  const subjectId = select.dataset.subjectId;
+  const courseId = select.dataset.courseId;
+
+  const status = selectedOption.dataset.status;
+
+  // 🛑 Confirmación
+    if (status === "active") {
+      const confirmDelete = confirm(
+        "Estás por eliminar el docente activo. ¿Continuar?"
+      );
+      if (!confirmDelete) return;
+    }
+
+
+  try {
+    const res = await fetchDeleteTeacherAssignSubject(
+      courseId,
+      subjectId,
+      teacherId,
+      academicYear
+    );
+    if (!res.ok) {
+      throw new Error("Error al eliminar la asignación acaaa");
+    }
+
+    uiToast(
+      "Docente eliminado correctamente de la materia",
+      "success"
+    );
+
+    // 🔁 refrescar UI
+    loadCourseSubjectsInfo(selectedCourseId);
+
+  } catch (error) {
+    uiToast(
+      error.message || "No se pudo eliminar el docente",
+      "error"
+    );
+  }
+});
+
+// ===================== Boton de Cambiar estado activo al  Docentes en la materia=====================
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".activateTeacherFromSubject");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const row = btn.closest("tr");
+  const select = row.querySelector(".teacher-select");
+
+  if (!select) {
+    uiToast("No se pudo identificar el docente", "error");
+    return;
+  }
+
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (!selectedOption) {
+    uiToast("Seleccioná un docente", "warning");
+    return;
+  }
+
+  const teacherId = selectedOption.value;
+  const academicYear = selectedOption.dataset.academicYear;
+  const subjectId = select.dataset.subjectId;
+  const courseId = select.dataset.courseId;
+
+  console.log("teacherId: ",teacherId,"subjectId: ",subjectId,"courseId: " ,courseId, "academicYear: ",academicYear)
+  
+  try {
+    const res = await fetchActivateTeacherAssignSubject(
+      courseId,
+      subjectId,
+      teacherId,
+      academicYear
+    );
+
+    if (!res.ok) {
+      throw new Error(res.data?.message || "No se pudo activar el docente");
+    }
+
+    uiToast("Docente activado correctamente", "success");
+      // 🔁 refrescar UI
+    loadCourseSubjectsInfo(selectedCourseId);
+
+  } catch (error) {
+    uiToast(error.message, "error");
+  }
+
+  
+});
+
+
+
+// Cerrar overlay
+document.getElementById("closeSubjectsOverlay").addEventListener("click", () => {
+  document.getElementById("subjectsOverlay").classList.add("d-none");
+
+
+  if (!panelInfo.classList.contains("d-none")&& confirmAddSubjectPressed) {
+    loadCourseSubjectsInfo(selectedCourseId)
+    console.log("entro curso")
+    confirmAddSubjectPressed = false;
+  
+  // Aquí ponés la acción que querés realizar
+}
+
+});
+
+
 // Cerrar overlay
 document.getElementById("closeCourseOverlay").addEventListener("click", () => {
   document.getElementById("courseOverlay").classList.add("d-none");

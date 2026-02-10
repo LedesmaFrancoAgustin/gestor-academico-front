@@ -160,19 +160,19 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="./attendance.html">
+                <a class="nav-link active" href="./attendance.html">
                 <i class="fa fa-calendar-check"></i> Asistencias
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link active"  href="./grades.html">
+                <a class="nav-link" href="./grades.html">
                 <i class="fa fa-file-alt"></i> Notas
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="./configurations.html">
+                <a class="nav-link" href="./configuracion.html">
                 <i class="fa fa-cog"></i> Configuración
                 </a>
             </li>
@@ -185,9 +185,7 @@
         </button>
 
         </div>
-
-
-        <div class="content" id="content">
+         <div class="content" id="content">
            
             <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css /> -->
                <div class="tableContainer">
@@ -195,78 +193,92 @@
                         <div class="col-md-offset-1">
                         <div class="panel">
                             <div class="panel-heading">
-                                <div class="row align-items-center">
 
-                                    <!-- Título -->
-                                    <div class="col-sm-2 col-xs-12">
-                                    <h4 class="title mb-0">Notas</h4>
+                                <!-- Título -->
+                                    <div class="col-xs-12 text-center">
+                                    <h4 class="title  mb-0">Asistencias</h4>
                                     </div>
+                                 <div class="row align-items-center">
+
+                                    
 
                                     <!-- Búsqueda y botones -->
                                     <div class="col-sm-5 col-xs-12 text-end">
-                                    <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <input
-                                        type="text"
-                                        id="searchStudent"
-                                        class="form-search form-control form-control-sm w-50"
-                                        placeholder="Buscar por nombre o DNI"
-                                        />
-                                        <button class="btn btn-table btn-default btn-sm" title="Reload" id="btnReloadGrades">
-                                        <i class="fa fa-sync-alt"></i>
-                                        </button>
-                                        <button class="btn btn-table btn-default btn-sm" title="Pdf">
-                                        <i class="fa fa-file-pdf"></i>
-                                        </button>
-                                        <button class="btn btn-table btn-default btn-sm" title="Excel">
-                                        <i class="fas fa-file-excel"></i>
-                                        </button>
-                                    </div>
-                                    </div>
-
-                                 <div class="col-sm-2 col-xs-12 selector-col">
-                                    <label for="courseSelect">Curso:</label>
-                                    <select id="courseSelect" class="form-select form-select-sm rounded">
-                                        <!-- Opciones dinámicas -->
-                                    </select>
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <input
+                                            type="text"
+                                            id="searchStudent"
+                                            class="form-search form-control form-control-sm w-50"
+                                            placeholder="Buscar por nombre o DNI"
+                                            />
+                                            <button class="btn btn-table btn-default btn-sm" title="Reload" id="btnReloadGrades">
+                                            <i class="fa fa-sync-alt"></i>
+                                            </button>
+                                            <button class="btn btn-table btn-default btn-sm" title="Pdf">
+                                            <i class="fa fa-file-pdf"></i>
+                                            </button>
+                                            <button class="btn btn-table btn-default btn-sm" title="Excel">
+                                            <i class="fas fa-file-excel"></i>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div class="col-sm-2 col-xs-12 selector-col">
-                                    <label for="termSelect">Tipo de Nota:</label>
-                                    <select id="termSelect" class="form-select form-select-sm rounded">
-                                        <option value="firstTerm">1er Trimestre</option>
-                                        <option value="secondTerm">2do Trimestre</option>
-                                        <option value="recuperatory">Recuperatorio</option>
-                                        <option value="december">Diciembre</option>
-                                        <option value="february">Febrero</option>
-                                    </select>
+                                        <label for="academicYearSelect">Año académico:</label>
+                                        <select id="academicYearSelect" class="form-select form-select-sm rounded">
+                                            <option value="" selected disabled>Seleccione un año</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                                        </select>
                                     </div>
 
+                                    <div class="col-sm-2 col-xs-12 selector-col">
+                                        <label for="courseSelect">Curso:</label>
+                                        <select id="courseSelect" class="form-select form-select-sm rounded " disabled>
+                                              <option value="" selected disabled> Seleccione un mes </option>
+                                        </select>
+                                    </div>
 
-
-
+                                    <div class="col-sm-2 col-xs-12 selector-col " >
+                                        <label for="termSelect">Mes:</label>
+                                        <select id="monthSelect" class="form-select form-select-sm rounded" disabled>
+                                            <option value="" selected disabled> Seleccione un mes </option>
+                                            <option value="01">Enero</option>
+                                            <option value="02">Febrero</option>
+                                            <option value="03">Marzo</option>
+                                            <option value="04">Abril</option>
+                                            <option value="05">Mayo</option>
+                                            <option value="06">Junio</option>
+                                            <option value="07">Julio</option>
+                                            <option value="08">Agosto</option>
+                                            <option value="09">Septiembre</option>
+                                            <option value="10">Octubre</option>
+                                            <option value="11">Noviembre</option>
+                                            <option value="12">Diciembre</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 </div>
 
                             <!-- Tabla -->
-                            <div class="panel-body table-responsive" >
-                            <table class="table" id="gradesTable">
-                                <thead>
-                                <tr>
+                            <div class="panel-body table-responsive">
+                                <table class="table" id="attendanceTable">
+                                    <thead id="attendanceTableHead">
                                     <tr>
-                                    <th>#</th>
-                                    <th>Usuario</th>
-                                    <th>DNI</th>
-                                    <th>-</th>
-                                    <th>-</th>
-                                    <th>-</th>
-                                    <th>-</th>
-                                </tr>
-                                   
-                                </tr>
-                                </thead>
-                                <tbody id="gradesTableBody"></tbody>
-                            </table>
+                                        <th>#</th>
+                                        <th>Alumno</th>
+                                        <th>DNI</th>
+                                        <!-- Fechas del mes dinámicas se agregan con JS -->
+                                    </tr>
+                                    </thead>
+                                    <tbody id="attendanceTableBody"></tbody>
+                                </table>
                             </div>
+
 
                             <!-- Footer con paginación y entries per page -->
                             <div class="panel-footer">
@@ -283,6 +295,8 @@
 
 
         </div>
+
+        
     </main>
 
     <footer id="footer">
@@ -296,7 +310,7 @@
     <script src="../../js/global.js" ></script>
     <script src="../../js/index.js" ></script>
     <script src="../../js/superAdmin/superAdmin.guard.js"></script>
-    <script src="../../js/superAdmin/grade.js"></script>
+    <script src="../../js/superAdmin/Attendance.js"></script>
     <script src="../../js/notifications.js"></script>
 
     <script src="https://kit.fontawesome.com/1c8c69f422.js" crossorigin="anonymous"></script>

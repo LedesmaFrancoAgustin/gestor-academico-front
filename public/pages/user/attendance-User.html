@@ -55,9 +55,7 @@
                     <span id="notifications-badge" class="notification-badge d-none">0</span>
                 </a>
 
-                <ul id="notifications-dropdown"
-    class="dropdown-menu dropdown-menu-end shadow notification-menu">
-
+                <ul id="notifications-dropdown" class="dropdown-menu dropdown-menu-end shadow notification-menu">
                     <li class="dropdown-header">Notificaciones</li>
                     <li><hr class="dropdown-divider" /></li>
                     <li><hr class="dropdown-divider" /></li>
@@ -86,8 +84,7 @@
                     </div>
                 </a>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow user-dropdown">
-
+                <ul class="dropdown-menu dropdown-menu-end shadow">
                     <li>
                     <a class="dropdown-item" href="./configurations-User.htm">
                         <i class="bi bi-person me-2"></i> Perfil
@@ -146,19 +143,19 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item ">
                 <a class="nav-link" href="./note-User.html">
                 <i class="fa fa-file-alt"></i> Notas
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="./attendance-User.html">
                 <i class="fa fa-calendar-check"></i> Asistencias
                 </a>
             </li>
 
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="./configurations-User.htm">
                 <i class="fa fa-cog"></i> Configuración
                 </a>
@@ -174,135 +171,104 @@
 
         </div>
 
-            <div class="container-fluid config-page">
-                <div class="config-wrapper">
+            <div class="container-fluid attendance-page">
+                <div class="attendance-wrapper">
 
                     <!-- Header -->
-                    <section class="config-header">
-                        <h1>Configuración del Gestor Académico</h1>
-                        <p>Administrá tu perfil y preferencias del panel docente</p>
+                    <section class="attendance-header">
+                        <h1>Asistencias</h1>
+                        <p>Seleccioná un curso para comenzar a ver las asistencias</p>
                     </section>
 
-                   <!-- Sección Perfil -->
-                    <section class="config-section" id="profileSection">
-                        <h2>Perfil</h2>
+                    <!-- Selector de curso -->
+                   <section class="attendance-selector">
 
-                        <div class="form-group inline-group">
-                            <label for="emailInput">
-                                <i class="bi bi-envelope"></i> Email
-                            </label>
+                     <div class="select-group">
+                        <label for="academicYearSelect">Año</label>
+                        <select id="academicYearSelect" class="attendance-select">
+                                            <option value="" selected disabled>Seleccione un año</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                        </select>
+                    </div>
 
-                            <div class="input-with-btn">
-                                <input
-                                    type="email"
-                                    id="emailInput"
-                                    class="config-input"
-                                    placeholder="tuemail@ejemplo.com"
-                                >
-                                <button class="btn btn-secondary" id="changeEmailBtn" type="button">
-                                    <i class="bi bi-pencil"></i> Cambiar
-                                </button>
-                            </div>
-                        </div>
-                    </section>
+                    <div class="select-group">
+                        <label for="courseSelect">Curso</label>
+                        <select id="courseSelect" class="grades-select" disabled>
+                        <option value="">Seleccionar un curso</option>
+                        </select>
+                    </div>
 
-                    <!-- Sección Contraseña -->
-                    <section class="config-section password-section">
-                    <h2><i class="bi bi-lock-fill"></i> Cambiar contraseña</h2>
+                   
+                    <div class="select-group">
+                        <label for="monthSelect">Mes</label>
+                        <select id="monthSelect" class="grades-select" disabled>
+                                            <option value="" selected disabled> Seleccione un mes </option>
+                                            <option value="01">Enero</option>
+                                            <option value="02">Febrero</option>
+                                            <option value="03">Marzo</option>
+                                            <option value="04">Abril</option>
+                                            <option value="05">Mayo</option>
+                                            <option value="06">Junio</option>
+                                            <option value="07">Julio</option>
+                                            <option value="08">Agosto</option>
+                                            <option value="09">Septiembre</option>
+                                            <option value="10">Octubre</option>
+                                            <option value="11">Noviembre</option>
+                                            <option value="12">Diciembre</option>
+                                        </select>
+                    </div>
 
-                    <form id="changePasswordForm" autocomplete="off">
-
-                        <div class="form-group inline-group">
-                        <label for="currentPasswordInput">Contraseña actual</label>
-                        <input
-                            type="password"
-                            id="currentPasswordInput"
-                            class="config-input"
-                            placeholder="••••••••"
-                            autocomplete="current-password"
-                        >
-                        </div>
-
-                        <div class="form-group inline-group">
-                        <label for="newPasswordInput">Nueva contraseña</label>
-                        <input
-                            type="password"
-                            id="newPasswordInput"
-                            class="config-input"
-                            placeholder="••••••••"
-                            autocomplete="new-password"
-                        >
-                        </div>
-
-                        <div
-                        class="form-group inline-group"
-                        id="repeatPasswordGroup"
-                        style="display:none;"
-                        >
-                        <label for="repeatPasswordInput">Repetir nueva contraseña</label>
-
-                        <div class="input-with-btn">
+                    <div class="search-group">
+                        <label for="attendanceSearch">Buscar alumno</label>
+                        <div class="search-input-wrapper">
                             <input
-                            type="password"
-                            id="repeatPasswordInput"
-                            class="config-input"
-                            placeholder="••••••••"
-                            autocomplete="new-password"
-                            >
-                            <button
-                            class="btn btn-secondary btnPassword"
-                            id="changePasswordBtn"
-                            type="submit"
-                            disabled
-                            >
-                            <i class="bi bi-pencil"></i> Cambiar
-                            </button>
+                            type="text"
+                            id="attendanceSearch"
+                            class="attendance-search"
+                            placeholder="Nombre o DNI..."
+                            autocomplete="off"
+                            />
+                            <i class="search-icon fa-solid fa-magnifying-glass"></i>
                         </div>
-                        </div>
+                    </div>
 
-                    </form>
+
                     </section>
+                
+                </div>
+                <div class="renderAttendance">
+                    <!-- Contenedor de notas -->
+                        <section class="attendance-content">
 
+                            <div class="table-wrapper">
+                                <table id="attendanceTable">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <section class="attendance-mobile">
+                            <div class="attendance-mobile-header">
+                                <h3 id="mobileDayTitle">Día 01 · Abril 2026</h3>
 
-
-
-                    <!-- Sección Preferencias -->
-                    <section class="config-section" id="preferencesSection">
-                        <h2>Preferencias</h2>
-
-                        <div class="switch-group">
-                            <label for="darkModeSwitch">
-                                <i class="bi bi-moon"></i> Modo oscuro
-                            </label>
-                            <input type="checkbox" id="darkModeSwitch">
+                                <select id="daySelect" class="attendance-select"></select>
                             </div>
 
-                            <div class="switch-group">
-                            <label for="notificationsSwitch">
-                                <i class="bi bi-bell"></i> Recibir notificaciones
-                            </label>
-                            <input type="checkbox" id="notificationsSwitch" checked>
-                            </div>
+                            <div id="attendanceMobileList" class="attendance-mobile-list"></div>
+                        </section>
 
-                            <div class="select-group">
-                            <label for="languageSelect">
-                                <i class="bi bi-translate"></i> Idioma
-                            </label>
-                            <select id="languageSelect" class="config-select">
-                                <option value="es">Español</option>
-                                <option value="en">Inglés</option>
-                            </select>
-                        </div>
+                    </div>
+            </div>
 
 
-                        
-                    </section>
-
-                </div>
-                </div>
 
 
-         
+           
        
     </main>
 
@@ -316,7 +282,7 @@
 
     <script src="../../js/users/user.guard.js" ></script>
     <script src="../../js/users/users.global.js" ></script>
-    <script src="../../js/users/configurations.user.js" ></script>
+    <script src="../../js/users/attendance.user.js" ></script>  
 
 
     <script src="../../js/global.js" ></script>

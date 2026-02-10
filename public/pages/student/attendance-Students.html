@@ -140,13 +140,13 @@
                         </a>
                     </li>
 
-                    <li class="nav-item active">
+                    <li class="nav-item ">
                         <a class="nav-link" href="./note-Students.html">
                         <i class="fa fa-file-alt"></i> Mis notas
                         </a>
                     </li>
 
-                    <li class="nav-item ">
+                    <li class="nav-item active">
                         <a class="nav-link" href="./attendance-Students.html">
                         <i class="fa fa-calendar-check"></i> Asistencias
                         </a>
@@ -167,66 +167,75 @@
                     </button>
 
             </div>
-
-            <div class="container-fluid student-grades-page">
-                <div class="student-grades-wrapper">
+            
+            <div class="container-fluid attendance-page">
+                <div class="attendance-wrapper">
 
                     <!-- Header -->
-                    <section class="student-grades-header">
-                        <h1>Mis notas</h1>
-                        <p>Seleccioná un curso y período para ver tus calificaciones</p>
+                    <section class="attendance-header">
+                        <h1>Asistencias</h1>
+                        <p>Seleccioná un curso para comenzar a ver las asistencias</p>
                     </section>
 
-                  <!-- Selector de curso y acciones -->
-                    <section class="student-grades-selector">
+                    <!-- Selector de curso -->
+                   <section class="attendance-selector">
 
-                        <div class="student-select-group">
-                            <label for="studentCourseSelect">Curso</label>
-                            <select id="studentCourseSelect" class="student-select">
-                            <option value="">Seleccionar un curso</option>
-                            </select>
-                        </div>
+                     <div class="select-group">
+                        <label for="academicYearSelect">Año</label>
+                        <select id="academicYearSelect" class="attendance-select">
+                                            <option value="" selected disabled>Seleccione un año</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                        </select>
+                    </div>
 
-                        <!-- Acción -->
-                        <div class="student-grades-action">
-                            <button id="downloadReportBtn" class="btn-download-report" disabled>
-                                <i class="bi bi-download"></i>
-                                Descargar boletín
-                            </button>
-                            <iframe
-                                id="boletin-frame"
-                                style="
-                                    position: absolute;
-                                    left: -9999px;
-                                    width: 297mm;
-                                    height: 210mm;
-                                    border: 0;
-                                    opacity: 0;
-                                    
-                                ">
-                                </iframe>
-
-                        </div>
-
-                    </section>
-
-                    <!-- Contenedor de notas -->
-                    <section class="student-grades-content">
-
-                        <!-- DESKTOP -->
-                        <div class="student-grades-sheet desktop-only">
-                            <table class="student-grades-table sheet-table"></table>
-                        </div>
-
-                        <!-- MOBILE -->
-                        <div class="noteStudent-student-grades-mobile mobile-only"></div>
+                  
+                    <div class="select-group">
+                        <label for="monthSelect">Mes</label>
+                        <select id="monthSelect" class="attendance-select" disabled>
+                            <option value="">Todos los meses</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Mayo</option>
+                            <option value="06">Junio</option>
+                            <option value="07">Julio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
 
                     </section>
 
-                     
+                    <div class="absences-table-wrapper">
 
+                        <div id="absencesTotalTableContainer" class="desktop-only"></div>
+
+                        <!-- Mobile -->
+                        <div id="absencesMobileContainer" class="mobile-only"></div>
+
+                        <!-- Desktop -->
+                        
+                        <div id="absencesTableContainer" class="desktop-only"></div>
+
+                    </div>
+
+
+                    
+
+
+                
                 </div>
+                
             </div>
+
+            
 
      
     </main>
@@ -244,7 +253,8 @@
 
     <script src="../../js/students/students.guard.js" ></script>
     <script src="../../js/students/students.global.js" ></script>
-    <script src="../../js/students/note.students.js" ></script>
+    <script src="../../js/students/attendance.Students.js" ></script>
+ 
 
     <script src="../../js/global.js" ></script>
     <script src="../../js/notifications.js"></script>

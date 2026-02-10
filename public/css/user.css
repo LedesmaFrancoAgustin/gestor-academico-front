@@ -1661,5 +1661,417 @@
     width: 100%;
   }
 }
+.attendance-page {
+  padding: 1.5rem;
+  padding-top: 90px;
+}
+
+.attendance-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.attendance-header {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Título */
+.attendance-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e3a8a; /* azul profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Subtítulo */
+.attendance-header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+/* Contenedor general */
+.attendance-selector {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.12));
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+/* Select */
+.attendance-select {
+  appearance: none;
+  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+/* =========================
+   Tabla de render
+========================= */
+.renderAttendance {
+  max-width: 1600px; /* MÁS grande que container */
+  margin: 0 auto; /* centrado */
+  padding: 0 1rem;
+}
+
+/* =========================
+   Buscador de alumnos
+========================= */
+.search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+}
+
+.attendance-selector .search-group {
+  margin-left: auto;
+}
+
+/* Wrapper input + icono */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Label moderno */
+.search-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  padding-left: 0.2rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Input */
+.attendance-search {
+  width: 300px;
+  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #1f2937;
+  transition: all 0.25s ease;
+}
+
+/* Placeholder */
+.attendance-search::placeholder {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Focus */
+.attendance-search:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 0.95rem;
+  color: #3b82f6;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .attendance-search {
+    width: 100%;
+  }
+}
+/* =========================
+   Tablas para aistencias
+========================= */
+/* =============================
+   🧱 Layout general
+============================= */
+#attendanceTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+
+.attendance-table-wrapper {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(96, 165, 250, 0.08));
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  overflow: auto;
+}
+
+/* =============================
+   HEADER
+============================= */
+#attendanceTable thead th {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1e3a8a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+#attendanceTable tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* =============================
+   CELDAS
+============================= */
+#attendanceTable td {
+  padding: 8px 6px;
+  text-align: center;
+  border-bottom: 1px solid #eef2ff;
+}
+
+#attendanceTable td,
+#attendanceTable th {
+  white-space: nowrap;
+}
+
+/* =============================
+   STICKY columnas
+============================= */
+.sticky-col {
+  background: #fff;
+  height: 17px;
+}
+
+.sticky-col.index {
+  width: 40px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.sticky-col.name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sticky-col.dni {
+  left: 222px;
+  min-width: 90px;
+  color: #475569;
+}
+
+/* =============================
+   ESTADOS
+============================= */
+td.present {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  font-weight: 800;
+  border-radius: 6px;
+}
+
+td.absent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+  font-weight: 800;
+  border-radius: 6px;
+}
+
+td.empty {
+  color: #94a3b8;
+}
+
+/* =============================
+   HOVER
+============================= */
+#attendanceTable tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* =============================
+   SCROLL
+============================= */
+.table-wrapper {
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.attendance-cell {
+  height: 17px;
+  line-height: 17px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.attendance-cell.present {
+  background: rgba(34, 197, 94, 0.18);
+  color: #166534;
+}
+
+.attendance-cell.present.late {
+  background: rgba(34, 197, 94, 0.35);
+  color: #14532d;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.55);
+}
+
+.attendance-cell.absent {
+  background: rgba(239, 68, 68, 0.18);
+  color: #7f1d1d;
+}
+
+.attendance-cell.absent.justified {
+  background: rgba(239, 68, 68, 0.35);
+  color: #7f1d1d;
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.55);
+}
+
+.attendance-cell.empty {
+  color: #94a3b8;
+}
+
+.day-col.weekend,
+.attendance-cell.weekend {
+  background-color: #f5f6f8; /* gris muy suave */
+  color: #999;
+}
+
+.day-col.weekend .day-initial {
+  color: #888;
+  font-weight: 600;
+}
+
+.day-col.weekend .day-number {
+  color: #aaa;
+}
+
+.weekend {
+  background-color: #f5f6f8;
+}
+
+.attendance-cell.weekend {
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .attendance-selector .search-group {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+/* =========================
+   Tablas para aistencias - Mobile
+========================= */
+/* CONTENEDOR */
+.attendance-mobile {
+  padding: 1rem;
+  display: none; /* invisible por defecto */
+}
+
+/* HEADER */
+.attendance-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.attendance-mobile-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+/* LISTA */
+.attendance-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* CARD */
+.attendance-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* INFO */
+.attendance-card .info {
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-card .name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.attendance-card .dni {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* STATUS */
+.attendance-status {
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 10px;
+}
+
+/* COLORES */
+.status-present {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.status-present.late {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.status-absent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+.status-absent.justified {
+  background: rgba(59, 130, 246, 0.2);
+  color: #1d4ed8;
+}
+
+.empty-state {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 1.5rem;
+}
 
 /*# sourceMappingURL=user.css.map */

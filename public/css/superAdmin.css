@@ -254,7 +254,7 @@
 
 /* Panel centrado */
 .overlay-content {
-  max-width: 900px;
+  max-width: 1000px;
   width: 95%;
   max-height: 90vh;
   overflow-y: auto;
@@ -382,13 +382,211 @@
   background: transparent;
 }
 
-/*------------------------Boton---------------------------------*/
 /*
-a i {
+==================================================================
+=Columna Docente aignados a las materias
+===================================================================
+*/
+.teacher-column-header {
+  background: linear-gradient(180deg, #f8f9fa, #c1d9f1);
+  border-left: 3px solid #0d6efd;
+  border-right: 3px solid #0d6efd;
+  font-weight: 600;
+  color: #0d6efd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  text-align: center;
+  position: relative;
+}
+
+.teacher-column-header::after {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #6c757d;
+  letter-spacing: normal;
+}
+
+.teacher-column-cell {
+  background-color: #fafbfc;
+  border-left: 3px solid #0d6efd;
+  border-right: 3px solid #0d6efd;
+  vertical-align: middle;
+  border-top: 1px solid #e6e9ed;
+}
+
+.teacher-cell {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e6e9ed;
+}
+
+.teacher-select {
+  max-width: 180px;
+  font-size: 0.8rem;
+}
+
+.teacher-status {
+  font-size: 0.7rem;
+  padding: 4px 6px;
+}
+
+.status-inactive {
+  background-color: #dee2e6;
+  color: #495057;
+}
+
+.status-active {
+  background-color: #198754;
+  color: #fff;
+}
+
+.teacher-actions a {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f3f5;
+  transition: all 0.15s ease;
+}
+
+.teacher-actions a:hover {
+  background-color: #e9ecef;
+  transform: scale(1.05);
+}
+
+.teacher-actions a i {
+  font-size: 0.8rem;
+}
+
+tr:hover .teacher-column-cell {
+  background-color: #f1f5ff;
+}
+
+/* ===================== Modal ===================== */
+/* Overlay completo */
+.teacher-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Oculto */
+.teacher-modal.d-none {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Contenedor modal */
+.teacher-modal-card {
+  max-width: 450px;
+  width: 90%;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+/* Animación */
+.teacher-modal:not(.d-none) .teacher-modal-card {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Header */
+.teacher-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2d4a72;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+/* Botón cerrar */
+.teacher-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #fff;
   cursor: pointer;
 }
 
-*/
+/* Select */
+.teacher-modal-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.teacher-modal-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+/* Botones */
+.teacher-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.teacher-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.teacher-btn-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.teacher-btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  margin-left: 0.5rem;
+}
+
+/* Curso nombre */
+#teacherModalCourseName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #007bff;
+  text-align: center;
+}
+
+/* Acciones centradas */
+.teacher-modal-actions {
+  text-align: center;
+}
+
 /* Contenedor de cada selector */
 .selector-col {
   margin-bottom: 1rem;
@@ -822,6 +1020,257 @@ tr.resaltado {
   .modal-content {
     padding: 1.5rem;
   }
+}
+/* ==========================
+   Tabla base
+========================== */
+#attendanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  table-layout: fixed; /* <--- esto obliga a que las columnas tengan ancho uniforme */
+}
+
+#attendanceTable th,
+#attendanceTable td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
+
+/* Encabezado */
+#attendanceTable th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+}
+
+/* ==========================
+   Celdas de asistencia
+========================== */
+.attendance-cell {
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: default;
+  position: relative; /* para tooltip */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Estados */
+.attendance-cell.present {
+  background-color: #4caf50; /* verde normal */
+}
+
+.attendance-cell.present.late {
+  background-color: #2e7d32; /* verde oscuro para tardanza */
+}
+
+.attendance-cell.absent {
+  background-color: #f44336; /* rojo normal */
+}
+
+.attendance-cell.absent.justified {
+  background-color: #c62828; /* rojo oscuro para ausente justificado */
+}
+
+.attendance-cell.empty {
+  background-color: #e9ecef; /* gris claro para días sin clase */
+  color: #666;
+}
+
+/* Hover */
+.attendance-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================
+   Tooltips
+========================== */
+/* Tooltip */
+/* Tooltip flotante */
+.tooltip-floating {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: pre-line;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+th.widthDate, td.widthDate {
+  width: 35px; /* ancho fijo para cada día */
+  max-width: 35px;
+  text-align: center;
+}
+
+.total-Attendance-Student {
+  width: 50px; /* ancho fijo para cada día */
+  max-width: 50px;
+  text-align: center;
+}
+
+/* ==========================
+   Filas espaciadoras
+========================== */
+.spacer-row td {
+  background-color: transparent;
+  border: none;
+  height: 12px; /* espacio entre alumnos y totales */
+}
+
+.spacer-col {
+  background-color: transparent;
+  border: none;
+  width: 12px;
+}
+
+/* ==========================
+   Totales por alumno o final
+========================== */
+.total-row {
+  font-weight: bold;
+  border-top: 2px solid #555; /* línea superior */
+}
+
+.total-present td.attendance-cell.present {
+  background-color: #307734; /* verde más oscuro */
+  color: #fff;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.total-absent td.attendance-cell.absent {
+  background-color: #b83e3e; /* rojo más oscuro */
+  color: #fff;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Columna final Total P / Total A */
+.total-row td:last-child,
+.total-row td:nth-last-child(2) {
+  border-left: 2px solid #333;
+}
+
+/* ==========================
+   Columna final Total P / Total A
+   Línea vertical separadora
+========================== */
+/* Columna final Total P / Total A */
+#attendanceTable td.total-col {
+  border-left: 2px solid #333; /* línea vertical */
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+th:first-child, td:first-child {
+  width: 30px;
+} /* # */
+th:nth-child(2), td:nth-child(2) {
+  width: 180px;
+} /* Nombre alumno */
+th:nth-child(3), td:nth-child(3) {
+  width: 80px;
+} /* DNI */
+/* ==========================
+   Edicion de celdas - Notas
+========================== */
+.attendance-cell {
+  position: relative;
+  text-align: center;
+  padding: 2px;
+  overflow: visible;
+}
+
+.attendance-input {
+  width: 100%;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.edit-note-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.edit-note-icon:hover {
+  color: #000;
+}
+
+.attendance-cell.present {
+  background-color: #d4edda; /* verde suave */
+}
+
+.attendance-cell.absent {
+  background-color: #f8d7da; /* rojo suave */
+}
+
+.attendance-cell.justified {
+  border: 1px dashed #007bff; /* azul para justificado */
+}
+
+.attendance-cell.late {
+  border: 1px dotted #ffc107; /* amarillo para tarde */
+}
+
+.attendance-cell.empty {
+  background-color: #f0f0f0;
+}
+
+.total-col {
+  font-weight: bold;
+}
+
+.edit-note-icon {
+  position: absolute;
+  top: -10px; /* sobresale hacia arriba */
+  right: 30px; /* sobresale hacia la derecha */
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2; /* por encima del input */
+}
+
+.attendance-cell .attendance-input:focus + .edit-note-icon {
+  opacity: 1;
+  transform: scale(1.1); /* un pequeño efecto para que resalte */
+}
+
+.edit-note-icon:hover {
+  color: #000;
+  transform: scale(1.2); /* efecto hover */
+}
+
+/*cuando hay cambio real*/
+td.changed {
+  outline: 2px solid #4caf50;
+}
+
+td.present {
+  background-color: #d4f8d4;
+}
+
+td.absent {
+  background-color: #ffd6d6;
 }
 
 /*# sourceMappingURL=superAdmin.css.map */
