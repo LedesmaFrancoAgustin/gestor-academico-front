@@ -78,6 +78,8 @@ function renderCoursesTable(data) {
               </li>
             <li> <a href="#" class="addStudents" title="Agregar alumnos"><i class="fa fa-graduation-cap"></i> </a>
               </li>
+            <li> <a href="#" class="addRepeaters" title="Agregar recursantes"> <i class="fa fa-user-clock"></i> </a>
+               </li>
             <li><a href="#" class="addSubjects" title="Agregar materias"> <i class="fa fa-book"></i></a>
               </li>
           </ul>
@@ -604,12 +606,363 @@ document.getElementById("closeStudentsOverlay").addEventListener("click", () => 
 
 if (!panelInfo.classList.contains("d-none")&& confirmAddStudentPressed) {
     loadCourseStudentsInfo(selectedCourseId)
+    
     console.log("entro")
     confirmAddStudentPressed = false;
   
   // Aquí ponés la acción que querés realizar
 }
 });
+
+// ===================== Agregar Recusante ==========================================================================
+// Abrir overlay al hacer clic en el ícono de agregar alumnos
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".addRepeaters");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const row = btn.closest("tr");
+  selectedCourseId = row.dataset.courseId;
+
+  openAddStudentRepeatersPanel(selectedCourseId)
+
+});
+
+// Abrir overlay al hacer clic en el ícono de agregar alumnos desde el panel de infoCurso
+const addBtn = document.getElementById("addStudentsRecourse");
+
+addBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (!selectedCourseId) {
+    uiToast("Seleccioná un curso primero", "warning");
+    return;
+  }
+
+  openAddStudentRepeatersPanel(selectedCourseId);
+});
+
+// -------------------------------- función openAddStudentRepeatersPanel -----------------------------
+const modal = document.getElementById("repeatersModal");
+const closeBtn = document.getElementById("closeRepeatersModal");
+
+async function openAddStudentRepeatersPanel(courseId) {
+
+  const resultsContainer = document.getElementById("repeatersResults");
+
+  modal.classList.remove("hidden");
+
+  inputSearchRepeaters.value = "";
+  inputSearchRepeaters.disabled = true;
+  resultsContainer.innerHTML = "";
+
+  subjectSelectRepeaters.innerHTML = `
+    <option value="" selected disabled>Cargando materias...</option>
+  `;
+
+  try {
+
+    const response = await fetchTeacherAndSubjetsAssignmment(courseId);
+    const subjectsArray = response.data;
+
+    console.log("subjectsArray: " , subjectsArray)
+
+    if (!subjectsArray || subjectsArray.length === 0) {
+      subjectSelectRepeaters.innerHTML = `
+        <option value="" disabled selected>No hay materias disponibles</option>
+      `;
+      return;
+    }
+
+    // 🔥 FILTRAR SOLO TITULARES
+    const titulares = subjectsArray.filter(
+      item => item.teacherStatusSubject === true
+    );
+
+    if (titulares.length === 0) {
+      subjectSelectRepeaters.innerHTML = `
+        <option value="" disabled selected>No hay materias titulares</option>
+      `;
+      return;
+    }
+
+    subjectSelectRepeaters.innerHTML = `
+      <option value="" selected disabled>Seleccionar materia</option>
+    `;
+
+    titulares.forEach(item => {
+
+      const option = document.createElement("option");
+
+      // value = TeachingAssignmentId
+      option.value = item.subjectId;
+
+      // 🔹 data attribute → teachingAssignmentId
+      option.dataset.teachingAssignmentId = item.TeachingAssignmentId;
+
+      // 🔹 data attribute → academicYearCourse
+      option.dataset.academicYearCourse = item.academicYearCourse;
+
+      // texto = Materia - Docente
+      option.textContent = `${item.subjectName} - ${item.teacherApellido} ${item.teacherNombre}`;
+
+      subjectSelectRepeaters.appendChild(option);
+
+    });
+
+  } catch (error) {
+
+    console.error("Error cargando materias:", error);
+
+    subjectSelectRepeaters.innerHTML = `
+      <option value="" disabled selected>Error al cargar materias</option>
+    `;
+  }
+}
+
+// -------------------------------- cerrar modal Recursante -----------------------------
+
+closeBtn.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
+
+// cerrar haciendo click afuera
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.add("hidden");
+  }
+});
+
+
+// -------------------------------- Selecionar materia para recursar-----------------------------
+const subjectSelectRepeaters = document.getElementById("subjectSelectRepeaters");
+subjectSelectRepeaters.addEventListener("change", () => {
+
+    if (subjectSelectRepeaters.value) {
+    inputSearchRepeaters.disabled = false;
+    inputSearchRepeaters.focus();
+  } else {
+    inputSearchRepeaters.disabled = true;
+  }
+
+});
+
+// -------------------------------- input buscar recursante -----------------------------
+const inputSearchRepeaters = document.getElementById("searchRepeatersInput");
+let debounceTimer;
+
+
+inputSearchRepeaters.addEventListener("input", async (e) => {
+
+  const query = e.target.value.trim();
+ 
+  // limpiar timer anterior
+  clearTimeout(debounceTimer);
+
+  // si está vacío, limpiar resultados
+  if (!query) {
+    renderRepeatersResults([]);
+    return;
+  }
+
+  // esperar 400ms antes de hacer fetch
+  debounceTimer = setTimeout(async () => {
+    const subjectId = subjectSelectRepeaters.value.trim();
+    console.log("subjectId: ",subjectId)
+    const students = await fetchStudentsRepeaters(10, query , subjectId);
+    renderRepeatersResults(students);
+  }, 400);
+
+
+});
+
+
+
+// -------------------------------- render de estudiante recursantes -----------------------------
+function renderRepeatersResults(students) {
+
+  const container = document.getElementById("repeatersResults");
+
+  // Si no hay resultados
+  if (!students || students.length === 0) {
+    container.innerHTML = `
+      <div class="no-results">
+        No se encontraron alumnos recursantes.
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <table class="repeaters-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Alumno</th>
+          <th>DNI</th>
+          <th>Email</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  students.forEach((student, index) => {
+    html += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${student.name} ${student.lastname}</td>
+        <td>${student.dni}</td>
+        <td>${student.email || "-"}</td>
+        <td>
+          <button 
+            class="btn-add-repeater"
+            data-id="${student._id}"
+          >
+            Agregar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  container.innerHTML = html;
+}
+
+// -------------------------------- Agregar recursante boton  -----------------------------
+const repeatersContainer = document.getElementById("repeatersResults");
+
+repeatersContainer.addEventListener("click", async (e) => {
+
+  const button = e.target.closest(".btn-add-repeater");
+  if (!button) return;
+
+  // 🔒 Evita doble click mientras procesa
+  if (button.disabled) return;
+
+  if (!subjectSelectRepeaters.value) {
+    uiToast("Seleccioná una materia primero", "warning");
+    return;
+  }
+
+  const selectedOption =
+    subjectSelectRepeaters.options[subjectSelectRepeaters.selectedIndex];
+
+  if (!selectedOption) {
+    uiToast("Materia inválida", "error");
+    return;
+  }
+
+  const studentId = button.dataset.id;
+  const teachingAssignmentId = selectedOption.dataset.teachingAssignmentId;
+  const academicYear = selectedOption.dataset.academicYearCourse;
+
+  console.log(studentId , teachingAssignmentId , academicYear)
+
+  try {
+
+    button.disabled = true;
+    button.textContent = "Agregando...";
+
+    await fetchCreateStudentRecourseAssignment(
+      studentId,
+      teachingAssignmentId,
+      academicYear
+    );
+
+    button.textContent = "Agregado ✓";
+    button.classList.add("success");
+
+    uiToast("Materia a recursante agregada correctamente", "success");
+
+  } catch (error) {
+
+    console.error(error);
+
+    button.disabled = false;
+    button.textContent = "Agregar";
+
+    uiToast(
+      error?.message || "Error inesperado al agregar recursado",
+      "error"
+    );
+  }
+
+});
+
+
+// -------------------------------- Fetch traer recursantes -----------------------------
+async function fetchStudentsRepeaters( limit , query , subjectId) {
+  try {
+    const res = await fetch(`${API_URL}/api/StudentSubjectStatus/students/pending/subjectId?limit=${limit}&q=${query}&subjectId=${subjectId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const result = await res.json();
+    
+    const students = result.data || [];
+  console.log("students: ", students)
+   return students
+  } catch (err) {
+    console.error("Error cargando alumnos recursantes", err);
+    courseStudentsIds = [];
+  }
+}
+
+
+async function fetchTeacherAndSubjetsAssignmment(courseId) {
+  try {
+    const res = await fetch(`${API_URL}/api/TeachingAssignment/teachers/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error(result.message || "Error al solicitar materias");
+    
+    const result = await res.json();
+    return result;
+
+  } catch (err) {
+    console.error("Error al solicitar materias: ", err);
+    throw err;
+  }
+}
+
+async function fetchCreateStudentRecourseAssignment( studentId, teachingAssignmentId, academicYear) {
+  try {
+    const res = await fetch(`${API_URL}/api/studentRecourseAssignment`, {
+      method: "POST", // 🔥 IMPORTANTE
+      headers: {
+        "Content-Type": "application/json", // 🔥 Necesario para body JSON
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        studentId,
+        teachingAssignmentId,
+        academicYear
+      })
+    });
+
+    const result = await res.json(); // 👈 primero parseamos
+
+    if (!res.ok) {
+      throw new Error(result.message || "Error al crear recursante");
+    }
+
+    return result;
+
+  } catch (err) {
+    console.error("Error al crear recursante:", err);
+    throw err;
+  }
+}
+
+
 
 
 // ===================== Buscar alumnos desde el backend =====================
@@ -1107,6 +1460,59 @@ async function loadCourseStudentsInfo(courseId) {
   }
 }
 
+async function loadCourseRepeaters(courseId) {
+  try {
+    const res = await fetch(`${API_URL}/api/studentRecourseAssignment/recourse/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const response = await res.json();
+    const repeaters = response.data; // 👈 IMPORTANTE
+
+    const tbody = document.getElementById("courseRepeatersList");
+
+    if (!repeaters || repeaters.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center text-muted">
+            No hay recursantes registrados
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    let html = "";
+
+    repeaters.forEach((item, index) => {
+      html += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.studentName}</td>
+          <td>${item.dni}</td>
+          <td>${item.email || "-"}</td>
+          <td>${item.subject}</td> <!-- 👈 cambiado -->
+          <td>
+            <button class="btn btn-sm  btn-remove-recourse text-danger" 
+                    data-id="${item.id}" title="Eliminar alumno (error de carga)">
+                    <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+  } catch (err) {
+    console.error("Error cargando recursante del curso", err);
+    uiToast("Error cargando recursante del curso", "error");
+  }
+}
+
+
+
+
 // 🔹 Traer y renderizar materias del curso
 async function loadCourseSubjectsInfo(courseId) {
   try {
@@ -1453,6 +1859,7 @@ try {
 async function loadCourseInfo(courseId) {
   await loadCourseUsersInfo(courseId);
   await loadCourseStudentsInfo(courseId);
+  await loadCourseRepeaters(courseId);
   await loadCourseSubjectsInfo(courseId);
 }
 
@@ -1784,6 +2191,64 @@ document.getElementById("courseStudentsList").addEventListener("click", async (e
     uiToast("No se pudo eliminar el alumno", "error");
   }
 });
+
+
+// ===================== Eliminar alumno Recursante del curso =====================
+
+// Delegación de eventos para los botones de eliminar recursante
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-remove-recourse");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  // 🔹 Tomamos el ID del estudiante recursante
+  const studentRecourseAssignmentId = btn.dataset.id;
+
+  if (!studentRecourseAssignmentId) {
+    uiToast("ID del recursante no encontrado", "error");
+    return;
+  }
+
+  // 🔹 Confirmación antes de eliminar
+  const confirmDelete = confirm(
+    "¿Estás seguro que querés eliminar este recursante? Esta acción es irreversible."
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    const res = await fetch(
+      `${API_URL}/api/studentRecourseAssignment/recourse/students/${studentRecourseAssignmentId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Error eliminando recursante");
+    }
+
+    // 🔹 Mensaje de éxito
+    uiToast(data.message || "Recursante eliminado correctamente", "success");
+
+    // 🔹 Opcional: eliminar la fila de la tabla directamente
+    const row = btn.closest("tr");
+    if (row) row.remove();
+
+  } catch (err) {
+    console.error(err);
+    uiToast(err.message || "Error eliminando recursante", "error");
+  }
+});
+
+
 
 // ===================== Eliminar materia de curso =====================
 
