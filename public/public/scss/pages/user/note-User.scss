@@ -1,0 +1,510 @@
+/* =========================
+   Página Cargar Notas
+========================= */
+
+.grades-page {
+  padding: 1.5rem;
+  padding-top: 90px;
+}
+
+.grades-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================
+   Header
+========================= */
+
+.grades-header {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #3b82f6;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(96, 165, 250, 0.08)
+  );
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Título */
+.grades-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e3a8a; /* azul profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Subtítulo */
+.grades-header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+
+/* =========================
+   Selector de curso
+========================= */
+
+/* Contenedor general */
+.grades-selector {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(96, 165, 250, 0.12)
+  );
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Label moderno */
+.select-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  padding-left: 0.2rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+
+/* Select */
+.grades-select {
+  appearance: none;
+  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  font-size: 0.95rem;
+  background: #fff;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Flecha */
+.select-group::after {
+  content: "▾";
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.65rem;
+  font-size: 0.9rem;
+  color: #3b82f6;
+  pointer-events: none;
+}
+
+/* Hover */
+.grades-select:hover {
+  border-color: #3b82f6;
+}
+
+/* Focus */
+.grades-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* Disabled */
+.grades-select:disabled {
+  background-color: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .grades-selector {
+    padding: 0.8rem;
+    gap: 0.8rem;
+  }
+
+  .select-group {
+    width: 100%;
+  }
+}
+
+
+
+/* =========================
+   Contenedor de notas
+========================= */
+
+#gradesContainer {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+
+/* =========================
+   Tabla (Desktop)
+========================= */
+.grades-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+.grades-table thead {
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+}
+
+.grades-table thead th {
+  padding: 0.9rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.grades-table thead th:first-child {
+  text-align: left;
+  padding-left: 1rem;
+}
+.grades-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.grades-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.grades-table tbody tr:hover {
+  background: #eef2ff;
+}
+
+.grades-table td {
+  padding: 0.7rem 0.6rem;
+  font-size: 0.85rem;
+  color: #1e293b;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.grades-table td:first-child {
+  font-weight: 600;
+  text-align: left;
+  padding-left: 1rem;
+  color: #0f172a;
+}
+
+.grades-table td:nth-child(2) {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.grade-input {
+  width: 56px;
+  padding: 0.35rem 0.4rem;
+  font-size: 0.85rem;
+  text-align: center;
+  border-radius: 8px;
+  border: 1.5px solid #c7d2fe;
+  background: #ffffff;
+  color: #1e3a8a;
+  transition: all 0.15s ease;
+}
+
+.grade-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.grade-readonly {
+  display: inline-block;
+  min-width: 60px;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  background: #e2e8f0;
+  text-align: center;
+}
+
+/* Columna índice */
+.col-index {
+  width: 42px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+/* Header del índice */
+.grades-table thead .col-index {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Body del índice */
+.grades-table tbody .col-index {
+  background: #f1f5f9;
+  color: #334155;
+  border-right: 1px solid #e5e7eb;
+}
+/*Indicador visual de cambios*/
+.grade-input.modified {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.grade-input.input-error {
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.08);
+}
+
+.grade-input.modified:not(.input-error) {
+  border: 2px solid #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+
+
+/* =========================
+   Cards (Mobile)
+========================= */
+/* Contenedor general */
+.grades-cards {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Card */
+.grade-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Header alumno */
+.grade-card-header {
+  margin-bottom: 0.8rem;
+}
+
+.grade-card-header h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.grade-card-header .dni {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Body */
+.grade-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Fila nota */
+.grade-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Label izquierda */
+.grade-field label {
+  font-size: 0.85rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Estado modificado (clave visual) */
+.grade-input.modified {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+/* Mejor toque táctil */
+@media (max-width: 480px) {
+  .grade-input {
+    width: 60px;
+  }
+}
+
+/* Base */
+.grade-input,
+.mobile-grade-input {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* 🔴 1 a 4 */
+.grade-low {
+  background-color: rgba(239, 68, 68, 0.12);   /* rojo suave */
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* 🟡 5 a 6 */
+.grade-mid {
+  background-color: rgba(234, 179, 8, 0.15);   /* amarillo suave */
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+/* 🟢 7 a 10 */
+.grade-high {
+  background-color: rgba(34, 197, 94, 0.15);   /* verde suave */
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+
+
+/* =========================
+   Acciones
+========================= */
+.grades-actions {
+  margin-top: 2rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 5px solid #3b82f6; /* mismo azul */
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(96, 165, 250, 0.08)
+  );
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Contenido */
+.actions-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Título */
+.grades-actions h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e3a8a; /* mismo azul profundo */
+  letter-spacing: -0.02em;
+}
+
+/* Texto */
+.grades-actions p {
+  font-size: 0.95rem;
+  color: #475569;
+  max-width: 520px;
+}
+
+/* Botón */
+.grades-actions button {
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+#saveGradesBtn {
+  padding: 0.65rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+  transition: all 0.2s ease;
+}
+
+#saveGradesBtn:not(:disabled):hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    #1d4ed8,
+    #2563eb
+  );
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.45);
+}
+
+#saveGradesBtn:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+#saveGradesBtn:disabled {
+  cursor: not-allowed;
+  background: linear-gradient(
+    135deg,
+    #cbd5f5,
+    #e0e7ff
+  );
+  color: #64748b;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .grades-actions button {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 768px) {
+  .grades-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .grades-actions {
+    text-align: center;
+  }
+/*
+  .grade-input {
+    width: 100%;
+  }
+    */
+}

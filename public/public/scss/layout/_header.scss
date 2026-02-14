@@ -1,0 +1,308 @@
+/* ==============================
+   HEADER BASE
+============================== */
+
+header {
+  width: 100%;
+  height: 70px;
+  padding: 10px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  background: linear-gradient(
+    180deg,
+    #eef4fb 0%,
+    #f8fafc 100%
+  );
+
+   border-bottom: 1px solid #dbe6f3;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    //box-shadow: 0px 9px 5px -7px #152a4f;
+    -webkit-box-shadow: 0px 9px 5px -7px #19325e;
+    -moz-box-shadow: 0px 9px 5px -7px #1a3563;
+}
+
+/* ==============================
+   HEADER LAYOUT
+============================== */
+
+.container-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ==============================
+   LOGO
+============================== */
+
+.logo {
+  width: 120px;
+  height: 45px;
+}
+
+/* ==============================
+   TITLE
+============================== */
+
+.titleName {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f3a5f;
+  margin: 0;
+}
+
+/* ==============================
+   ACTIONS (RIGHT SIDE)
+============================== */
+
+.conteiner-header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions-list {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==============================
+   NOTIFICATIONS
+============================== */
+
+.notification-icon {
+  font-size: 1.2rem;
+  color: #1f3a5f;
+  transition: transform 0.2s ease;
+}
+
+.notification-toggle:hover .notification-icon {
+  transform: scale(1.1);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #dc3545;
+  color: white;
+  font-size: 0.50rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.notification-menu {
+  width: 280px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notification-menu .dropdown-header {
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6f6f6f;
+  padding: 8px 14px;
+}
+.notification-menu .dropdown-divider {
+  margin: 6px 0;
+  opacity: 0.4;
+}
+.notification-menu .dropdown-item {
+  font-size: 13.5px;
+  padding: 8px 14px;
+  color: #2b2b2b;
+  border-radius: 8px;
+}
+.notification-menu .dropdown-item:hover {
+  background: #f5f7fa;
+}
+.notification-menu .dropdown-item.text-center {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2563eb;
+}
+
+.notification-menu .dropdown-item.text-center:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+
+
+
+
+/* ==============================
+   USER AVATAR
+============================== */
+
+.user-avatar {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f4f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.user-avatar img {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.25s ease;
+}
+
+.user-avatar:hover img {
+  transform: scale(1.1);
+}
+
+/* Flechita */
+.dropdown-arrow {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-arrow::before {
+  content: "";
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #333;
+}
+
+.show .dropdown-arrow::before {
+  transform: rotate(180deg);
+}
+.user-dropdown .dropdown-item {
+  font-size: 12px;
+  padding: 8px 14px;
+  color: #2b2b2b;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: 8px;
+}
+.user-dropdown .dropdown-item i {
+  font-size: 14px;
+  color: #6f6f6f;
+}
+.user-dropdown .dropdown-item:hover {
+  background: #f5f7fa;
+}
+
+.user-dropdown .dropdown-item.text-danger {
+  color: #b42318;
+}
+
+.user-dropdown .dropdown-item.text-danger i {
+  color: #b42318;
+}
+
+.user-dropdown .dropdown-item.text-danger:hover {
+  background: rgba(180, 35, 24, 0.08);
+}
+.user-dropdown .dropdown-divider {
+  margin: 6px 0;
+  opacity: 0.5;
+}
+
+
+
+
+
+/* ==============================
+   USER NAME – HEADER
+============================== */
+
+.user-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f3a5f;
+  letter-spacing: 0.3px;
+  transition: color 0.25s ease;
+  white-space: nowrap;
+   
+}
+
+.text-none-a{
+  text-decoration: none !important;
+}
+
+/* ==============================
+   HOVER UNDERLINE (INSTITUTIONAL)
+============================== */
+
+.hover-underline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.hover-underline:hover {
+  transform: scale(1.05);
+}
+
+.hover-underline::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 75%;
+  height: 0;
+  background: #2fa84f;
+  transform: translateX(-50%);
+  transition: height 0.25s ease;
+}
+
+.hover-underline:hover::after {
+  height: 2px;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+
+@media (max-width: 768px) {
+
+  .notification-menu{
+    position: absolute !important;
+    inset: 20px -50px auto auto !important;
+  }
+  .conteiner-header-title {
+    display: none;
+  }
+
+  .header-actions-list {
+    gap: 0.75rem;
+  }
+
+  .logo {
+  width: 90px;
+  height: 35px;
+}
+
+
+
+
+}

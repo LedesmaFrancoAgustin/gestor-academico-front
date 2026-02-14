@@ -1,0 +1,361 @@
+.settings-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  background-color: #f0f7f5; /* verde muy suave */
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+
+.settings-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* permite que los tabs bajen de línea en pantallas pequeñas */
+  margin-bottom: 1.5rem;
+  gap: 0.5rem; /* un poco menos de gap en mobile */
+}
+
+.tab-button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  background: #f1f1f1;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background: #55ac75;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2fa84f;
+}
+
+.btn-save {
+  background: #55ac75;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  background: #28a141;
+}
+
+.btn-warning {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: #e03b3b;
+}
+
+
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+
+/* Card de configuracion de perfil*/
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.settings-card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.card-header i:first-child {
+  margin-right: 0.5rem;
+  color: #4caf71;
+}
+
+.card-body {
+  display: none;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.mini-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* espacio vertical entre inputs */
+}
+
+.mini-form input {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.mini-form input:focus {
+  border-color: #4caf71;
+  outline: none;
+}
+
+.mini-form button.btn-save-sm {
+  align-self: flex-end; /* botón a la derecha */
+  margin-top: 0.3rem;
+}
+
+
+.btn-save-sm {
+  background: #55ac75;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-save-sm:hover {
+  background: #439664;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.settings-card.active .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.settings-card.active .card-body {
+  display: block;
+}
+
+
+/* Modal centrado */
+.modal {
+  display: none; /* oculto por defecto */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5); /* fondo semi-transparente */
+}
+
+/* Modal centrado */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.current-email {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f7;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.current-email span {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Botones del modal */
+.modal-buttons {
+  display: flex;
+  justify-content: center; /* centrado horizontal */
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel {
+  background: #e05a55;
+}
+
+.btn-cancel:hover {
+  background: #e03b3b;
+}
+.btn-edit {
+  background: #4caf71;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+  background: #439664;
+}
+
+.current-password {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f7;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.current-password span {
+  font-weight: 500;
+  color: #333;
+}
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 1rem;
+  }
+
+  .settings-title {
+    font-size: 1.5rem;
+  }
+
+  .tab-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .current-email,
+  .current-password {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+      .current-email span,
+    .current-password span {
+      font-weight: 500;
+      color: #333;
+
+      overflow: hidden;        /* recorta el texto si es muy largo */
+      text-overflow: ellipsis; /* agrega "..." al final */
+      white-space: nowrap;     /* evita que el texto haga wrap */
+      max-width: 100%;         /* no exceda el contenedor */
+      display: inline-block;   /* necesario para que funcione text-overflow */
+      vertical-align: middle;
+    }
+
+
+  .btn-edit {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+
+}

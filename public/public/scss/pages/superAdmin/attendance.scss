@@ -1,0 +1,254 @@
+/* ==========================
+   Tabla base
+========================== */
+#attendanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  table-layout: fixed; /* <--- esto obliga a que las columnas tengan ancho uniforme */
+}
+
+
+#attendanceTable th,
+#attendanceTable td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
+
+/* Encabezado */
+#attendanceTable th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+}
+
+
+/* ==========================
+   Celdas de asistencia
+========================== */
+.attendance-cell {
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  cursor: default;
+  position: relative; /* para tooltip */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Estados */
+.attendance-cell.present {
+  background-color: #4caf50; /* verde normal */
+}
+
+.attendance-cell.present.late {
+  background-color: #2e7d32; /* verde oscuro para tardanza */
+}
+
+.attendance-cell.absent {
+  background-color: #f44336; /* rojo normal */
+}
+
+.attendance-cell.absent.justified {
+  background-color: #c62828; /* rojo oscuro para ausente justificado */
+}
+
+.attendance-cell.empty {
+  background-color: #e9ecef; /* gris claro para días sin clase */
+  color: #666;
+}
+
+/* Hover */
+.attendance-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* ==========================
+   Tooltips
+========================== */
+/* Tooltip */
+/* Tooltip flotante */
+.tooltip-floating {
+  position: absolute;
+  background-color: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: pre-line;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  display: none;
+}
+
+th.widthDate, td.widthDate {
+  width: 35px; /* ancho fijo para cada día */
+  max-width: 35px;
+  text-align: center;
+}
+
+.total-Attendance-Student{
+  width: 50px; /* ancho fijo para cada día */
+  max-width: 50px;
+  text-align: center;
+}
+
+/* ==========================
+   Filas espaciadoras
+========================== */
+.spacer-row td {
+  background-color: transparent;
+  border: none;
+  height: 12px; /* espacio entre alumnos y totales */
+}
+
+.spacer-col   {
+  background-color: transparent;
+  border: none;
+  //height: 12px; /* espacio entre alumnos y totales */
+  width: 12px;
+}
+
+/* ==========================
+   Totales por alumno o final
+========================== */
+.total-row {
+  font-weight: bold;
+  border-top: 2px solid #555; /* línea superior */
+}
+
+.total-present td.attendance-cell.present {
+  background-color: #307734; /* verde más oscuro */
+  color: #fff;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.total-absent td.attendance-cell.absent {
+  background-color: #b83e3e; /* rojo más oscuro */
+  color: #fff;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Columna final Total P / Total A */
+.total-row td:last-child,
+.total-row td:nth-last-child(2) {
+  border-left: 2px solid #333;
+}
+
+/* ==========================
+   Columna final Total P / Total A
+   Línea vertical separadora
+========================== */
+
+
+/* Columna final Total P / Total A */
+#attendanceTable td.total-col {
+  border-left: 2px solid #333; /* línea vertical */
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+th:first-child, td:first-child { width: 30px; } /* # */
+th:nth-child(2), td:nth-child(2) { width: 180px; } /* Nombre alumno */
+th:nth-child(3), td:nth-child(3) { width: 80px; }  /* DNI */
+
+
+/* ==========================
+   Edicion de celdas - Notas
+========================== */
+
+.attendance-cell {
+  position: relative;
+  text-align: center;
+  padding: 2px;
+   overflow: visible; 
+}
+
+.attendance-input {
+  width: 100%;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.edit-note-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.edit-note-icon:hover {
+  color: #000;
+}
+
+.attendance-cell.present {
+  background-color: #d4edda; /* verde suave */
+}
+
+.attendance-cell.absent {
+  background-color: #f8d7da; /* rojo suave */
+}
+
+.attendance-cell.justified {
+  border: 1px dashed #007bff; /* azul para justificado */
+}
+
+.attendance-cell.late {
+  border: 1px dotted #ffc107; /* amarillo para tarde */
+}
+
+.attendance-cell.empty {
+  background-color: #f0f0f0;
+}
+
+.total-col {
+  font-weight: bold;
+}
+
+.edit-note-icon {
+  position: absolute;
+  top: -10px;     /* sobresale hacia arriba */
+  right: 30px;   /* sobresale hacia la derecha */
+  cursor: pointer;
+  font-size: 1rem; 
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2;    /* por encima del input */
+}
+
+.attendance-cell .attendance-input:focus + .edit-note-icon {
+  opacity: 1;
+  transform: scale(1.1); /* un pequeño efecto para que resalte */
+}
+
+.edit-note-icon:hover {
+  color: #000;
+  transform: scale(1.2); /* efecto hover */
+}
+
+/*cuando hay cambio real*/
+td.changed {
+  outline: 2px solid #4caf50;
+}
+
+
+td.present {
+  background-color: #d4f8d4;
+}
+
+td.absent {
+  background-color: #ffd6d6;
+}

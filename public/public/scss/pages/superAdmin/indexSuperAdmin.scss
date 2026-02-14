@@ -1,0 +1,126 @@
+/* Content general */
+.content-indexSuperUser {
+ // margin-left: 220px;
+  padding: 2rem;
+ 
+}
+
+/* Bienvenida */
+.dashboard-welcome h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.3rem;
+  color: #1f3a5f;
+}
+
+.dashboard-welcome p {
+  color: #475569;
+}
+
+/* Estadísticas rápidas */
+.dashboard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  flex: 1 1 200px;
+  padding: 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f3a5f;
+}
+
+/* Acciones rápidas */
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.action-card {
+  background: #ffffff;
+  flex: 1 1 150px;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.action-card i {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.action-card:hover {
+  background: #e0ecff;
+  transform: translateY(-2px);
+}
+
+/* Últimas notificaciones */
+.dashboard-notifications h3 {
+  margin-bottom: 0.5rem;
+  color: #1f3a5f;
+}
+
+.list-group-item {
+  background: #ffffff;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+/*------------------------ Seccion de PANEL CONTROL -------------------------*/
+/* Contenedor principal */
+.dashboard-welcome {
+  padding: 2rem 0;
+  background: #f5f7fa; /* fondo muy suave */
+  
+}
+
+/* Caja interna con sombra y bordes redondeados */
+.dashboard-welcome-container {
+  display: inline-block;
+  background: #ffffff; /* blanco para que destaque sobre el fondo */
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* sombra sutil */
+  text-align: center;
+  width: 100%;
+}
+
+/* Título */
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0d6efd; /* azul elegante */
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem; /* espacio entre icono y texto */
+}
+
+/* Subtítulo */
+.dashboard-subtitle {
+  font-size: 1rem;
+  color: #6c757d; /* gris suave */
+  margin: 0;
+}
+
+/* Icono opcional */
+.dashboard-title i {
+  font-size: 2.2rem;
+  vertical-align: middle;
+}
+

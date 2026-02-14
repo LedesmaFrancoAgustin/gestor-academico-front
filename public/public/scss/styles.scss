@@ -1,0 +1,13 @@
+/// sass --watch scss:css
+@import "./base/mixin.scss";
+@import "./base/reset";
+@import "./base/fonts";
+
+@import "./layout/header";
+@import "./layout/main";
+@import "./layout/footer";
+
+@import "./pages/login/login";
+
+
+
