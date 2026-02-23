@@ -170,6 +170,11 @@
                 <i class="fa fa-file-alt"></i> Notas
                 </a>
             </li>
+             <li class="nav-item">
+                <a class="nav-link" href="./reportCard.html">
+                    <i class="fa fa-clipboard"></i> Calendario
+                </a>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="./configuracion.html">
@@ -225,6 +230,16 @@
                                                 <i class="bi bi-person-plus"></i>
                                                 Agregar Alumnos
                                             </button>
+                                            <button class="btn btn-table btn-default d-flex align-items-center gap-2" id="btnAddStudentMassive">
+                                                <i class="bi bi-person-plus"></i>
+                                                Carga Masiva Alumnos 
+                                            </button>
+                                            <input 
+                                                type="file" 
+                                                id="massiveStudentFile" 
+                                                accept=".xlsx,.xls" 
+                                                style="display: none;" 
+                                                />
 
                                             <div id="userFormOverlay" class="overlay d-none">
                                                 <div class="overlay-content">

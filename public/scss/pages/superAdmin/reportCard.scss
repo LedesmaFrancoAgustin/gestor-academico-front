@@ -1,0 +1,109 @@
+/* =========================
+   MODAL CONFIG FECHAS - REPORT CARD
+========================= */
+
+/* Overlay */
+.rcf-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center; align-items: center;
+  z-index: 1050;
+}
+.rcf-modal-overlay.show { display: flex; }
+
+/* Modal */
+.rcf-modal-dialog { 
+  max-width: 800px;  /* Más compacto */
+  max-height: 900px;  /* Más compacto */
+  width: 90%; 
+  margin: 0; 
+}
+.rcf-modal-content {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  overflow: hidden;
+  max-height: 90vh;   /* Altura limitada con scroll si es necesario */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.rcf-modal-header {
+  background: linear-gradient(90deg, #2A5B7E, #355c77);
+  color: #fff;
+  padding: 0.75rem 1rem;  /* Padding más compacto */
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 1.15rem; font-weight: 600;
+}
+.rcf-btn-close {
+  background: transparent; border: none;
+  color: #fff; font-size: 1.25rem; cursor: pointer;
+}
+
+/* Body */
+.rcf-modal-body { 
+  padding: 1rem 1.25rem;  /* Menos padding */
+  overflow-y: auto;       /* Scroll si hay mucho contenido */
+}
+.rcf-form-group { margin-bottom: 0.75rem; }
+.rcf-form-group label { font-weight: 500; display: block; margin-bottom: 0.25rem; }
+.rcf-form-control {
+  width: 100%;
+  padding: 0.4rem 0.6rem; /* Más compacto */
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+}
+
+/* Period Cards */
+.rcf-period-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem; /* Más compacto */
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.rcf-period-title { font-weight: 600; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; }
+.rcf-period-fields { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.rcf-period-fields > div { flex: 1; min-width: 120px; }
+
+/* Badges */
+.rcf-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.4rem;
+  color: #fff;
+  font-weight: 500;
+}
+.rcf-open { background-color: #28a745; }
+.rcf-closed { background-color: #6c757d; }
+.rcf-warning { background-color: #ffc107; color: #333; }
+
+/* Period colors */
+.rcf-blue { border-left: 4px solid #2A5B7E; }
+.rcf-green { border-left: 4px solid #28a745; }
+.rcf-yellow { border-left: 4px solid #ffc107; }
+.rcf-red { border-left: 4px solid #dc3545; }
+.rcf-purple { border-left: 4px solid #6f42c1; }
+
+/* Footer */
+.rcf-modal-footer {
+  padding: 0.75rem 1rem;  /* Más compacto */
+  display: flex; justify-content: flex-end; gap: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+.rcf-btn-primary { 
+  background: #4e54c8; color: #fff; border: none; 
+  padding: 0.4rem 1rem; border-radius: 0.5rem; cursor: pointer; 
+  font-size: 0.95rem;
+}
+.rcf-btn-secondary { 
+  background: #ccc; color: #333; border: none; 
+  padding: 0.4rem 1rem; border-radius: 0.5rem; cursor: pointer; 
+  font-size: 0.95rem;
+}

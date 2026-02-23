@@ -139,12 +139,100 @@
   .select-group {
     width: 100%;
   }
+
+  .period-container {
+   width: 100%;
+   display: flex;
+   justify-content: center;
+}
+
+}
+
+
+/* =========================
+   Contenedor de Fechas
+========================= */
+/* CONTENEDOR */
+.period-container {
+  margin-top: 6px;
+}
+
+/* BADGE GENERAL */
+.period-badge {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: inline-block;
+  min-width: 260px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* HEADER */
+.period-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* BODY */
+.period-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* FECHAS */
+.period-dates {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* STATUS BASE */
+.period-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 14px;
+}
+
+/* ESTADOS */
+.period-status.active {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.period-status.out {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.period-status.closed {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.period-status.neutral {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.hidden {
+  display: none;
 }
 
 
 
 /* =========================
    Contenedor de notas
+========================= */
+/* =========================
+   CONTENEDOR
 ========================= */
 
 #gradesContainer {
@@ -153,42 +241,70 @@
 }
 
 /* =========================
-   Tabla (Desktop)
+   TABLA BASE
 ========================= */
+
 .grades-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+  font-family: "Inter", sans-serif;
 }
+
+/* =========================
+   HEADER GENERAL
+========================= */
+
 .grades-table thead {
-  background: linear-gradient(
-    135deg,
-    #2563eb,
-    #3b82f6
-  );
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
 }
 
 .grades-table thead th {
   padding: 0.9rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #ffffff;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-align: center;
   white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+/* Primera fila del header */
+.grades-table thead .header-top th {
+  font-size: 0.75rem;
+}
+
+/* Segunda fila (Parcial / Final) */
+.grades-table thead .header-bottom th {
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+/* Separación elegante entre bloques */
+.grades-table thead th:nth-child(3),
+.grades-table thead th:nth-child(5) {
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.25);
+}
+
+/* Primera columna */
 .grades-table thead th:first-child {
   text-align: left;
-  padding-left: 1rem;
+  padding-left: 1.2rem;
 }
+
+/* =========================
+   BODY
+========================= */
+
 .grades-table tbody tr {
-  transition: background 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .grades-table tbody tr:nth-child(even) {
@@ -200,24 +316,53 @@
 }
 
 .grades-table td {
-  padding: 0.7rem 0.6rem;
+  padding: 0.75rem 0.6rem;
   font-size: 0.85rem;
   color: #1e293b;
   text-align: center;
   border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #f1f5f9;
 }
 
 .grades-table td:first-child {
   font-weight: 600;
   text-align: left;
-  padding-left: 1rem;
+  padding-left: 1.2rem;
   color: #0f172a;
 }
 
-.grades-table td:nth-child(2) {
-  font-size: 0.8rem;
-  color: #64748b;
+/* Última columna sin borde */
+.grades-table th:last-child,
+.grades-table td:last-child {
+  border-right: none;
 }
+
+
+
+
+/* ============================================================
+   INPUTS DENTRO DE CELDA
+================================================================ */
+
+.grades-table input {
+  width: 55px;
+  padding: 0.35rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.grades-table input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* =========================
+   INPUT DE NOTA
+========================= */
 
 .grade-input {
   width: 56px;
@@ -238,6 +383,24 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
+/* =========================
+   ESTADOS DEL INPUT
+========================= */
+
+.grade-input.modified {
+  border: 2px solid #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.grade-input.input-error {
+  border: 2px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.08);
+}
+
+/* =========================
+   MODO SOLO LECTURA
+========================= */
+
 .grade-readonly {
   display: inline-block;
   min-width: 60px;
@@ -250,40 +413,146 @@
   text-align: center;
 }
 
-/* Columna índice */
+/* =========================
+   COLUMNA ÍNDICE
+========================= */
+
 .col-index {
   width: 42px;
   text-align: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #1e40af;
 }
 
-/* Header del índice */
 .grades-table thead .col-index {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
 
-/* Body del índice */
 .grades-table tbody .col-index {
   background: #f1f5f9;
   color: #334155;
   border-right: 1px solid #e5e7eb;
 }
-/*Indicador visual de cambios*/
-.grade-input.modified {
-  border-color: #3b82f6;
-  background: #eff6ff;
-}
-.grade-input.input-error {
-  border: 2px solid #dc3545;
-  background-color: rgba(220, 53, 69, 0.08);
+
+.input-locked {
+  background-color: #f2f2f2;
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 
-.grade-input.modified:not(.input-error) {
-  border: 2px solid #0d6efd;
-  background-color: rgba(13, 110, 253, 0.05);
+.grade-input.low {
+  background-color: #ffe5e5;
+  border: 1px solid #ff4d4d;
+}
+
+.grade-input.mid {
+  background-color: #fff7d6;
+  border: 1px solid #ffc107;
+}
+
+.grade-input.high {
+  background-color: #e6f7e6;
+  border: 1px solid #28a745;
+}
+
+.grade-input {
+  transition: background-color 0.2s ease, border 0.2s ease;
+}
+
+.grade-disabled {
+  //background-color: #f3f4f6;
+  //color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.grade-disabled {
+  //background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  border-color: #e5e7eb;
+}
+
+/* =========================
+   Mensajes de fuera de fecha
+========================= */
+.grade-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.grade-wrapper[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 999;
+}
+
+.grade-wrapper[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lock-icon {
+  display: flex;
+  align-content: center;
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Tooltip */
+.lock-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  right: 0;
+
+  background: #111827;
+  color: white;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  width: max-content;
+  max-width: 180px;
+  white-space: normal;
+  word-break: break-word;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+}
+
+/* Hover desktop */
+.lock-icon:hover::after {
+  opacity: 1;
+}
+
+/* Tap mobile */
+.lock-icon:active::after {
+  opacity: 1;
 }
 
 
@@ -291,64 +560,103 @@
 /* =========================
    Cards (Mobile)
 ========================= */
-/* Contenedor general */
-.grades-cards {
-  display: grid;
-  gap: 1rem;
-}
-
-/* Card */
-.grade-card {
+.grade-card.pro-card {
   background: #ffffff;
   border-radius: 14px;
-  padding: 1rem 1.1rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Header alumno */
-.grade-card-header {
-  margin-bottom: 0.8rem;
+.card-header.compact {
+  margin-bottom: 8px;
 }
 
-.grade-card-header h4 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.grade-card-header .dni {
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
-/* Body */
-.grade-card-body {
+.student-main {
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  gap: 10px;
+  align-items: center;
 }
 
-/* Fila nota */
-.grade-field {
+.index-box {
+  background: #2563eb;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.student-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-dni {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.card-body.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grade-row.compact {
+  display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-/* Label izquierda */
-.grade-field label {
-  font-size: 0.85rem;
-  color: #334155;
-  font-weight: 500;
+.grade-label {
+  font-size: 12px;
+  color: #374151;
 }
 
-/* Estado modificado (clave visual) */
-.grade-input.modified {
+.grade-input {
+  width: 70px;
+  padding: 4px 6px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.grade-input:focus {
+  outline: none;
   border-color: #2563eb;
-  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
+
+.input-disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.badge-rec {
+  background: #f59e0b;
+  color: white;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 6px;
+}
+
+.rec-title {
+  font-size: 14px;
+  margin: 14px 0 6px;
+  font-weight: 600;
+  color: #b45309;
+}
+
+
 
 /* Mejor toque táctil */
 @media (max-width: 480px) {
@@ -357,29 +665,6 @@
   }
 }
 
-/* Base */
-.grade-input,
-.mobile-grade-input {
-  transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-
-/* 🔴 1 a 4 */
-.grade-low {
-  background-color: rgba(239, 68, 68, 0.12);   /* rojo suave */
-  border-color: rgba(239, 68, 68, 0.4);
-}
-
-/* 🟡 5 a 6 */
-.grade-mid {
-  background-color: rgba(234, 179, 8, 0.15);   /* amarillo suave */
-  border-color: rgba(234, 179, 8, 0.45);
-}
-
-/* 🟢 7 a 10 */
-.grade-high {
-  background-color: rgba(34, 197, 94, 0.15);   /* verde suave */
-  border-color: rgba(34, 197, 94, 0.45);
-}
 
 
 
@@ -508,3 +793,57 @@
   }
     */
 }
+
+
+/* =========================
+   Tabla de Recursantes - Destopk
+========================= */
+
+#gradesRecursiveContainer {
+  margin-top: 2.5rem;
+  overflow-x: auto;
+}
+
+.repeating-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.8rem;
+  padding-left: 0.25rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.repeating-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.repeating-table {
+  margin-top: 0.5rem;
+}
+
+.repeating-table thead {
+  background: linear-gradient(
+    135deg,
+    #1e40af,
+    #2563eb
+  );
+}
+
+.badge-rec {
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+}
+

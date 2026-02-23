@@ -6,15 +6,15 @@
     <title>Gestor Académico</title>
     <meta name="description" content="Ejemplo de un documento HTML básico con todas sus estructuras esenciales">
     
+ 
     <link rel="stylesheet" href="../../css/styles.css">
-    <link rel="stylesheet" href="../../css/user.css">
+    <link rel="stylesheet" href="../../css/preceptor.css">
     <link rel="stylesheet" href="../../css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-     <!-- Font Awesome CDN -->
+        <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 
 </head>
 <body >
@@ -42,7 +42,7 @@
             <ul class="header-actions-list">
 
                 <!-- NOTIFICACIONES -->
-                <li class="notification-dropdown hover-underline dropdown">
+                <li class="notification-dropdown hover-underline dropdown ">
                 <a
                     class="notification-toggle position-relative d-flex align-items-center justify-content-center"
                     href="#"
@@ -52,7 +52,7 @@
                     aria-expanded="false"
                 >
                     <i class="bi bi-bell notification-icon"></i>
-                    <span id="notifications-badge" class="notification-badge d-none"></span>
+                    <span id="notifications-badge" class="notification-badge d-none">0</span>
                 </a>
 
                 <ul id="notifications-dropdown" class="dropdown-menu dropdown-menu-end shadow notification-menu">
@@ -112,78 +112,74 @@
 
 
     <main>
-         <!-- SIDEBAR DOCENTE -->
-        <div class="teacher-sidebar-container">
+            <!-- SIDEBAR PRECEPTOR -->
+            <div class="preceptor-sidebar-container">
 
-        <aside class="teacher-sidebar" id="teacherSidebar">
+            <aside class="preceptor-sidebar" id="preceptorSidebar">
 
-            <!-- User info -->
-            <div class="teacher-sidebar-user">
-            <div class="teacher-sidebar-avatar">
-                <i class="fa fa-user-circle"></i>
+                <!-- User info -->
+                <div class="preceptor-sidebar-user">
+                    <div class="preceptor-sidebar-avatar">
+                        <i class="fa fa-user-circle"></i>
+                    </div>
+                    <div class="preceptor-sidebar-user-info">
+                        <h3 class="preceptor-sidebar-username" id="user-name">Preceptor</h3>
+                        <span class="preceptor-sidebar-role">Preceptor</span>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <ul class="nav flex-column preceptor-sidebar-nav">
+
+                    <li class="nav-item ">
+                        <a class="nav-link" href="./index-Preceptor.html">
+                            <i class="fa fa-home"></i> Inicio
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./attendance-Preceptor.html">
+                            <i class="fa fa-calendar-check"></i> Asistencias
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="./note-Preceptor.html">
+                            <i class="fa fa-file-alt"></i> Notas
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="./configurations-Preceptor.html">
+                            <i class="fa fa-cog"></i> Configuración
+                        </a>
+                    </li>
+
+                </ul>
+            </aside>
+
+            <!-- Toggle button -->
+            <button id="preceptorSidebarToggle" class="preceptor-sidebar-toggle">
+                <i class="bi bi-caret-left-fill"></i>
+            </button>
+
             </div>
-            <div class="teacher-sidebar-user-info">
-                <h3 class="teacher-sidebar-username" id="user-name">Docente</h3>
-                <span class="teacher-sidebar-role">Docente</span>
-            </div>
-            </div>
 
-            <!-- Navigation -->
-            <ul class="nav flex-column teacher-sidebar-nav">
 
-            <li class="nav-item ">
-                <a class="nav-link" href="./indexUser.html">
-                <i class="fa fa-home"></i> Inicio
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="./course-User.html">
-                <i class="fa fa-book"></i> Cursos
-                </a>
-            </li>
-
-            <li class="nav-item active">
-                <a class="nav-link" href="./note-User.html">
-                <i class="fa fa-file-alt"></i> Notas
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="./attendance-User.html">
-                <i class="fa fa-calendar-check"></i> Asistencias
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="./configurations-User.htm">
-                <i class="fa fa-cog"></i> Configuración
-                </a>
-            </li>
-
-            </ul>
-        </aside>
-
-        <!-- Toggle button -->
-        <button id="teacherSidebarToggle" class="teacher-sidebar-toggle">
-            <i class="bi bi-caret-left-fill"></i>
-        </button>
-
-        </div>
-
-            <div class="container-fluid grades-page">
-                <div class="grades-wrapper">
+            <div class="container preceptor-home-content">
+            
+                <div class="attendance-wrapper">
 
                     <!-- Header -->
-                    <section class="grades-header">
-                                <h1>Cargar notas</h1>
-                                <p>Seleccioná un curso para comenzar a cargar las calificaciones</p>
+                    <section class="attendance-header">
+                        <h1>Asistencias</h1>
+                        <p>Seleccioná un curso para comenzar a ver/cargar las asistencias</p>
                     </section>
 
                     <!-- Selector de curso -->
-                   <section class="grades-selector">
+                   <section class="attendance-selector">
 
-                    <div class="select-group">
+                     <div class="select-group">
                         <label for="academicYearSelect">Año</label>
                         <select id="academicYearSelect" class="attendance-select">
                                             <option value="" selected disabled>Seleccione un año</option>
@@ -198,72 +194,79 @@
 
                     <div class="select-group">
                         <label for="courseSelect">Curso</label>
-                        <select id="courseSelect" class="grades-select" disabled>
+                        <select id="courseSelect" class="attendance-select" disabled>
                         <option value="">Seleccionar un curso</option>
                         </select>
                     </div>
 
+                   
                     <div class="select-group">
-                        <label for="subjectSelect">Materia</label>
-                        <select id="subjectSelect" class="grades-select" disabled>
-                        <option value="">Seleccionar materia</option>
+                        <label for="monthSelect">Mes</label>
+                        <select id="monthSelect" class="attendance-select" disabled>
+                                 <option value="" selected disabled> Seleccione un mes </option>
+                                 <option value="03">Marzo</option>
+                                 <option value="04">Abril</option>
+                                 <option value="05">Mayo</option>
+                                 <option value="06">Junio</option>
+                                 <option value="07">Julio</option>
+                                 <option value="08">Agosto</option>
+                                 <option value="09">Septiembre</option>
+                                 <option value="10">Octubre</option>
+                                 <option value="11">Noviembre</option>
+                                 <option value="12">Diciembre</option>
                         </select>
                     </div>
 
-                    <div class="select-group">
-                        <label for="gradeTypeSelect">Período</label>
-                            <select id="gradeTypeSelect" class="grades-select">
-                                <option value="firstTerm.partial">1° Cuatrimestre - Parcial</option>
-                                <option value="firstTerm.final">1° Cuatrimestre - Final</option>
-                                <option value="secondTerm.partial">2° Cuatrimestre - Parcial</option>
-                                <option value="secondTerm.final">2° Cuatrimestre - Final</option>
-                                <option value="recuperatoryFirstTerm">Recuperatorio 1° C</option>
-                                <option value="december">Diciembre</option>
-                                <option value="february">Febero</option>
-                                <option value="all">Todas</option>
-                            </select>
+                    <div class="search-group">
+                        <label for="attendanceSearch">Buscar alumno</label>
+                        <div class="search-input-wrapper">
+                            <input
+                            type="text"
+                            id="attendanceSearch"
+                            class="attendance-search"
+                            placeholder="Nombre o DNI..."
+                            autocomplete="off"
+                            />
+                            <i class="search-icon fa-solid fa-magnifying-glass"></i>
+                        </div>
                     </div>
 
-                    <div class="period-container ">
-                         <div id="labelAcademicCalendar" class="period-badge hidden"></div>
-                    </div>
-                    
+                  </section>
+                
+                </div>
+            </div>
+            <div class="preceptor-render-attendance">
+    
+                    <!-- Contenedor de asistencias -->
+                    <section class="preceptor-attendance-content">
 
-
-
-                    
+                        <div class="preceptor-table-wrapper">
+                            <table id="preceptorAttendanceTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
 
                     </section>
 
+            </div>
 
-                    <!-- Contenedor de notas -->
-                    <section class="grades-content">
-                        <div id="gradesContainer"></div>
-                        <div id="gradesRecursiveContainer"></div>
-                    </section>
-
-                   <!-- Acciones -->
+                <div class="container">
+             <!-- Acciones -->
                     <section class="grades-actions">
                         <div class="actions-content">
                             <h2>Acciones</h2>
-                            <p>Guardá los cambios realizados en las calificaciones</p>
+                            <p>Guardá los cambios realizados en las asistencias</p>
 
-                            <button id="saveGradesBtn" class="btn btn-primary" disabled>
-                            Guardar notas
+                            <button id="saveAttendanceBtn" class="btn btn-primary" disabled>
+                            Guardar asistencia
                             </button>
                         </div>
                     </section>
 
-
-                </div>
-                </div>
-
-
-
-
-           
-       
-    </main>
+                    </div>
+        <div id="attendanceTooltip" class="custom-tooltip"></div>
+</main>
 
     <footer id="footer">
         <p>&copy; <span id="year"></span> Mi Página Web. Todos los derechos reservados.</p>
@@ -273,10 +276,9 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="../../js/ui-feedback.js"  ></script>
 
-    <script src="../../js/users/user.guard.js" ></script>
-    <script src="../../js/users/users.global.js" ></script>
-    <script src="../../js/users/note.user.js" ></script>
-
+    <script src="../../js/preceptor/preceptor.guard.js" ></script>
+    <script src="../../js/preceptor/preceptor.global.js" ></script>
+    <script src="../../js/preceptor/attendance.Preceptor.js" ></script>
 
     <script src="../../js/global.js" ></script>
     <script src="../../js/notifications.js"></script>

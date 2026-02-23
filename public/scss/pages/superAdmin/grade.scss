@@ -43,43 +43,101 @@
 }
 
 
-.vertical-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg); /* para leer de abajo hacia arriba */
-  height: 200px;
+
+/* Tabla compacta */
+#gradesTable {
+  table-layout: fixed;
+  width: 100%;
+  font-size: 13px;
+}
+
+#gradesTable th,
+#gradesTable td {
   text-align: center;
   vertical-align: middle;
+  padding: 4px;
+}
+
+/* Columnas fijas */
+#gradesTable th:nth-child(1),
+#gradesTable td:nth-child(1) {
+  width: 40px;
+}
+
+#gradesTable th:nth-child(2),
+#gradesTable td:nth-child(2) {
+  width: 180px;
+  text-align: left;
+}
+
+#gradesTable th:nth-child(3),
+#gradesTable td:nth-child(3) {
+  width: 110px;
+}
+
+/* Materias mismo ancho */
+#gradesTable th.subject-col,
+#gradesTable td.subject-col {
+  width: 50px;
+ 
+}
+
+/* Encabezado vertical */
+.vertical-header {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+
+  display: flex;
+  align-items: center;     /* 🔥 centra verticalmente */
+  justify-content: center; /* 🔥 centra horizontalmente */
+
+  width: 100%;
+  height: 120px;           /* 🔥 importante para que tenga espacio */
+  text-align: center;
   white-space: nowrap;
+  font-size: 12px;
 }
 
-.grade-red {
-  background-color: #f8d7da !important; /* rojo claro */
-  color: #721c24;
+/* Input compacto */
+.grade-input {
+  width: 50px;
+  height: 28px;
+  padding: 2px;
+  font-size: 12px;
 }
 
-.grade-yellow {
-  background-color: #fff3cd !important; /* amarillo claro */
-  color: #856404;
+/* 🔴 Recursantes */
+.repeating-row {
+  background-color: #fff5f5;
 }
 
-.grade-green {
-  background-color: #d4edda !important; /* verde claro */
-  color: #155724;
+.repeating-row td:first-child {
+  border-left: 4px solid #dc3545;
 }
 
-
-/* Toda la fila se resalta con borde azul */
-tr.resaltado {
-  border: 3px solid #3498db; /* Azul claro */
-  transition: border 0.2s ease;
+/* Base */
+.grade-input {
+  width: 50px;
+  height: 28px;
+  padding: 2px;
+  font-size: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Solo la columna del nombre se resalta */
-.resaltado-nombre {
-  background-color: #f9f871; /* amarillo claro */
-  font-weight: 600;
-  color: #2c3e50; /* azul oscuro */
-  transition: background-color 0.2s ease, color 0.2s ease;
-  border-radius: 4px;
-  padding: 2px 4px;
+/* 🔴 Desaprobado */
+.grade-low {
+  background-color: #ffe5e5 !important;
+  border-color: #dc3545 !important;
+}
+
+/* 🟡 En proceso */
+.grade-mid {
+  background-color: #fff8db  !important;
+  border-color: #ffc107 !important;
+}
+
+/* 🟢 Aprobado */
+.grade-high {
+  background-color: #e6f4ea !important;
+  border-color: #198754 !important;
 }

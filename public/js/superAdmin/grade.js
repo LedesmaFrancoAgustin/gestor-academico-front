@@ -1,175 +1,511 @@
 // =============================
 // 🟢 Referencias al DOM
-
-
-
 // =============================
-const gradesTableBody = document.getElementById("gradesTableBody");
 const searchInput = document.getElementById("searchStudent");
+const academicYearSelect = document.getElementById("academicYearSelect");
 const courseSelect = document.getElementById("courseSelect");
 const termSelect = document.getElementById("termSelect");
+
+const gradesTableBody = document.getElementById("gradesTableBody");
+
 const btnReload = document.getElementById("btnReloadGrades");
 
 let gradesData = []; // arreglo vacío inicial
 let studentIds = [];
 let courses = [];
 
+
 let  subjects = [];
 
-let selectedCourseId = "";
-let selectedFilterGrades = "firstTerm"
+let selectedYear = null;
+let selectedCourseId = null;
+
+let courseInfo = null;
+let recusantStudent = null
+let gradeInfo = null;
+
+let studentsByGrade = null // alumnos mapeados con la notas (Regulares y recursantes)
+let allStudents = []; // Copia para usar con el buscador
+
+let selectedFilterGrades = "firstTerm.partial"
+
 
 
 // =============================
 // 🟢 Event listeners
 // =============================
-searchInput.addEventListener("input", () => {
-  if (!selectedCourseId) return;
-  loadStudentsAndGrades(selectedCourseId);
+
+// =============================
+//  Selector del año
+// =============================
+academicYearSelect.addEventListener("change", async () => {
+    selectedYear = academicYearSelect.value;
+    console.log("Año seleccionado:", selectedYear);
+
+    // Traer cursos del año
+    const courses = await fetchAttendanceForYear(selectedYear);
+
+   // console.log(" courses:", courses);
+    // Limpiar el select de cursos antes de agregar
+    courseSelect.innerHTML = '<option value="" selected disabled> Seleccione un curso </option>';
+
+    if (courses.length === 0) {
+        uiToast("Todavía no hay cursos disponibles para este año", "info");
+        courseSelect.disabled = true; // Deshabilitar si no hay cursos
+        return;
+    }
+
+    // Agregar cursos al select
+    courses.forEach(course => {
+        const option = document.createElement("option");
+        option.value = course._id;   // valor que se enviará al backend
+        option.textContent = course.name; // lo que ve el usuario
+        courseSelect.appendChild(option);
+    });
+
+    // Habilitar select de cursos
+    courseSelect.disabled = false;
 });
 
-
-termSelect.addEventListener("change", async (e) => {
-  selectedFilterGrades = e.target.value;
-  if (!selectedCourseId) return;
-  await loadStudentsAndGrades(selectedCourseId);
-});
-
-btnReload.addEventListener("click", () => {
-  // Recargar datos desde API
-  fetchGradesFromAPI();
-});
 // Cambiar curso
 courseSelect.addEventListener("change", async () => {
   selectedCourseId = courseSelect.value;
   if (!selectedCourseId) return;
+ 
+  courseInfo = await fetchSubjectAndStudentsFromCourse(selectedCourseId);
 
-  await updateTableHeaders(selectedCourseId); // columna materias
-  await loadStudentsAndGrades(selectedCourseId); // alumnos + notas
+  recusantStudent = await fetchGetRecourseFromCourse(selectedCourseId)
+
+  gradeInfo = await fetchGradesForCourse(selectedCourseId,selectedYear)
+
+  studentsByGrade = mappedStudentsByGrade(courseInfo, recusantStudent, gradeInfo );
+  
+  //console.log("courseInfo ",courseInfo)
+  //console.log("recusantStudent ",recusantStudent)
+  //console.log("gradeInfo ",gradeInfo)
+  //console.log("mappedStudentsByGrade ",studentsByGrade)
+  
+ 
+  
+  termSelect.disabled = false;
 });
 
-// =============================
-// 👆 Listener delegado para inputs de notas
-// =============================
-gradesTableBody.addEventListener("focusin", (e) => {
-  const input = e.target.closest(".grade-input");
-  if (!input) return;
+// Cambiar Tipo de nota
+termSelect.addEventListener("change", async (e) => {
+  selectedFilterGrades = e.target.value;
+  if (!selectedCourseId) return;
 
-  const tr = input.closest("tr");
-  if (tr) tr.classList.add("resaltado");
-
-  const nombreTd = tr?.querySelector("td:nth-child(2)"); // segunda columna
-  if (nombreTd) nombreTd.classList.add("resaltado-nombre");
+  allStudents = [...studentsByGrade];
+  renderGradesByCourse(studentsByGrade)
+  
 });
 
-gradesTableBody.addEventListener("focusout", (e) => {
-  const input = e.target.closest(".grade-input");
-  if (!input) return;
+// Escuchar Input de notas
+document.addEventListener("change", async (e) => {
+  if (!e.target.classList.contains("grade-input")) return;
 
-  const tr = input.closest("tr");
-  if (tr) tr.classList.remove("resaltado");
+  const input = e.target;
+  const rawValue = input.value.trim();
 
-  const nombreTd = tr?.querySelector("td:nth-child(2)");
-  if (nombreTd) nombreTd.classList.remove("resaltado-nombre");
-});
+  input.classList.remove("grade-low", "grade-mid", "grade-high");
 
+  let value = null;
 
-gradesTableBody.addEventListener("change", async (e) => {
-  const input = e.target.closest(".grade-input");
-  if (!input) return;
+  // ============================
+  // 1️⃣ Si está vacío → borrar nota
+  // ============================
+  if (rawValue === "") {
+    value = null;
+  } else {
+    value = Number(rawValue);
 
-  const value = Number(input.value);
+    if (isNaN(value) || value < 1 || value > 10) {
+      uiToast("La nota debe estar entre 1 y 10", "warning");
+      return;
+    }
 
-  if (value < 1 || value > 10) {
-    uiToast("La nota debe estar entre 1 y 10", "warning");
-    return;
+    if (value <= 4) input.classList.add("grade-low");
+    else if (value <= 6) input.classList.add("grade-mid");
+    else input.classList.add("grade-high");
   }
 
   try {
+    input.disabled = true;
+
     await fetchPostGrade({
-      studentId: input.dataset.studentId,
-      subjectId: input.dataset.subjectId,
+      studentId: input.dataset.student,
+      subjectId: input.dataset.subject,
       courseId: selectedCourseId,
-      term: selectedFilterGrades, // 👈 clave
+      academicYear: selectedYear,
+      term: selectedFilterGrades,
+      value // 🔥 ahora puede ser null
+    });
+
+    updateLocalGrade({
+      studentId: input.dataset.student,
+      subjectId: input.dataset.subject,
+      term: selectedFilterGrades,
       value
     });
 
-    uiToast("Nota guardada", "success");
-  } catch {
+    uiToast(value === null ? "Nota eliminada" : "Nota guardada", "success");
+
+  } catch (err) {
     uiToast("Error al guardar nota", "error");
+  } finally {
+    input.disabled = false;
   }
 });
 
+// Input Buscador por Nombre o Dni
+searchInput.addEventListener("input", () => {
+  const searchTerm = searchInput.value.trim().toLowerCase();
 
-// =============================
-// 🟢 Llenar el select con cursos obtenidos desde API
-// =============================
-async function fillCourseSelect() {
-    courses = await fetchCourseFromAPI();
+  if (!searchTerm) {
+    renderGradesByCourse(allStudents);
+    return;
+  }
 
-  // Llenar el select
-  courseSelect.innerHTML = '<option value="">Todos los cursos</option>';
-  courses.forEach(c => {
-    const option = document.createElement("option");
-    option.value = c._id; // o c.id según tu modelo
-    option.textContent = c.name;
-    courseSelect.appendChild(option);
+  const filteredStudents = allStudents.filter(student => {
+
+    const fullName =
+      `${student.studentNombre} ${student.studentApellido}`.toLowerCase();
+
+    const dni = student.studentDni?.toString() || "";
+
+    return (
+      fullName.includes(searchTerm) ||
+      dni.includes(searchTerm)
+    );
   });
 
-  return ; // opcional, si querés usarlo después
-}
+  renderGradesByCourse(filteredStudents);
+});
+// ====================================================================================================
+//  🟢 Render
+// ====================================================================================================
+function renderGradesByCourse(students) {
+  const table = document.getElementById("gradesTable");
+  table.innerHTML = "";
 
-// =============================
-// 🟢 Función para filtrar estudiantes por búsqueda
-// =============================
-function filterStudents(students, searchText) {
-  if (!Array.isArray(students)) return [];
+  if (!students || !students.length) return;
+  if (!selectedFilterGrades || selectedFilterGrades === "select") return;
 
-  if (!searchText) return students;
-
-  const lowerSearch = searchText.trim().toLowerCase();
-
-  return students.filter(s =>
-    s.nombre?.toLowerCase().includes(lowerSearch) ||
-    s.apellido?.toLowerCase().includes(lowerSearch) ||
-    s.dni?.toString().includes(lowerSearch)
+  // 🔹 Ordenar alumnos por apellido
+  students.sort((a, b) =>
+    a.studentApellido.localeCompare(b.studentApellido)
   );
-}
 
+  // 🔹 Tomamos materias del primer alumno
+  const subjects = students[0].grades;
 
-// =============================
-// 🟢 Función para cargar estudiantes + notas de un curso
-// =============================
-async function loadStudentsAndGrades(courseId) {
-  if (!courseId) return;
+  // =========================
+  // 🧱 CREAR THEAD
+  // =========================
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
 
-  const course = courses.find(c => c._id === courseId);
-  if (!course) return;
+  headerRow.innerHTML = `
+    <th>#</th>
+    <th>Alumno</th>
+    <th>DNI</th>
+  `;
 
-  const studentIds = course.students.map(s => s.student);
-
-  // Traer estudiantes
-  const students = await fetchUsersByIdsAndRoles({
-    ids: studentIds,
-    roles: ["alumno"]
+  subjects.forEach(subj => {
+    headerRow.innerHTML += `
+      <th class="subject-col">
+        <div class="vertical-header">
+          ${subj.subjectName}
+        </div>
+      </th>
+    `;
   });
 
-  // Traer notas
-  const gradesMap = await fetchGradesForCourse(courseId);
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
 
-  // Filtrar según búsqueda
-  const filteredStudents = filterStudents(students, searchInput.value);
+  // =========================
+  // 📦 CREAR TBODY
+  // =========================
+  const tbody = document.createElement("tbody");
 
-  // Renderizar
-  renderGradesByCourse(filteredStudents, gradesMap);
+  students.forEach((student, index) => {
+
+    const row = document.createElement("tr");
+
+    // 🔴 Marcar recursantes
+    if (student.isRepeating) {
+      row.classList.add("repeating-row");
+    }
+
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>
+        ${student.studentApellido}, ${student.studentNombre}
+        ${student.isRepeating ? '<span class="badge bg-danger ms-1">Rec.</span>' : ''}
+      </td>
+      <td>${student.studentDni}</td>
+    `;
+
+    student.grades.forEach(subj => {
+
+      const gradeValue = getGradeValue(subj.grades, selectedFilterGrades);
+      const gradeClass = getGradeClass(gradeValue);
+
+      row.innerHTML += `
+        <td class="subject-col">
+          <input 
+            type="number"
+            min="1"
+            max="10"
+            step="1"
+            class="form-control form-control-sm text-center grade-input ${gradeClass}"
+            data-student="${student.studentId}"
+            data-subject="${subj.subjectId}"
+            value="${gradeValue ?? ""}"
+          >
+        </td>
+      `;
+    });
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
 }
+// ====================================================================================================
+//  🟢 Funciones 
+// ====================================================================================================
+/**
+ * Mapea estudiantes de un curso con sus materias y notas
+ * @param {Object} courseInfo - Información del curso (students y subjects)
+ * @param {Array} gradeInfo - Array de notas por estudiante y materia
+ * @returns {Array} - Array de estudiantes con sus materias y notas
+ */
+function mappedStudentsByGrade(courseInfo, recourseStudents = [], gradeInfo = []) {
+  if (!courseInfo?.data) return [];
+
+  console.log("Entro")
+  const students = courseInfo.data.students.filter(s => s.active);
+  const subjects = courseInfo.data.subjects;
+
+  // 🔹 Map rápido para notas
+  const gradeMap = new Map();
+  gradeInfo.forEach(g => {
+    const key = `${g.studentId}_${g.subjectId}`;
+    gradeMap.set(key, g);
+  });
+
+  // 🔹 IDs de alumnos regulares
+  const courseStudentIds = new Set(
+    students.map(s => s.student._id)
+  );
+
+  // ============================
+  // 1️⃣ ALUMNOS REGULARES
+  // ============================
+  const mappedRegularStudents = students.map(studentEntry => {
+    const student = studentEntry.student;
+
+    const gradesBySubject = subjects.map(subjEntry => {
+      const subj = subjEntry.subject;
+      const key = `${student._id}_${subj._id}`;
+      const gradeObj = gradeMap.get(key);
+
+      return {
+        subjectId: subj._id,
+        subjectName: subj.name,
+        grades: gradeObj?.grades ?? null,
+        isRepeating: false
+      };
+    });
+
+    return {
+      studentId: student._id,
+      studentNombre: student.nombre,
+      studentApellido: student.apellido,
+      studentDni: student.dni,
+      isRepeating: false,
+      grades: gradesBySubject
+    };
+  });
+
+  // ============================
+  // 2️⃣ ALUMNOS RECURSANTES
+  // ============================
+  const mappedRecourseStudents = [];
+
+  recourseStudents.forEach(r => {
+
+    const studentId = r.studentId;
+
+    // ⚠ Evitar duplicar si ya está como regular
+    if (courseStudentIds.has(studentId)) return;
+
+    // ⚠ Evitar duplicados internos
+    if (mappedRecourseStudents.some(s => s.studentId === studentId)) return;
+
+    const gradesBySubject = subjects.map(subjEntry => {
+      const subj = subjEntry.subject;
+      const key = `${studentId}_${subj._id}`;
+      const gradeObj = gradeMap.get(key);
+
+      return {
+        subjectId: subj._id,
+        subjectName: subj.name,
+        grades: gradeObj?.grades ?? null,
+        isRepeating: true
+      };
+    });
+
+    mappedRecourseStudents.push({
+      studentId,
+      studentNombre: r.studentName,
+      studentApellido: r.studentLastName, // ⚠ si no viene separado
+      studentDni: r.dni,
+      isRepeating: true,
+      grades: gradesBySubject
+    });
+  });
+
+  // ============================
+  // 3️⃣ UNIFICAR
+  // ============================
+  return [...mappedRegularStudents, ...mappedRecourseStudents];
+}
+//* Actualizar Mapeo estudiantes de un curso con sus materias y notas
+function updateLocalGrade({
+  studentId,
+  subjectId,
+  term,
+  value
+}) {
+  const student = studentsByGrade.find(s => s.studentId === studentId);
+  if (!student) return;
+
+  const subject = student.grades.find(g => g.subjectId === subjectId);
+  if (!subject) return;
+
+  if (!subject.grades) subject.grades = {};
+
+  // 🔹 Manejar nested (firstTerm.partial)
+  const pathParts = term.split(".");
+
+  if (pathParts.length === 2) {
+    const [period, evalType] = pathParts;
+
+    if (!subject.grades[period]) {
+      subject.grades[period] = {};
+    }
+
+    if (!subject.grades[period][evalType]) {
+      subject.grades[period][evalType] = {};
+    }
+
+    subject.grades[period][evalType].value = value;
+
+  } else {
+    // december, february, recuperatoryFirstTerm
+    if (!subject.grades[term]) {
+      subject.grades[term] = {};
+    }
+
+    subject.grades[term].value = value;
+  }
+}
+// obtener valor dinámico - Esta función interpreta el string tipo "firstTerm.partial"
+function getGradeValue(gradesObj, path) {
+  if (!gradesObj || !path) return null;
+
+  const keys = path.split(".");
+  let result = gradesObj;
+
+  for (let key of keys) {
+    if (!result[key]) return null;
+    result = result[key];
+  }
+
+  return result.value ?? null;
+}
+//Asignar clases a los inpout de las notas
+function getGradeClass(value) {
+  if (value === null || value === undefined || value === "") return "";
+
+  const num = Number(value);
+
+  if (num >= 1 && num <= 4) return "grade-low";
+  if (num >= 5 && num <= 6) return "grade-mid";
+  if (num >= 7 && num <= 10) return "grade-high";
+
+  return "";
+}
+// ====================================================================================================
+//  🟢 Fetch 
+// ====================================================================================================
+
 // =============================
-// 🟢 Fetch de notas de un curso + trimestre (con try/catch)
+//  🟢 Fetch Buscar cursos 
 // =============================
-async function fetchGradesForCourse(courseId) {
+async function fetchAttendanceForYear(Year) {
   try {
     const res = await fetch(
-      `${API_URL}/api/grade/course/${courseId}?term=${selectedFilterGrades}`,
+      `${API_URL}/api/course/${Year}/year`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Error al traer los cursos:", res.status, res.statusText);
+      return {}; // devolvemos un objeto vacío
+    }
+
+    const data = await res.json();
+
+    return data.data;
+
+  } catch (error) {
+    console.error("Error al traer los cursos:", error);
+    uiToast("Error al conectar con el servidor para traer los curso","error");
+    return {}; // devolvemos un objeto vacío
+  }
+}
+// =============================
+// 🟢 Fetch para traer materias del curso
+// =============================
+async function fetchSubjectAndStudentsFromCourse(courseId) {
+  if (!courseId) {
+    console.warn("No se proporcionó courseId");
+    return [];
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_URL}/api/course/${courseId}`, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!res.ok) throw new Error("Error al cargar el curso");
+
+    
+    const resData = await res.json();
+    return resData || []; // devolvemos solo el array de materias
+
+  } catch (error) {
+    console.error("Error al cargar curso:", error);
+    return [];
+  }
+}
+// =============================
+// 🟢 Fetch de notas de un curso 
+// =============================
+async function fetchGradesForCourse(courseId,academicYear) {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/grade/course/${courseId}?academicYear=${academicYear}`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -178,32 +514,29 @@ async function fetchGradesForCourse(courseId) {
     if (!res.ok) {
       console.error("Error al traer las notas:", res.status, res.statusText);
       uiToast("Error al traer las notas del curso");
-      return {}; // devolvemos un objeto vacío
+      return [];
     }
 
     const data = await res.json();
-    const gradesArray = data.data || [];
-
-    // Map para acceso rápido: gradesMap[studentId][subjectId] = value
-    const gradesMap = {};
-    gradesArray.forEach(g => {
-      if (!gradesMap[g.studentId]) gradesMap[g.studentId] = {};
-      gradesMap[g.studentId][g.subjectId] = g.value;
-    });
-
-    return gradesMap;
+    return data.data || [];
 
   } catch (error) {
     console.error("Error al traer notas:", error);
     uiToast("Error al conectar con el servidor para traer notas");
-    return {}; // devolvemos un objeto vacío
+    return [];
   }
 }
-
 // =============================
 // 🟢  Fetch para obtener Notas desde API
 // =============================
-async function fetchPostGrade({ studentId, subjectId, courseId, term, value }) {
+async function fetchPostGrade({
+  studentId,
+  subjectId,
+  courseId,
+  academicYear,   // 👈 AGREGAR
+  term,
+  value
+}) {
   return fetch(`${API_URL}/api/grade/register/individualNote`, {
     method: "POST",
     headers: {
@@ -214,214 +547,47 @@ async function fetchPostGrade({ studentId, subjectId, courseId, term, value }) {
       studentId,
       subjectId,
       courseId,
+      academicYear,  // 👈 NECESARIO
       term,
       value
     })
   });
 }
+
 // =============================
-// 🟢  Fetch para obtener cursos activos desde API
+// 🟢 Fetch Recursantes del curso
 // =============================
-async function fetchCourseFromAPI() {
+async function fetchGetRecourseFromCourse(courseId) {
   try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/api/course/active`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (!res.ok) throw new Error("Error al cargar los cursos");
-
-    const resData = await res.json();
-    return resData.data.data || []; // devolvemos solo el array de cursos
-   
-
-  } catch (error) {
-    console.error("Error al cargar cursos:", error);
-    return [];
-  }
-}
-
-// =============================
-// 🟢 Fetch para obtener usuarios por IDs y roles
-// =============================
-async function fetchUsersByIdsAndRoles({ ids = [], roles = [], q = "", limit = 50, page = 1 }) {
-  try {
-    if (!ids || ids.length === 0) return [];
-
-    const token = localStorage.getItem("token");
-
-    // 🔹 Construir query params para q, limit, page
-    const params = new URLSearchParams({ q, limit, page });
-
-    // 🔹 POST al endpoint
-    const res = await fetch(`${API_URL}/api/users/search/ids?${params.toString()}`, {
-      method: "POST", // ✅ Debe ser POST para enviar body
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ ids, roles }) // ✅ enviar arrays grandes en el body
-    });
-
-    if (!res.ok) throw new Error(`Error al obtener usuarios: ${res.status}`);
-
-    const resData = await res.json();
-    return resData.data || [];
-
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return [];
-  }
-}
-
-
-// =============================
-// 🟢 Fetch para traer materias del curso
-// =============================
-async function fetchSubjectFromCourse(courseId) {
-  if (!courseId) {
-    console.warn("No se proporcionó courseId");
-    return [];
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/api/course/${courseId}/subjects`, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
+    const res = await fetch(
+      `${API_URL}/api/studentRecourseAssignment/recourse/${courseId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
+    );
 
-    if (!res.ok) throw new Error("Error al cargar las materias");
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error al traer recursantes:", res.status, errorText);
+      uiToast("Error al traer recursantes del curso", "error");
+      return [];
+    }
 
-    
-    const resData = await res.json();
-    console.log("resData: ",resData)
-    return resData.data || []; // devolvemos solo el array de materias
+    const json = await res.json();
+
+    // 🔹 Soporta ambas respuestas (directa o envuelta en data)
+    if (Array.isArray(json)) return json;
+    if (Array.isArray(json.data)) return json.data;
+
+    return [];
 
   } catch (error) {
-    console.error("Error al cargar materias:", error);
+    console.error("Error de conexión:", error);
+    uiToast("Error al conectar con el servidor", "error");
     return [];
   }
 }
-
-// =============================
-// 🟢 Función para actualizar las columnas según las materias
-// =============================
-async function updateTableHeaders(courseId) {
-  subjects = await fetchSubjectFromCourse(courseId);
-  console.log("subjects: ",subjects)
-  // Primeras columnas fijas
-  let headerHTML = `
-    <tr>
-      <th>#</th>
-      <th>Usuario</th>
-      <th>DNI</th>
-  `;
-
-subjects.forEach(sub => {
-  headerHTML += `
-    <th
-      class="vertical-text"
-      data-subject-id="${sub.subject?._id || ""}">
-      ${sub.subject?.name || "-"}
-    </th>
-  `;
-});
-  // Si quieres que siempre haya al menos 4 columnas de materias
-  for (let i = subjects.length; i < 4; i++) {
-    headerHTML += `<th>-</th>`;
-  }
-
-  headerHTML += `</tr>`;
-
-  // Reemplazamos el thead
-  gradesTable.querySelector("thead").innerHTML = headerHTML;
-}
-
-// =============================
-// 🟢 Función para renderizar tabla de notas
-// =============================
-function renderGradesByCourse(students, gradesMap) {
-  gradesTableBody.innerHTML = "";
-
-  // Tomar materias del header
-  const subjectIds = Array.from(
-    gradesTable.querySelectorAll("thead th[data-subject-id]")
-  ).map(th => th.dataset.subjectId);
-
-  students.forEach((student, index) => {
-    let gradesHTML = "";
-
-    subjectIds.forEach(subjectId => {
-      const value = gradesMap?.[student._id]?.[subjectId] ?? "";
-
-      // Asignar clase según valor
-      let gradeClass = "";
-      if (value >= 1 && value <= 4) gradeClass = "grade-red";
-      else if (value >= 5 && value <= 6) gradeClass = "grade-yellow";
-      else if (value >= 7) gradeClass = "grade-green";
-
-      gradesHTML += `
-        <td>
-          <input
-            type="number"
-            min="1"
-            max="10"
-            class="form-control form-control-sm grade-input ${gradeClass}"
-            data-student-id="${student._id}"
-            data-subject-id="${subjectId}"
-            value="${value}"
-            style="text-align:center;"
-          />
-        </td>
-      `;
-    });
-
-    gradesTableBody.insertAdjacentHTML(
-      "beforeend",
-      `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${student.apellido} ${student.nombre}</td>
-        <td>${student.dni}</td>
-        ${gradesHTML}
-      </tr>
-      `
-    );
-  });
-}
-
-function getGradeForSubject(grades = [], subjectId) {
-  if (!grades || !subjectId) return "";
-
-  const grade = grades.find(
-    g => g.subject?._id === subjectId || g.subject === subjectId
-  );
-
-  return grade?.value ?? "";
-}
-
-
-// =============================
-// 🟢  Funcion  para ordenar Alfabeticamente 
-// =============================
-
-function sortUsers(users, { by = "apellido", locale = "es" } = {}) {
-  return [...users].sort((a, b) => {
-    const valA = a.user?.[by] || "";
-    const valB = b.user?.[by] || "";
-    return valA.localeCompare(valB, locale);
-  });
-}
-
-
-// =============================
-// 🟢 Inicialización
-// =============================
-function initGrade() {
-    fillCourseSelect();
-  }
-
-initGrade()

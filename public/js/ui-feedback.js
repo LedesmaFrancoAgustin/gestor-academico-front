@@ -21,6 +21,35 @@ window.uiToast = (message, type = "info") => {
     }
   }).showToast();
 };
+// Carga
+window.uiLoadingToast = (message = "Procesando...") => {
+
+  const toast = Toastify({
+    text: `
+      <div class="toast-loading-card">
+        <div class="toast-loading-dot"></div>
+        <div class="toast-loading-dot"></div>
+        <div class="toast-loading-dot"></div>
+        <span>${message}</span>
+      </div>
+    `,
+    duration: -1,
+    gravity: "top",
+    position: "right",
+    close: false,
+    escapeMarkup: false, // 🔥 IMPORTANTE
+    style: {
+      background: "#f1f1f1",
+      color: "#333",
+      borderRadius: "10px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+      padding: "12px 16px"
+    }
+  });
+
+  toast.showToast();
+  return toast;
+};
 
 // Confirm
 window.uiConfirm = async ({

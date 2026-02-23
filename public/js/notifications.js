@@ -7,6 +7,7 @@ const notificationToggle = document.getElementById("notificationDropdown");
 const dropdown = document.getElementById("notifications-dropdown");
 const badge = document.getElementById("notifications-badge");
 
+
 //console.log(dropdown, badge);
 
 

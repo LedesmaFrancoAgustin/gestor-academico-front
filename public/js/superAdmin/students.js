@@ -185,8 +185,8 @@ function renderStudents(students, tbody, currentPage = 1, limit = 10) {
       <td>${user.dni || "-"}</td>
       <td>${user.email || "-"}</td>
       <td>${user.rol}</td>
-      <td>${user.currentCourse.currentClass || "-"}</td>
-      <td>${user.currentCourse.currentDivision || "-"}</td>
+      <td>${user.currentCourse?.currentClass || "-"}</td>
+      <td>${user.currentCourse?.currentDivision || "-"}</td>
       <td>
         <span class="badge ${user.activo ? "bg-success" : "bg-danger"}">
           ${user.activo ? "Activo" : "Inactivo"}
@@ -471,6 +471,78 @@ btReloadStudents.addEventListener("click", () => {
   searchInput.value = "";
   initStudents();
 });
+
+// =============================
+// 🟢 Carga masiva
+// =============================
+
+const btnMassive = document.getElementById("btnAddStudentMassive");
+const fileInput = document.getElementById("massiveStudentFile");
+
+btnMassive.addEventListener("click", () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
+    uiToast("Solo se permiten archivos Excel (.xlsx o .xls)", "error");
+    fileInput.value = "";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  await fetchPostMassiveStudents(formData);
+});
+
+async function fetchPostMassiveStudents(formData) {
+  let loadingToast;
+
+  try {
+    btnMassive.disabled = true;
+
+    // 🔥 Mostrar loading
+    loadingToast = uiLoadingToast("Cargando alumnos...");
+
+    const response = await fetch(`${API_URL}/api/importMassive/students`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Error en la carga");
+    }
+
+    // 🔥 Cerrar loading
+    loadingToast.hideToast();
+
+    uiToast(
+      `Insertados: ${data.inserted} | Errores: ${data.errors?.length || 0}`,
+      data.errors?.length ? "warning" : "success"
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    if (loadingToast) loadingToast.hideToast();
+
+    uiToast("Error en la carga masiva", "error");
+
+  } finally {
+    btnMassive.disabled = false;
+    fileInput.value = "";
+  }
+}
+
 
 // =============================
 // 🟢 Iniciar tabla al cargar la página

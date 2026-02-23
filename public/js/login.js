@@ -51,6 +51,10 @@ function redirectByRole(role) {
       window.location.href = "./pages/student/index-Students.html";
       break;
 
+    case "preceptor":
+      window.location.href = "./pages/preceptor/index-Preceptor.html";
+      break;
+
     default:
       uiToast("Rol no autorizado", "error");
       localStorage.clear();

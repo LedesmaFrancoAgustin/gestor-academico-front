@@ -170,6 +170,11 @@
                 <i class="fa fa-file-alt"></i> Notas
                 </a>
             </li>
+             <li class="nav-item">
+                <a class="nav-link" href="./reportCard.html">
+                    <i class="fa fa-clipboard"></i> Calendario
+                </a>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="./configurations.html">
@@ -246,6 +251,19 @@
                                                     <input type="text" class="form-control" id="code" placeholder="Ej: MAT2026" required>
                                                     </div>
 
+                                                     <!-- Numero de orden -->
+                                                    <div class="form-group py-2">
+                                                        <label for="academicYear">Numero de Orden</label>
+                                                        <input 
+                                                            type="number" 
+                                                            class="form-control" 
+                                                            id="order" 
+                                                            placeholder="Ej: 1" 
+                                                            min="1"
+                                                            required
+                                                            >
+                                                    </div>
+
                                                     <!-- Año académico -->
                                                     <div class="form-group py-2">
                                                     <label for="academicYear">Año Académico</label>
@@ -287,22 +305,23 @@
                                     </div>
                                 </div>
                                 <div class="panel-body table-responsive">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Nombre</th>
-        <th>Código</th>
-        <th>Año Académico</th>
-        <th>Tipo</th>
-        <th>Activo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="subjectsTableBody">
-      <!-- Filas generadas por JS -->
-    </tbody>
-  </table>
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nombre</th>
+                                            <th>Código</th>
+                                            <th>Orden</th>
+                                            <th>Año Académico</th>
+                                            <th>Tipo</th>
+                                            <th>Activo</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="subjectsTableBody">
+                                        <!-- Filas generadas por JS -->
+                                        </tbody>
+                                    </table>
                                 </div>
 
                                 <div class="panel-footer">

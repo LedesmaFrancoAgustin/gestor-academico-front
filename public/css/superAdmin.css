@@ -885,44 +885,99 @@ tr:hover .teacher-column-cell {
   background-color: #fff;
 }
 
-.vertical-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg); /* para leer de abajo hacia arriba */
-  height: 200px;
+/* Tabla compacta */
+#gradesTable {
+  table-layout: fixed;
+  width: 100%;
+  font-size: 13px;
+}
+
+#gradesTable th,
+#gradesTable td {
   text-align: center;
   vertical-align: middle;
+  padding: 4px;
+}
+
+/* Columnas fijas */
+#gradesTable th:nth-child(1),
+#gradesTable td:nth-child(1) {
+  width: 40px;
+}
+
+#gradesTable th:nth-child(2),
+#gradesTable td:nth-child(2) {
+  width: 180px;
+  text-align: left;
+}
+
+#gradesTable th:nth-child(3),
+#gradesTable td:nth-child(3) {
+  width: 110px;
+}
+
+/* Materias mismo ancho */
+#gradesTable th.subject-col,
+#gradesTable td.subject-col {
+  width: 50px;
+}
+
+/* Encabezado vertical */
+.vertical-header {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center; /* 🔥 centra verticalmente */
+  justify-content: center; /* 🔥 centra horizontalmente */
+  width: 100%;
+  height: 120px; /* 🔥 importante para que tenga espacio */
+  text-align: center;
   white-space: nowrap;
+  font-size: 12px;
 }
 
-.grade-red {
-  background-color: #f8d7da !important; /* rojo claro */
-  color: #721c24;
+/* Input compacto */
+.grade-input {
+  width: 50px;
+  height: 28px;
+  padding: 2px;
+  font-size: 12px;
 }
 
-.grade-yellow {
-  background-color: #fff3cd !important; /* amarillo claro */
-  color: #856404;
+/* 🔴 Recursantes */
+.repeating-row {
+  background-color: #fff5f5;
 }
 
-.grade-green {
-  background-color: #d4edda !important; /* verde claro */
-  color: #155724;
+.repeating-row td:first-child {
+  border-left: 4px solid #dc3545;
 }
 
-/* Toda la fila se resalta con borde azul */
-tr.resaltado {
-  border: 3px solid #3498db; /* Azul claro */
-  transition: border 0.2s ease;
+/* Base */
+.grade-input {
+  width: 50px;
+  height: 28px;
+  padding: 2px;
+  font-size: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Solo la columna del nombre se resalta */
-.resaltado-nombre {
-  background-color: #f9f871; /* amarillo claro */
-  font-weight: 600;
-  color: #2c3e50; /* azul oscuro */
-  transition: background-color 0.2s ease, color 0.2s ease;
-  border-radius: 4px;
-  padding: 2px 4px;
+/* 🔴 Desaprobado */
+.grade-low {
+  background-color: #ffe5e5 !important;
+  border-color: #dc3545 !important;
+}
+
+/* 🟡 En proceso */
+.grade-mid {
+  background-color: #fff8db !important;
+  border-color: #ffc107 !important;
+}
+
+/* 🟢 Aprobado */
+.grade-high {
+  background-color: #e6f4ea !important;
+  border-color: #198754 !important;
 }
 
 .settings-container {
@@ -1525,6 +1580,191 @@ td.present {
 
 td.absent {
   background-color: #ffd6d6;
+}
+
+/* =========================
+   MODAL CONFIG FECHAS - REPORT CARD
+========================= */
+/* Overlay */
+.rcf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.rcf-modal-overlay.show {
+  display: flex;
+}
+
+/* Modal */
+.rcf-modal-dialog {
+  max-width: 800px; /* Más compacto */
+  max-height: 900px; /* Más compacto */
+  width: 90%;
+  margin: 0;
+}
+
+.rcf-modal-content {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  max-height: 90vh; /* Altura limitada con scroll si es necesario */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.rcf-modal-header {
+  background: linear-gradient(90deg, #2A5B7E, #355c77);
+  color: #fff;
+  padding: 0.75rem 1rem; /* Padding más compacto */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.rcf-btn-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Body */
+.rcf-modal-body {
+  padding: 1rem 1.25rem; /* Menos padding */
+  overflow-y: auto; /* Scroll si hay mucho contenido */
+}
+
+.rcf-form-group {
+  margin-bottom: 0.75rem;
+}
+
+.rcf-form-group label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.rcf-form-control {
+  width: 100%;
+  padding: 0.4rem 0.6rem; /* Más compacto */
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 0.95rem;
+}
+
+/* Period Cards */
+.rcf-period-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem; /* Más compacto */
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.rcf-period-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.rcf-period-fields {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.rcf-period-fields > div {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Badges */
+.rcf-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.4rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.rcf-open {
+  background-color: #28a745;
+}
+
+.rcf-closed {
+  background-color: #6c757d;
+}
+
+.rcf-warning {
+  background-color: #ffc107;
+  color: #333;
+}
+
+/* Period colors */
+.rcf-blue {
+  border-left: 4px solid #2A5B7E;
+}
+
+.rcf-green {
+  border-left: 4px solid #28a745;
+}
+
+.rcf-yellow {
+  border-left: 4px solid #ffc107;
+}
+
+.rcf-red {
+  border-left: 4px solid #dc3545;
+}
+
+.rcf-purple {
+  border-left: 4px solid #6f42c1;
+}
+
+/* Footer */
+.rcf-modal-footer {
+  padding: 0.75rem 1rem; /* Más compacto */
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.rcf-btn-primary {
+  background: #4e54c8;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.rcf-btn-secondary {
+  background: #ccc;
+  color: #333;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
 }
 
 /*# sourceMappingURL=superAdmin.css.map */

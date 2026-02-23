@@ -41,6 +41,7 @@ function renderSubjectsTable(data) {
       <td>${index + 1 + (currentPage - 1) * itemsPerPage}</td>
       <td>${subject.name}</td>
       <td>${subject.code}</td>
+      <td>${subject.order}</td>
       <td>${subject.academicYear}</td>
       <td>${subject.type === "mandatory" ? "Obligatoria" : "Optativa"}</td>
       <td>
@@ -99,6 +100,7 @@ function openEditSubject(subject) {
   addSubjectForm.dataset.originalData = JSON.stringify({
     name: subject.name,
     code: subject.code,
+    order: subject.order,
     academicYear: subject.academicYear,
     type: subject.type,
     active: subject.active
@@ -107,6 +109,7 @@ function openEditSubject(subject) {
   // Llenar campos
   document.getElementById("name").value = subject.name;
   document.getElementById("code").value = subject.code;
+  document.getElementById("order").value = subject.order;
   document.getElementById("academicYear").value = subject.academicYear;
   document.getElementById("type").value = subject.type;
   document.getElementById("activeSubject").checked = subject.active;
@@ -123,6 +126,7 @@ addSubjectForm.addEventListener("submit", async (e) => {
   const currentData = {
     name: document.getElementById("name").value.trim(),
     code: document.getElementById("code").value.trim(),
+    order: parseInt(document.getElementById("order").value, 10),
     academicYear: document.getElementById("academicYear").value.trim(),
     type: document.getElementById("type").value,
     active: document.getElementById("activeSubject").checked

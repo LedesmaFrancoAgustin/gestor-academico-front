@@ -1,101 +1,103 @@
-
+const academicYearSelect = document.getElementById("academicYearSelect");
 const courseSelect = document.getElementById("courseSelect"); // Selector de curso
 const subjectSelect = document.getElementById("subjectSelect");/// Selector de Materia
 const gradeTypeSelect = document.getElementById("gradeTypeSelect");/// Selector de Notas
 
+const user = JSON.parse(localStorage.getItem("user"));; // 🔥 Perfil del docente
+
+const badgeLabel = document.getElementById("labelAcademicCalendar");  // Label de fechas academicas
+
 // Orden académico de las notas
 const GRADE_ORDER = [
-  { key: "firstTerm", label: "1° Trimestre" },
-  { key: "secondTerm", label: "2° Trimestre" },
-  { key: "recuperatory", label: "Recuperatorio" },
-  { key: "december", label: "Diciembre" },
-  { key: "february", label: "Febrero" }
+  "firstTerm.partial",
+  "firstTerm.final",
+  "secondTerm.partial",
+  "secondTerm.final",
+  "recuperatoryFirstTerm",
+  "december",
+  "february"
 ];
+
+const TERM_CUT_MAP = {
+  firstTerm: "firstTermFinal",
+  secondTerm: "secondTermFinal",
+  recuperatoryFirstTerm: "recuperatory",
+  december: "december",
+  february: "february",
+  all: null
+};
+
+
 
 // Estado actual de la vista
 let selectedGradeType = "firstTerm";
 let selectedCourseId = null;
+let selectedSubjectId = null;
+let academicYear = null;
 
-let courseId = null;
-let currentSubjectList = [];
-let cachedGrades = [];
-let hasUnsavedChanges = false;
+let configAcademicCalendar = []    //Datos de calendario academico 
+let regularStudent = []    //Datos de alumnos regular
+let repeatingStudents = [] //Datos de alumnos recursante
 
+let cachedGrades = [];   //Notas de estudiantes
+
+let studentsWithGrades= [];; // Estudiantes con notas
 
 let gradesDraft = {};
 
+// ==========================================================================================================================
+// 🟢 Eventos
+// ==========================================================================================================================
+// =============================
+//  Selector del año
+// =============================
+academicYearSelect.addEventListener("change", async (e) => {
+  academicYear = academicYearSelect.value;
+  //console.log("Año seleccionado:", academicYear);
 
+  const courses = await fetchMyCoursesByYear(academicYear);
+  //console.log("Courses:", courses);
 
+  courseSelect.innerHTML =
+    '<option value="" selected disabled>Seleccione un curso</option>';
 
-// Llamamos a la función al cargar la página
-document.addEventListener("DOMContentLoaded", renderCourses);
-// Traer los cursos del usuario
-async function fetchMyCourses() {
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) return;
-
-    const res = await fetch(`${API_URL}/api/users/my-courses`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    });
-
-    if (!res.ok) throw new Error("Error al cargar cursos");
-
-    const data = await res.json();
-    return data.data || [];
-  } catch (err) {
-    console.error(err);
-  }
-}
-// ==============================
-// Renderizar cursos en el select
-// ==============================
-async function renderCourses() {
-  const courses = await fetchMyCourses();
-
-  // Limpiamos el select
-  courseSelect.innerHTML = `<option value="">Seleccioná un curso</option>`;
-
-  if (courses.length === 0) {
-    const option = document.createElement("option");
-    option.disabled = true;
-    option.textContent = "No tenés cursos asignados";
-    courseSelect.appendChild(option);
+  if (!courses.length) {
+    uiToast("Todavía no hay cursos disponibles para este año", "info");
+    courseSelect.disabled = true;
     return;
   }
 
-  courses.forEach(courseItem => {
-    /**
-     * ⚠️ Ajustá esto según cómo venga tu backend
-     * Ejemplo común:
-     * courseItem.course._id
-     * courseItem.course.name
-     */
-    const course = courseItem.course || courseItem;
-
+  courses.forEach(course => {
     const option = document.createElement("option");
     option.value = course._id;
-    option.textContent = `${course.name} (${course.code})`;
-
+    option.textContent = course.name;
     courseSelect.appendChild(option);
   });
-}
+
+  configAcademicCalendar = await fetchGetAcademicYearPeriodConfig(academicYear)
+  console.log("configAcademicCalendar: ",configAcademicCalendar)
+  updateAcademicCalendarLabel(selectedGradeType)
+
+    if (e.target.value) {
+    badgeLabel.classList.remove("hidden");
+  } else {
+    badgeLabel.classList.add("hidden");
+  }
+
+  courseSelect.disabled = false;
+});
 /* =========================
    Selector del curso
 ========================= */
 courseSelect.addEventListener("change", async (e) => {
-  courseId = e.target.value;
+  selectedCourseId = e.target.value;
 
   subjectSelect.innerHTML = `<option value="">Seleccionar materia</option>`;
   subjectSelect.disabled = true;
 
-  if (!courseId) return;
-  currentSubjectList = await fetchMySubjectsByCourse(courseId)
+  if (!selectedCourseId) return;
+  currentSubjectList = await fetchMySubjectsByCourse(selectedCourseId)
 
-console.log("currentSubjectList: ",currentSubjectList)
    if (currentSubjectList.length === 0) {
     uiToast("No tenés materias asignadas en este curso","info");
     return;
@@ -117,23 +119,78 @@ console.log("currentSubjectList: ",currentSubjectList)
    Selector de Materia
 ========================= */
 subjectSelect.addEventListener("change", async (e) => {
-  subjectId = e.target.value;
-  if (!subjectId || !courseId) return;
+  selectedSubjectId = e.target.value;
+  if (!selectedSubjectId || !selectedCourseId) return;
 
-  cachedGrades = await fetchGradesForCourse(courseId, subjectId);
+  regularStudent = await fetchStudentsFromCourse(selectedCourseId);
+
+  repeatingStudents = await fetchRepeatingStudents({
+    teacherId: user.id,
+    subjectId: selectedSubjectId ,
+    academicYear
+  });
+
+  if(regularStudent.length > 1 || repeatingStudents.length > 1 )
+   cachedGrades = await fetchGradesForCourse(selectedCourseId,selectedSubjectId,academicYear);
+
+  //console.log("regularStudent: ",regularStudent)
+  //console.log("repeatingStudents: ",repeatingStudents)
+  //console.log("cachedGrades ready to render:", cachedGrades);
+  
+  // 🔹 Merge todo en un solo array listo para render
+  studentsWithGrades = mergeGrades(regularStudent, repeatingStudents, cachedGrades);
+
+
+  console.log("Students ready to render:", studentsWithGrades);
+  //console.log("regularStudent: ",regularStudent)
+  //console.log("repeatingStudents: ",repeatingStudents)
+  //console.log("CachedGrades: ",CachedGrades)
   renderCurrentView();
+  
 });
+
 /* =========================
    Selector de nota
 ========================= */
 gradeTypeSelect.addEventListener("change", (e) => {
   selectedGradeType = e.target.value;
-  if (!courseId || cachedGrades.length === 0) return;
+  if (!courseSelect || cachedGrades === null) return;
 
   renderCurrentView();
+  //lockTermsBySelectedTerm(selectedGradeType);
+  updateAcademicCalendarLabel(selectedGradeType)
+});
+/* =========================
+   Que cambie el color mientras escribe
+========================= */
+document.addEventListener("input", (e) => {
+  if (!e.target.classList.contains("grade-input")) return;
+
+  const input = e.target;
+
+  // remover clases anteriores
+  input.classList.remove("low", "mid", "high");
+
+  const newClass = getGradeColorClass(input.value);
+
+  if (newClass) {
+    input.classList.add(newClass);
+  }
 });
 
+/* =========================
+   Boton de Guardar Nota
+========================= */
+document.getElementById("saveGradesBtn").addEventListener("click", async () => {
+ 
+  await saveAllGrades();
+  // 🔹 Aquí harías el POST al backend
+  // await fetch(`${API_URL}/api/course/${courseId}/grades`, { method: "POST", body: JSON.stringify(grades) })
+});
 
+// ==========================================================================================================================
+// 🟢 Render
+// ==========================================================================================================================
 /* =========================
    Función principal: cargar notas según pantalla
 ========================= */
@@ -141,252 +198,568 @@ function renderCurrentView() {
   const isDesktop = window.innerWidth > 768;
 
   if (isDesktop) {
-    renderGradesDesktop(cachedGrades);
+    renderGradesDesktop(studentsWithGrades);
+    //console.log("studentsWithGrades: ",studentsWithGrades)
   } else {
-    renderGradesMobile(cachedGrades);
+    renderGradesMobile(studentsWithGrades);
   }
 }
-
-
-
 /* =========================
-   Renderizar tabla editable en escritorio
+   Render Desktop
 ========================= */
-function renderGradesDesktop(students) {
+function renderGradesDesktop(students = []) { // 🔹 default a arreglo vacío
   const gradesContainer = document.getElementById("gradesContainer");
   gradesContainer.innerHTML = "";
+
+  const container = document.getElementById("gradesRecursiveContainer");
+  container.innerHTML = "";
+  if (!students || students.length === 0) {
+    gradesContainer.innerHTML = "<p>No hay alumnos para mostrar.</p>";
+    return;
+  }
+
+  const regularStudents = students.filter(s => !s.isRepeating);
+  const repeatingStudents = students.filter(s => s.isRepeating);
+
+  renderRegularTable(regularStudents);
+  renderRepeatingTable(repeatingStudents);
+}
+function renderRegularTable(students) {
+  const gradesContainer = document.getElementById("gradesContainer");
+  if (students.length === 0) return;
 
   const table = document.createElement("table");
   table.className = "grades-table";
 
-  /* =========================
-     Columnas visibles
-  ========================= */
-  const gradeColumns =
-    selectedGradeType === "all"
-      ? GRADE_ORDER
-      : GRADE_ORDER.slice(
-          0,
-          GRADE_ORDER.findIndex(g => g.key === selectedGradeType) + 1
-        );
+  const { columns: gradeColumns, active } = getGradeColumns();
 
-  /* =========================
-     Header
-  ========================= */
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr>
-      <th class="col-index">#</th>
-      <th>Alumno</th>
-      <th>DNI</th>
-      ${gradeColumns.map(g => `<th>${g.label}</th>`).join("")}
-    </tr>
-  `;
+  const hasFirstTerm = gradeColumns.some(g =>
+    g.path.startsWith("firstTerm")
+  );
 
-  table.appendChild(thead);
+  const hasSecondTerm = gradeColumns.some(g =>
+    g.path.startsWith("secondTerm")
+  );
 
-  /* =========================
-     Body
-  ========================= */
-  const tbody = document.createElement("tbody");
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th rowspan="2">#</th>
+        <th rowspan="2">Alumno</th>
+        <th rowspan="2">DNI</th>
 
-  students.forEach((s, index) => {
-  const tr = document.createElement("tr");
+        ${hasFirstTerm ? `<th colspan="2">1° Cuatrimestre</th>` : ""}
+        ${hasSecondTerm ? `<th colspan="2">2° Cuatrimestre</th>` : ""}
 
-  let gradeCells = "";
+        ${gradeColumns.some(g => g.path  === "recuperatoryFirstTerm") ? `<th rowspan="2">Recuperatorio 1°C</th>` : ""}
+        ${gradeColumns.some(g => g.path  === "december") ? `<th rowspan="2">Diciembre</th>` : ""}
+        ${gradeColumns.some(g => g.path  === "february") ? `<th rowspan="2">Febrero</th>` : ""}
+      </tr>
 
-  gradeColumns.forEach(g => {
-    const value = s.grades?.[g.key] ?? "";
-    const editable =
-      selectedGradeType === "all" || g.key === selectedGradeType;
+      <tr>
+        ${hasFirstTerm ? `
+          <th>Parcial</th>
+          <th>Final</th>
+        ` : ""}
 
-    gradeCells += `
-      <td>
-        ${
-          editable
-            ? `<input 
+        ${hasSecondTerm ? `
+          <th>Parcial</th>
+          <th>Final</th>
+        ` : ""}
+      </tr>
+    </thead>
+    <tbody>
+      ${students.map((s, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${s.studentApellido} ${s.studentNombre}</td>
+          <td>${s.studentDni}</td>
+
+          ${gradeColumns.map(g => {
+            const gradeObj = s.grades[g.path];
+            const value = gradeObj?.value ?? null;
+            const colorClass = getGradeColorClass(value);
+
+            const [periodKey, evaluationType] = g.path.split(".");
+            const isOpen = isEvaluationOpen(periodKey, evaluationType);
+
+            const isViewOnly = active === "all";
+            const isEditable = !isViewOnly && g.path === active && isOpen;
+
+           let tooltipText = "";
+
+            if (active === "all") {
+              tooltipText = "Modo solo lectura";
+            } else if (!isOpen) {
+              tooltipText = "Fuera de fecha de carga";
+            }
+
+            const tooltipAttr = tooltipText 
+              ? `data-tooltip="${tooltipText}"` 
+              : '';
+
+            return `
+            <td>
+              <div class="grade-wrapper" ${tooltipAttr}>
+                <input 
                   type="number"
                   min="1"
                   max="10"
                   step="0.1"
-                  class="grade-input"
+                  class="grade-input ${colorClass} ${!isEditable ? "grade-disabled" : ""}"
                   data-student-id="${s.studentId}"
-                  data-subject-id="${s.subjectId}"
-                  data-grade-type="${g.key}" 
-                  data-original="${value ?? ""}"
-                  value="${value ?? ""}"
-              >`
-            : `<span class="grade-readonly">${value || "-"}</span>`
-        }
-      </td>
-    `;
-  });
+                  data-grade-type="${g.path}"
+                  data-original="${value ?? ''}"
+                  data-is-repeating="${s.isRepeating}"
+                  value="${value ?? ''}"
+                  placeholder="-"
+                  ${!isEditable ? "disabled" : ""}
+                >
+              </div>
+            </td>
+          `;
+          }).join("")}
 
-  tr.innerHTML = `
-    <td class="col-index">${index + 1}</td>
-    <td>${s.studentApellido} ${s.studentNombre}</td>
-    <td>${s.studentDni}</td>
-    ${gradeCells}
+        </tr>
+      `).join("")}
+    </tbody>
   `;
 
-  tbody.appendChild(tr);
-});
 
-
-  table.appendChild(tbody);
   gradesContainer.appendChild(table);
 }
+
+function renderRepeatingTable(students) {
+  const container = document.getElementById("gradesRecursiveContainer");
+  if (students.length === 0) return;
+
+  const title = document.createElement("h3");
+  title.textContent = "Alumnos Recursantes";
+  container.appendChild(title);
+
+  const table = document.createElement("table");
+  table.className = "grades-table repeating-table";
+
+  const { columns: gradeColumns, active } = getGradeColumns();
+
+  const hasFirstTerm = gradeColumns.some(g =>
+      g.path.startsWith("firstTerm")
+    );
+
+    const hasSecondTerm = gradeColumns.some(g =>
+      g.path.startsWith("secondTerm")
+    );
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th rowspan="2">#</th>
+        <th rowspan="2">Alumno</th>
+        <th rowspan="2">DNI</th>
+
+        ${hasFirstTerm ? `<th colspan="2">1° Cuatrimestre</th>` : ""}
+        ${hasSecondTerm ? `<th colspan="2">2° Cuatrimestre</th>` : ""}
+
+        ${gradeColumns.some(g => g.path  === "recuperatoryFirstTerm") ? `<th rowspan="2">Recuperatorio 1°C</th>` : ""}
+        ${gradeColumns.some(g => g.path  === "december") ? `<th rowspan="2">Diciembre</th>` : ""}
+        ${gradeColumns.some(g => g.path  === "february") ? `<th rowspan="2">Febrero</th>` : ""}
+      </tr>
+
+      <tr>
+        ${hasFirstTerm ? `
+          <th>Parcial</th>
+          <th>Final</th>
+        ` : ""}
+
+        ${hasSecondTerm ? `
+          <th>Parcial</th>
+          <th>Final</th>
+        ` : ""}
+      </tr>
+    </thead>
+
+    <tbody>
+      ${students.map((s, i) => `
+        <tr>
+          <td>${i + 1}</td>
+
+          <td>
+            ${s.studentApellido} ${s.studentNombre}
+            <span class="badge-rec">Recursante</span>
+          </td>
+
+          <td>${s.studentDni}</td>
+
+          ${gradeColumns.map(g => {
+            const gradeObj = s.grades[g.path];
+            const value = gradeObj?.value ?? null;
+            const colorClass = getGradeColorClass(value);
+            
+            const [periodKey, evaluationType] = g.path.split(".");
+            const isOpen = isEvaluationOpen(periodKey, evaluationType);
+
+            const isViewOnly = active === "all";
+            const isEditable = !isViewOnly && g.path === active && isOpen;
+
+            let tooltipText = "";
+
+            if (active === "all") {
+              tooltipText = "Modo solo lectura";
+            } else if (!isOpen) {
+              tooltipText = "Fuera de ventana de carga";
+            }
+
+            const tooltipAttr = tooltipText 
+              ? `data-tooltip="${tooltipText}"` 
+              : '';
+
+            return `
+              <td>
+                <input 
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="0.1"
+                  class="grade-input ${colorClass} ${!isEditable ? "grade-disabled" : ""}"
+                  data-student-id="${s.studentId}"
+                  data-grade-type="${g.path}"
+                  data-original="${value ?? ''}"
+                  data-is-repeating="${s.isRepeating}"
+                  value="${value ?? ''}"
+                  placeholder="-"
+                  ${tooltipAttr}
+                  ${!isEditable ? "disabled" : ""}
+                >
+              </td>
+            `;
+          }).join("")}
+
+        </tr>
+      `).join("")}
+    </tbody>
+  `;
+
+  container.appendChild(table);
+}
 /* =========================
-   Renderizar cards en mobile
+   Render Mobile
 ========================= */
-function renderGradesMobile(students) {
-  const gradesContainer = document.getElementById("gradesContainer");
-  gradesContainer.innerHTML = "";
+function renderGradesMobile(students = []) {
+  const container = document.getElementById("gradesContainer");
+  container.innerHTML = "";
 
-  const grid = document.createElement("div");
-  grid.className = "grades-cards";
+  if (!students || students.length === 0) {
+    container.innerHTML = "<p class='no-students'>No hay alumnos para mostrar.</p>";
+    return;
+  }
 
-  /* =========================
-     Columnas visibles (MISMA lógica que desktop)
-  ========================= */
-  const gradeColumns =
-    selectedGradeType === "all"
-      ? GRADE_ORDER
-      : GRADE_ORDER.slice(
-          0,
-          GRADE_ORDER.findIndex(g => g.key === selectedGradeType) + 1
-        );
+  const { columns: gradeColumns, active } = getGradeColumns();
 
-  students.forEach(s => {
+  console.log("gradeColumns:", gradeColumns);
+
+  function createCard(s, index) {
+
     const card = document.createElement("div");
-    card.className = "grade-card";
-
-    let gradesInputs = "";
-
-    gradeColumns.forEach(g => {
-      const value = s.grades?.[g.key] ?? "";
-      const editable =selectedGradeType === "all" || g.key === selectedGradeType;
-
-      gradesInputs += `
-        <div class="grade-field">
-          <label>${g.label}</label>
-          ${
-            editable
-              ? `<input
-                    type="number"
-                    min="1"
-                    max="10"
-                    step="0.1"
-                    class="grade-input "
-                    data-student-id="${s.studentId}"
-                    data-subject-id="${s.subjectId}"
-                    data-grade-type="${g.key}"
-                    data-original="${value ?? ""}"
-                    value="${value ?? ""}"
-                >`
-              : `<span class="grade-readonly">${value || "-"}</span>`
-          }
-        </div>
-      `;
-    });
+    card.className = `grade-card pro-card ${s.isRepeating ? "repeating-card" : ""}`;
 
     card.innerHTML = `
-      <div class="grade-card-header">
-        <h4>${s.studentApellido} ${s.studentNombre}</h4>
-        <span class="dni">DNI: ${s.studentDni}</span>
+      <div class="card-header compact">
+        <div class="student-main">
+          <span class="index-box">${index + 1}</span>
+          <div>
+            <div class="student-name">
+              ${s.studentApellido} ${s.studentNombre}
+              ${s.isRepeating ? `<span class="badge-rec">Recursante</span>` : ""}
+            </div>
+            <div class="student-dni">DNI: ${s.studentDni}</div>
+          </div>
+        </div>
       </div>
 
-      <div class="grade-card-body">
-        ${gradesInputs}
+      <div class="card-body compact">
+        ${gradeColumns.map(g => {
+
+          const gradeObj = s.grades[g.path];
+          const value = gradeObj?.value ?? null;
+          const colorClass = getGradeColorClass(value);
+
+          const [periodKey, evaluationType] = g.path.split(".");
+          const isOpen = isEvaluationOpen(periodKey, evaluationType);
+
+          const isViewOnly = active === "all";
+          const isEditable = !isViewOnly && g.path === active && isOpen;
+
+          let tooltipText = "";
+
+          if (isViewOnly) {
+            tooltipText = "Modo solo lectura";
+          } else if (!isOpen) {
+            tooltipText = "Fuera de fecha de carga";
+          }
+
+          const tooltipAttr = tooltipText
+            ? `data-tooltip="${tooltipText}"`
+            : "";
+
+          return `
+          <div class="grade-row compact">
+            <span class="grade-label">${g.label}</span>
+
+            <div class="grade-wrapper">
+              <div class="input-group">
+
+                ${
+                  !isEditable && tooltipText
+                    ? `<i class="lock-icon fa-solid fa-lock" data-tooltip="${tooltipText}"></i>`
+                    : ""
+                }
+
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="0.1"
+                  class="grade-input ${colorClass} ${!isEditable ? "grade-disabled" : ""}"
+                  data-student-id="${s.studentId}"
+                  data-grade-type="${g.path}"
+                  data-original="${value ?? ''}"
+                  data-is-repeating="${s.isRepeating}"
+                  value="${value ?? ''}"
+                  placeholder="-"
+                  ${!isEditable ? "disabled" : ""}
+                >
+
+              </div>
+            </div>
+          </div>
+        `;
+        }).join("")}
       </div>
     `;
 
-    grid.appendChild(card);
+    return card;
+  }
+
+  students.forEach((s, i) => {
+    container.appendChild(createCard(s, i));
+  });
+}
+// ==========================================================================================================================
+// 🟢 Funciones
+// ==========================================================================================================================
+//validar si está abierto -- Fecha validad para cargar nota
+function isEvaluationOpen(periodKey, evaluationType) {
+  if (!configAcademicCalendar?.periods) return false;
+
+  const period = configAcademicCalendar.periods.find(p => p.key === periodKey);
+  if (!period) return false;
+
+  // Si está cerrado manualmente
+  if (period.isManuallyClosed) return false;
+
+  const evaluation = period.evaluations.find(e => e.type === evaluationType);
+  if (!evaluation) return false;
+
+  const now = new Date();
+  const start = new Date(evaluation.gradingWindow.startDate);
+  const end = new Date(evaluation.gradingWindow.endDate);
+
+  return now >= start && now <= end;
+}
+function getNestedGradeValue(grades, path) {
+  return path.split(".").reduce((acc, k) => acc?.[k], grades)?.value ?? null;
+}
+function getGradeColumns() {
+
+  const selected = document.getElementById("gradeTypeSelect").value;
+
+  if (selected === "all") {
+    return {
+      columns: GRADE_ORDER.map(pathToColumnObject),
+      active: null
+    };
+  }
+
+  const selectedIndex = GRADE_ORDER.indexOf(selected);
+  if (selectedIndex === -1) return { columns: [], active: null };
+
+  const allowed = GRADE_ORDER.slice(0, selectedIndex + 1);
+
+  return {
+    columns: allowed.map(pathToColumnObject),
+    active: selected
+  };
+}
+//Convertir path → objeto columna
+function pathToColumnObject(path) {
+
+  const keys = {
+    "firstTerm.partial": "firstTermPartial",
+    "firstTerm.final": "firstTermFinal",
+    "secondTerm.partial": "secondTermPartial",
+    "secondTerm.final": "secondTermFinal",
+    "recuperatoryFirstTerm": "recuperatoryFirstTerm",
+    "december": "december",
+    "february": "february"
+  };
+
+  const labels = {
+    "firstTerm.partial": "1°C - Parcial",
+    "firstTerm.final": "1°C - Final",
+    "secondTerm.partial": "2°C - Parcial",
+    "secondTerm.final": "2°C - Final",
+    "recuperatoryFirstTerm": "Recup. 1°C",
+    "december": "Diciembre",
+    "february": "Febrero"
+  };
+
+  return {
+    path,                 // 🔥 no tocar
+    key: keys[path],      // 🔥 no tocar
+    label: labels[path]   // ✅ nuevo campo seguro
+  };
+}
+
+//Función para bloquear según término
+function lockTermsBySelectedTerm(selectedTerm) {
+
+  const termOrder = [
+    "firstTerm",
+    "secondTerm",
+    "recuperatory",
+    "december",
+    "february"
+  ];
+
+  const selectedIndex = termOrder.indexOf(selectedTerm);
+
+  document.querySelectorAll(".grade-input").forEach(input => {
+
+    const inputTerm = input.dataset.gradeType;
+    const inputIndex = termOrder.indexOf(inputTerm);
+
+    if (inputIndex !== selectedIndex) {
+      input.disabled = true;
+      input.classList.add("input-locked");
+    } else {
+      input.disabled = false;
+      input.classList.remove("input-locked");
+    }
+
   });
 
-  gradesContainer.appendChild(grid);
 }
 
-/* =========================
-   fetch a estudiante
-========================= */
-async function fetchStudents(courseId) {
-  try {
-    console.log(courseId)
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_URL}/api/course/${courseId}/students`, {
-      headers: { "Authorization": `Bearer ${token}` }
+// ==============================
+/**
+ * Merge students with their grades
+ * @param {Array} regularStudents - alumnos regulares
+ * @param {Array} repeatingStudents - alumnos recursantes
+ * @param {Array} cachedGrades - notas ya cargadas
+ * @returns {Array} alumnos con sus notas y flag isRepeating
+ */
+function mergeGrades(regularStudents, repeatingStudents, cachedGrades) {
+
+  const allStudents = [];
+
+  // 🔹 Paths reales del schema actual
+  const gradePaths = [
+    "firstTerm.partial",
+    "firstTerm.final",
+    "secondTerm.partial",
+    "secondTerm.final",
+    "recuperatoryFirstTerm",
+    "december",
+    "february"
+  ];
+
+  // 🔹 Helper para acceder a propiedades anidadas
+  const getNestedValue = (obj, path) =>
+    path.split(".").reduce((acc, key) => acc?.[key], obj);
+
+  // 🔹 Creamos estructura base vacía
+  const createEmptyGrades = () => {
+    const obj = {};
+    gradePaths.forEach(path => {
+      obj[path] = {
+        value: null,
+        loadedAt: null,
+        loadedBy: null
+      };
     });
-    if (!res.ok) throw new Error("Error al cargar alumnos");
-    const data = await res.json();
-    console.log(data.data)
-    return data.data || [];
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-}
-// =============================
-// 🟢 Fetch de notas de un curso + trimestre (con try/catch)
-// =============================
-async function fetchGradesForCourse(courseId,subjectId) {
-  try {
-    const res = await fetch(
-      `${API_URL}/api/grade/course/${courseId}/subject/${subjectId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
+    return obj;
+  };
 
-    if (!res.ok) {
-      console.error("Error al traer las notas:", res.status, res.statusText);
-      uiToast("Error al traer las notas del curso");
-      return [];
+  // 🔥 OPTIMIZACIÓN IMPORTANTE
+  // Convertimos cachedGrades en lookup por studentId
+  const gradesByStudent = Object.fromEntries(
+    cachedGrades.map(g => [g.studentId?.toString(), g])
+  );
+
+  // 🔹 Función que arma las notas para un alumno
+  const getGrades = (studentId) => {
+
+    const gradeObj = gradesByStudent[studentId?.toString()];
+
+    if (!gradeObj || !gradeObj.grades) {
+      return createEmptyGrades();
     }
 
-    const data = await res.json();
-    return data.data || [];
+    const orderedGrades = createEmptyGrades();
 
-  } catch (error) {
-    console.error("Error al traer notas:", error);
-    uiToast("Error al conectar con el servidor para traer notas");
-    return [];
-  }
-}
-// =============================
-// 🟢 Fetch materias del docente
-// =============================
-async function fetchMySubjectsByCourse(courseId) {
-  try {
-    const res = await fetch(
-      `${API_URL}/api/teachingAssignment/mySubjects/${courseId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    gradePaths.forEach(path => {
+
+      const gradeData = getNestedValue(gradeObj.grades, path);
+
+      if (gradeData) {
+        orderedGrades[path] = {
+          value: gradeData.value ?? null,
+          loadedAt: gradeData.loadedAt ?? null,
+          loadedBy: gradeData.loadedBy ?? null
+        };
       }
-    );
+    });
 
-    if (!res.ok) {
-      console.error("Error al traer materias del docente");
-      return [];
-    }
+    return orderedGrades;
+  };
 
-    const data = await res.json();
-    return data.data || [];
+  // 🔹 Regulares
+  regularStudents.forEach(s => {
+    allStudents.push({
+      studentId: s.student._id,
+      studentNombre: s.student.nombre,
+      studentApellido: s.student.apellido,
+      studentDni: s.student.dni,
+      grades: getGrades(s.student._id),
+      isRepeating: false
+    });
+  });
 
-  } catch (error) {
-    console.error("Error fetchMySubjectsByCourse:", error);
-    return [];
-  }
+  // 🔹 Recursantes
+  repeatingStudents.forEach(s => {
+    allStudents.push({
+      studentId: s.studentId,
+      studentNombre: s.studentNombre,
+      studentApellido: s.studentApellido,
+      studentDni: s.studentDni,
+      grades: getGrades(s.studentId),
+      isRepeating: true
+    });
+  });
+
+  return allStudents;
 }
+
+// ==========================================================================================================================
+// 🟢 FUncion -  guardar Nota 
+// ==========================================================================================================================
 
 /* =================================================================
    Cargar notas
 ========================= ========================================*/
 //Cuando se escribe una nota
 document
-  .getElementById("gradesContainer")
+  .querySelector(".grades-content")
   .addEventListener("input", e => {
     if (!e.target.classList.contains("grade-input")) return;
 
@@ -464,8 +837,157 @@ document
     enableSaveButton();
   });
 
+/* =========================
+   Guardar notas
+========================= */
+async function saveAllGrades() {
+
+  const inputs = document.querySelectorAll(".grade-input");
+  const gradesMap = {};
+
+  inputs.forEach(input => {
+
+    if (input.disabled) return; // 🔥 no procesar bloqueados
+
+    const value = input.value === "" ? null : Number(input.value);
+    const original = input.dataset.original === "" 
+      ? null 
+      : (input.dataset.original != null ? Number(input.dataset.original) : null);
+
+    if (value === original) return;
+
+    const studentId = input.dataset.studentId;
+    const gradeType = input.dataset.gradeType;
+    const isRepeating = input.dataset.isRepeating === "true";
+
+    const key = `${studentId}-${selectedSubjectId}`;
+
+    if (!gradesMap[key]) {
+      gradesMap[key] = {
+        student: studentId,
+        course: selectedCourseId,
+        subject: selectedSubjectId,
+        academicYear,
+        isRepeating,
+        grades: {}
+      };
+    }
+
+    gradesMap[key].grades[gradeType] = { value };
+  });
+
+  const gradesArray = Object.values(gradesMap);
+
+  if (gradesArray.length === 0) {
+    uiToast("No hay cambios para guardar", "info");
+    return;
+  }
+
+  const result = await fetchSaveGradesToServer(gradesArray);
+
+  if (result?.success) {
+
+    applySavedGradesToCache(gradesArray);
+
+    document.querySelectorAll(".grade-input.modified").forEach(input => {
+      input.dataset.original = input.value;
+      input.classList.remove("modified");
+    });
+
+    uiToast("Notas guardadas correctamente", "success");
+
+    hasUnsavedChanges = false;
+    document.getElementById("saveGradesBtn").disabled = true;
+
+  } else {
+
+    uiToast(result?.message || "Error guardando notas", "error");
+
+  }
+}
+
+function applySavedGradesToCache(savedGradesArray) {
+
+  console.log("cachedGrades ready to render:", savedGradesArray);
+  if (!Array.isArray(savedGradesArray)) {
+    savedGradesArray = [savedGradesArray];
+  }
+
+  savedGradesArray.forEach(saved => {
+
+    const studentId = saved.student; // 🔥 viene así del backend
+    const grades = saved.grades;
+
+    if (!studentId) {
+      console.error("❌ student undefined en:", saved);
+      return;
+    }
+
+    /* =========================
+       1️⃣ ACTUALIZAR CACHE
+    ========================= */
+
+    let existingCache = cachedGrades.find(
+      g => g.studentId?.toString() === studentId.toString()
+    );
+
+    if (!existingCache) {
+      existingCache = {
+        studentId: studentId,
+        grades: {}
+      };
+      cachedGrades.push(existingCache);
+    }
+
+    /* =========================
+       2️⃣ ACTUALIZAR studentsWithGrades
+    ========================= */
+
+    const existingStudent = studentsWithGrades.find(
+      s => s.studentId?.toString() === studentId.toString()
+    );
 
 
+    Object.keys(grades || {}).forEach(term => {
+
+      const incoming = grades[term];
+
+      const normalized = {
+        value: incoming?.value ?? null,
+        loadedAt: incoming?.loadedAt ?? null,
+        loadedBy: incoming?.loadedBy ?? null
+      };
+
+      // actualizar cache
+      existingCache.grades[term] = normalized;
+
+      // actualizar modelo renderizado
+      if (existingStudent) {
+        if (!existingStudent.grades) {
+          existingStudent.grades = {};
+        }
+        existingStudent.grades[term] = normalized;
+      }
+
+    });
+
+  });
+
+  console.log("✅ Cache actualizado:", cachedGrades);
+  console.log("✅ studentsWithGrades actualizado:", studentsWithGrades);
+}
+///Funcion para el color de input
+function getGradeColorClass(value) {
+  const num = Number(value);
+
+  if (!value && value !== 0) return "";
+
+  if (num >= 1 && num <= 4) return "low";
+  if (num >= 5 && num <= 6) return "mid";
+  if (num >= 7 && num <= 10) return "high";
+
+  return "";
+}
 
 ///Habilitar botón Guardar
 function enableSaveButton() {
@@ -476,18 +998,230 @@ function enableSaveButton() {
 
   document.getElementById("saveGradesBtn").disabled = !hasChanges;
 }
+//Función para actualizar el label fecha de carga
+function updateAcademicCalendarLabel(gradePath) {
 
-//Prevención de salida sin guardar
-window.addEventListener("beforeunload", e => {
-  if (!document.getElementById("saveGradesBtn").disabled) {
-    e.preventDefault();
-    e.returnValue = "";
+  const label = document.getElementById("labelAcademicCalendar");
+
+  if (!configAcademicCalendar?.periods) return;
+
+  // Si selecciona Todas
+  if (gradePath === "all") {
+    label.classList.remove("hidden");
+    label.innerHTML = `
+      <div class="period-header">Modo visualización</div>
+      <div class="period-status neutral">Todas las evaluaciones</div>
+    `;
+    return;
   }
-});
 
+  const [periodKey, evaluationType] = gradePath.split(".");
+
+  const period = configAcademicCalendar.periods.find(
+    p => p.key === periodKey
+  );
+
+  if (!period) return;
+
+  let evaluation = null;
+
+  if (evaluationType) {
+    evaluation = period.evaluations.find(e => e.type === evaluationType);
+  } else {
+    // Para casos como recuperatorio, diciembre, febrero
+    evaluation = period.evaluations[0];
+  }
+
+  if (!evaluation?.gradingWindow) return;
+
+  const now = new Date();
+  const startDate = new Date(evaluation.gradingWindow.startDate);
+  const endDate = new Date(evaluation.gradingWindow.endDate);
+
+  const start = formatDate(startDate);
+  const end = formatDate(endDate);
+
+  let statusClass = "";
+  let statusText = "";
+
+  if (period.isManuallyClosed) {
+    statusClass = "closed";
+    statusText = "Cerrado";
+  } else if (now < startDate || now > endDate) {
+    statusClass = "out";
+    statusText = "Fuera de fecha";
+  } else {
+    statusClass = "active";
+    statusText = "Habilitado";
+  }
+
+  label.classList.remove("hidden");
+
+  label.innerHTML = `
+    <div class="period-header">Período de carga</div>
+    <div class="period-body">
+        <span class="period-dates">${start} — ${end}</span>
+        <span class="period-status ${statusClass}">
+            ${statusText}
+        </span>
+    </div>
+  `;
+}
+
+
+
+//Función para formatear fechas
+function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+
+// ==========================================================================================================================
+// 🟢 Fetch 
+// ==========================================================================================================================
+// =============================
+//  Fetch Buscar cursos 
+// =============================
+async function fetchMyCoursesByYear(year) {
+  try {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!token || !user?.id) return [];
+
+    const res = await fetch(
+      `${API_URL}/api/TeachingAssignment/myCourseByYear/user/${user.id}?year=${year}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!res.ok) throw new Error("Error al cargar cursos");
+
+    const { data } = await res.json();
+    return data || [];
+  } catch (err) {
+    console.error("fetchMyCoursesByYear:", err);
+    return [];
+  }
+}
+// =============================
+//  Fetch materias del docente
+// =============================
+async function fetchMySubjectsByCourse(courseId) {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/teachingAssignment/mySubjects/${courseId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Error al traer materias del docente");
+      return [];
+    }
+
+    const data = await res.json();
+    return data.data || [];
+
+  } catch (error) {
+    console.error("Error fetchMySubjectsByCourse:", error);
+    return [];
+  }
+}
+// ==============================
+// //  Fetch - Traer los alumnos del Curso(Docente)
+// ==============================
+async function fetchStudentsFromCourse(courseId) {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    const res = await fetch(`${API_URL}/api/course/${courseId}/students`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) throw new Error("Error al obtener alumnos del curso");
+
+    const data = await res.json();
+    return data.data || [];
+  } catch (err) {
+    console.error(err);
+  }
+}
 /* =========================
-   Guardar notas
+   Fetch - Recursantes por Profesor + Materia
 ========================= */
+async function fetchRepeatingStudents({ teacherId, subjectId, academicYear }) {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `${API_URL}/api/studentRecourseAssignment/recourse/teacher/${teacherId}?subjectId=${subjectId}&academicYear=${academicYear}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Error al cargar recursantes");
+    }
+
+    const data = await res.json();
+    return data.data || [];
+
+  } catch (err) {
+    console.error("Error fetch recursantes:", err);
+    return [];
+  }
+}
+// =============================
+// 🟢 Fetch de notas de un curso + trimestre (con try/catch)
+// =============================
+async function fetchGradesForCourse(courseId,subjectId,academicYear) {
+  try {
+    const res = await fetch(
+      `${API_URL}/api/grade/course/${courseId}/subject/${subjectId}?academicYear=${academicYear}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Error al traer las notas:", res.status, res.statusText);
+      uiToast("Error al traer las notas del curso");
+      return [];
+    }
+
+    const data = await res.json();
+    return data.data || [];
+
+  } catch (error) {
+    console.error("Error al traer notas:", error);
+    uiToast("Error al conectar con el servidor para traer notas");
+    return [];
+  }
+}
 // =============================
 // 🟢 Fetch para guardar notas
 // =============================
@@ -506,130 +1240,47 @@ async function fetchSaveGradesToServer(gradesArray) {
 
     if (!res.ok) {
       console.error("Error guardando notas:", data.message || data);
-      return { success: false, data };
+      return {
+      success: false,
+      message: data.message || "Error en el servidor"
+    };
     }
 
-    return { success: true, data };
+    return data.data; // 🔥 devolvemos exactamente lo que manda el backend
 
   } catch (error) {
     console.error("Error al conectar con el servidor:", error);
     return { success: false, data: error };
   }
 }
+// =============================
+// 🟢 Fetch Buscar configuraciones de fecha
+// =============================
+async function fetchGetAcademicYearPeriodConfig(academicYear) {
+  try {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
 
-async function saveAllGrades() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const teacherId = user.id;
+    if (!token || !user?.id) return null;
 
-  const inputs = document.querySelectorAll(".grade-input");
-  const gradesMap = {};
+    const res = await fetch(`${API_URL}/api/academicYearPeriodConfig/${academicYear}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
 
- inputs.forEach(input => {
-    const value = input.value === "" ? null : Number(input.value);
-    const original =input.dataset.original === "" ? null : Number(input.dataset.original);
+    const response = await res.json(); // 🔹 leer siempre el JSON
 
-    if (value === original) return; // 🧠 doble seguridad
-
-    const studentId = input.dataset.studentId;
-    const subjectId = input.dataset.subjectId;
-    const gradeType = input.dataset.gradeType;
-   // const teacherId = JSON.parse(localStorage.getItem("user")).id;
-
-    // Creamos un registro por alumno+materia
-    const key = `${studentId}-${subjectId}`;
-    if (!gradesMap[key]) {
-      gradesMap[key] = {
-        student: studentId,
-        course: courseId,  // variable global del curso seleccionado
-        subject: subjectId,
-        teacher: teacherId,
-        grades: {}
-      };
+    if (!res.ok) {
+      uiToast(response.message || "Error obteniendo la configuración", "error");
+      return null;
     }
 
-    gradesMap[key].grades[gradeType] = value;
-  });
-
-  const gradesArray = Object.values(gradesMap);
-
-  if (gradesArray.length === 0) {
-    Swal.fire("Info", "No hay cambios para guardar", "info");
-    return;
-  }
-
-  const result = await fetchSaveGradesToServer(gradesArray);
-
-if (result.success) {
-  // 🧠 ACTUALIZAMOS EL CACHE LOCAL
-  applySavedGradesToCache(gradesArray);
-
-   document.querySelectorAll(".grade-input.modified").forEach(input => {
-    input.dataset.original = input.value;
-    input.classList.remove("modified");
-  });
-  
-  Swal.fire("Éxito", "Notas guardadas correctamente", "success");
-  
-  hasUnsavedChanges = false;
-  document.getElementById("saveGradesBtn").disabled = true;
-} else {
-  Swal.fire({
-    title: "Error guardando notas",
-    text: result.data.message || "No se pudieron guardar las notas",
-    icon: "error"
-  });
-}
-
-}
-
-/* =================================================================
-  Aplica color al input
-========================= ========================================*/
-function getGradeClass(value) {
-  if (value >= 1 && value <= 4) return "grade-bad";
-  if (value <= 6) return "grade-regular";
-  return "grade-good";
-}
-
-
-function applyGradeColor(input) {
-  const value = input.value === "" ? null : Number(input.value);
-
-  input.classList.remove("grade-low", "grade-mid", "grade-high");
-
-  if (value === null) return;
-
-  if (value >= 1 && value <= 4) {
-    input.classList.add("grade-low");
-  } else if (value >= 5 && value <= 6) {
-    input.classList.add("grade-mid");
-  } else if (value >= 7 && value <= 10) {
-    input.classList.add("grade-high");
+    return response.data; // 🔹 devuelve solo los datos si todo OK
+  } catch (err) {
+    console.error("Error en fetchGetAcademicYearPeriodConfig:", err);
+    //uiToast(err.message || "Error al conectar con el servidor", "error");
+    return null;
   }
 }
-
-/* =================================================================
-  Actualizar cachedGrades
-========================= ========================================*/
-function applySavedGradesToCache(savedGrades) {
-  savedGrades.forEach(saved => {
-    const local = cachedGrades.find(
-    g =>
-      String(g.studentId) === String(saved.student) &&
-      String(g.subjectId) === String(saved.subject)
-  );
-
-    if (!local) return;
-
-    Object.keys(saved.grades).forEach(term => {
-      local.grades[term] = saved.grades[term];
-    });
-  });
-}
-
-document.getElementById("saveGradesBtn").addEventListener("click", async () => {
- 
-  await saveAllGrades();
-  // 🔹 Aquí harías el POST al backend
-  // await fetch(`${API_URL}/api/course/${courseId}/grades`, { method: "POST", body: JSON.stringify(grades) })
-});
