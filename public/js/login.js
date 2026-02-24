@@ -3,14 +3,20 @@ const form = document.getElementById("loginForm");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("emailUser").value;
+  const identifier = document.getElementById("identifier").value;
   const password = document.getElementById("passwordUser").value;
+
+  if (!identifier) {
+    uiToast("Debes ingresar email o DNI", "error");
+  } else if (!/^\d+$/.test(identifier) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+    uiToast("Debe ser un correo válido o un DNI numérico", "error");
+  }
 
   try {
     const response = await fetch(`${API_URL}/api/users/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ identifier, password })
     });
 
     const result = await response.json();

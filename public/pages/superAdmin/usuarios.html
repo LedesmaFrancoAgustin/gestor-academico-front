@@ -270,6 +270,22 @@
                                                         </div>
                                                     </div>
 
+                                                     <!-- Fecha de Nacimiento -->
+                                                    <div class="form-group mb-3">
+                                                        <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                                                        <input type="date" class="form-control" id="fechaNacimiento">
+                                                    </div>
+                                                        <!-- Género -->
+                                                    <div class="form-group mb-3">
+                                                        <label for="genero">Género</label>
+                                                        <select class="form-control" id="genero">
+                                                            <option value="">Seleccione</option>
+                                                            <option value="masculino">Masculino</option>
+                                                            <option value="femenino">Femenino</option>
+                                                            <option value="otro">Otro</option>
+                                                        </select>
+                                                    </div>
+
                                                     <!-- Rol -->
                                                     <div class="form-group py-2">
                                                         <label for="rol">Rol</label>
@@ -284,15 +300,18 @@
 
                                                     <!-- Curso / División (solo alumno) -->
                                                     <div class="form-row d-none py-2 " id="cursoFields">
-                                                        <div class="form-group col-md-6 py-2">
-                                                        <label for="curso">Curso</label>
-                                                        <input type="text" class="form-control" id="curso" placeholder="Ej: 2°">
+                                                        <!-- Legajo -->
+                                                        <div class="form-group mb-3">
+                                                        <label for="legajo">Legajo</label>
+                                                        <input type="text" class="form-control" id="legajo" placeholder="Ej: 4907/25">
                                                         </div>
 
-                                                        <div class="form-group col-md-6 py-2">
-                                                        <label for="division">División</label>
-                                                        <input type="text" class="form-control" id="division" placeholder="Ej: A">
+                                                        <!-- Libro y Folio -->
+                                                        <div class="form-group mb-3">
+                                                        <label for="libroFolio">Libro / Folio</label>
+                                                        <input type="text" class="form-control" id="libroFolio" placeholder="Ej: 36E 74">
                                                         </div>
+
                                                     </div>
 
                                                     <!-- Activo -->
@@ -341,6 +360,7 @@
                                                 <th>Dni</th>
                                                 <th>Email</th>
                                                 <th>Rol</th>
+                                                <th>fecha Nacimiento</th>
                                                 <th>Curso</th>
                                                 <th>Division</th>
                                                 <th>Area</th>

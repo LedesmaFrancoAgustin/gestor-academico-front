@@ -128,8 +128,17 @@ tbody.addEventListener("click",async (e) => {
       email: editBtn.dataset.email,
       rol: editBtn.dataset.rol,
       curso: editBtn.dataset.curso,
-      division: editBtn.dataset.division,
+
+      legajo: editBtn.dataset.legajo,
+      genero: editBtn.dataset.genero,
+      libroFolio: editBtn.dataset.libroFolio,
+
       activo: editBtn.dataset.activo === "true",
+      // 🔹 Convertimos fechaNacimiento a YYYY-MM-DD
+      fechaNacimiento: editBtn.dataset.fechaNacimiento 
+        ? new Date(editBtn.dataset.fechaNacimiento).toISOString().split("T")[0]
+        : ""
+
     };
 
     openEditStudent(student);
@@ -184,9 +193,12 @@ function renderStudents(students, tbody, currentPage = 1, limit = 10) {
       <td>${user.nombre} ${user.apellido}</td>
       <td>${user.dni || "-"}</td>
       <td>${user.email || "-"}</td>
+      <td>${formatDate(user.fechaNacimiento)}</td>
       <td>${user.rol}</td>
-      <td>${user.currentCourse?.currentClass || "-"}</td>
-      <td>${user.currentCourse?.currentDivision || "-"}</td>
+      <td>${user.activeCourse?.name || "-"}</td>
+      <td>${user.activeCourse?.modality  || "-"}</td>
+      <td>${user.legajo || "-"}</td>
+      <td>${user.libroFolio || "-"}</td>
       <td>
         <span class="badge ${user.activo ? "bg-success" : "bg-danger"}">
           ${user.activo ? "Activo" : "Inactivo"}
@@ -203,7 +215,10 @@ function renderStudents(students, tbody, currentPage = 1, limit = 10) {
                 data-email="${user.email}" 
                 data-rol="${user.rol}" 
                 data-curso="${user.curso || ''}" 
-                data-division="${user.division || ''}" 
+                data-legajo="${user.legajo || ''}" 
+                data-fecha-Nacimiento="${user.fechaNacimiento || ''}" 
+                data-genero="${user.genero || ''}" 
+                data-libro-Folio="${user.libroFolio || ''}" 
                 data-activo="${user.activo}">
                 <i class="fa fa-edit"></i>
             </a>
@@ -239,6 +254,16 @@ function renderEmptyTable(tbody) {
     </tr>
   `;
 }
+// =============================
+// 🔹 Función utilitaria para formatear fechas DD/MM/YYYY
+// =============================
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  return `${d.getDate().toString().padStart(2,"0")}/${
+    (d.getMonth() + 1).toString().padStart(2,"0")
+  }/${d.getFullYear()}`;
+}
 
 // =============================
 // 🟢 Funciones del formulario
@@ -248,7 +273,7 @@ function renderEmptyTable(tbody) {
 function openAddStudentForm() {
   addUserForm.reset(); // 🔹 Limpiar campos
   document.getElementById("title-form").textContent = "Agregar Alumno"; // 🔹 Actualizar título
-  document.getElementById("cursoFields").classList.remove("d-none"); // 🔹 Mostrar curso/división
+  //document.getElementById("cursoFields").classList.remove("d-none"); // 🔹 Mostrar curso/división
   addUserOverlay.classList.remove("d-none"); // 🔹 Mostrar overlay
 
   // Cambiar texto del botón submit
@@ -272,9 +297,13 @@ function openEditStudent(student) {
   document.getElementById("nombre").value = student.nombre;
   document.getElementById("apellido").value = student.apellido;
   document.getElementById("dni").value = student.dni || "";
-  document.getElementById("email").value = student.email;
-  document.getElementById("curso").value = student.curso || "";
-  document.getElementById("division").value = student.division || "";
+  document.getElementById("email").value = student.email || "";
+
+  document.getElementById("legajo").value = student.legajo || "";
+  document.getElementById("libroFolio").value = student.libroFolio || "";
+  document.getElementById("fechaNacimiento").value = student.fechaNacimiento || "";
+  document.getElementById("genero").value = student.genero || "";
+
   document.getElementById("activo").checked = student.activo;
 
   // Contraseña opcional al editar
@@ -370,8 +399,12 @@ addUserForm.addEventListener("submit", async (e) => {
     dni: document.getElementById("dni").value.trim(),
     email: document.getElementById("email").value.trim(),
     rol:"alumno",
-    curso: document.getElementById("curso").value.trim(),
-    division: document.getElementById("division").value.trim(),
+
+    legajo: document.getElementById("legajo").value.trim(),
+    libroFolio: document.getElementById("libroFolio").value.trim(),
+    fechaNacimiento: document.getElementById("fechaNacimiento").value.trim(),
+    genero: document.getElementById("genero").value.trim(),
+
     activo: document.getElementById("activo").checked,
   };
 
@@ -505,7 +538,6 @@ async function fetchPostMassiveStudents(formData) {
   try {
     btnMassive.disabled = true;
 
-    // 🔥 Mostrar loading
     loadingToast = uiLoadingToast("Cargando alumnos...");
 
     const response = await fetch(`${API_URL}/api/importMassive/students`, {
@@ -522,15 +554,37 @@ async function fetchPostMassiveStudents(formData) {
       throw new Error(data.message || "Error en la carga");
     }
 
-    // 🔥 Cerrar loading
+    // 🔥 Cerrar loading antes del toast final
     loadingToast.hideToast();
 
-    uiToast(
-      `Insertados: ${data.inserted} | Errores: ${data.errors?.length || 0}`,
-      data.errors?.length ? "warning" : "success"
-    );
+    // ==========================
+    // 🔎 Si hay errores
+    // ==========================
+    if (data.errors?.length) {
+
+      console.table(data.errors);
+
+      const errorList = data.errors
+        .map(e => `Fila ${e.row} | DNI: ${e.dni} → ${e.error}`)
+        .join("\n");
+
+      console.log("Detalle errores:\n" + errorList);
+
+      uiToast(
+        `Insertados: ${data.inserted} | Actualizados: ${data.updated} | Errores: ${data.errors.length}`,
+        "warning"
+      );
+
+    } else {
+
+      uiToast(
+        `Insertados: ${data.inserted} | Actualizados: ${data.updated}`,
+        "success"
+      );
+    }
 
   } catch (error) {
+
     console.error(error);
 
     if (loadingToast) loadingToast.hideToast();
@@ -538,6 +592,7 @@ async function fetchPostMassiveStudents(formData) {
     uiToast("Error en la carga masiva", "error");
 
   } finally {
+
     btnMassive.disabled = false;
     fileInput.value = "";
   }

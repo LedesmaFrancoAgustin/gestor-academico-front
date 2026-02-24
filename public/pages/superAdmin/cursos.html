@@ -542,13 +542,23 @@
                                                     <!-- Nombre -->
                                                     <div class="form-group py-2">
                                                     <label for="nombre">Nombre del Curso</label>
-                                                    <input type="text" class="form-control" id="nombre" placeholder="Ej: Matemática Avanzada" required>
+                                                    <input type="text" class="form-control" id="nombre" placeholder="Ej: 6-A 2026" required>
                                                     </div>
 
                                                     <!-- Código -->
                                                     <div class="form-group py-2">
                                                     <label for="codigo">Código del Curso</label>
-                                                    <input type="text" class="form-control" id="codigo" placeholder="Ej: MAT2026" required>
+                                                    <input type="text" class="form-control" id="codigo" placeholder="Ej: 6-A-2026" required>
+                                                    </div>
+
+                                                     <!-- Modalidad -->
+                                                    <div class="form-group py-2">
+                                                        <label for="codigo">Modalidad</label>
+                                                        <select class="form-control" id="modality" required>
+                                                            <option value="" disabled selected>Seleccionar modalidad</option>
+                                                            <option value="Comunicación">Comunicación</option>
+                                                            <option value="Arte">Arte</option>
+                                                        </select>
                                                     </div>
 
                                                     <!-- Año Académico -->
@@ -593,6 +603,7 @@
                                                 <th>#</th>
                                                 <th>Nombre</th>
                                                 <th>Codigo</th>
+                                                <th>Modalidad</th>
                                                 <th>Año academico</th>
                                                 <th>Activo</th>
                                                 <th>acciones</th>

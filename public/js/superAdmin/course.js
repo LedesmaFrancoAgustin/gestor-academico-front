@@ -65,6 +65,7 @@ function renderCoursesTable(data) {
         <td>${index + 1 + (currentPage - 1) * Number(entriesSelectCourse.value)}</td>
         <td>${course.name}</td>
         <td>${course.code}</td>
+        <td>${course.modality}</td>
         <td>${course.academicYear}</td>
         <td>
           <span class="badge ${course.active ? "bg-success" : "bg-secondary"}">
@@ -173,12 +174,14 @@ function openEditCourse(course) {
   addCourseForm.dataset.originalData = JSON.stringify({
     name: course.name,
     code: course.code,
+    modality: course.modality,
     academicYear: course.academicYear,
     active: course.active
   });
 
   document.getElementById("nombre").value = course.name;
   document.getElementById("codigo").value = course.code;
+  document.getElementById("modality").value = course.modality;
   document.getElementById("anioAcademico").value = course.academicYear;
   document.getElementById("activoCourse").checked = course.active;
 }
@@ -190,6 +193,7 @@ addCourseForm.addEventListener("submit", async (e) => {
   const cursoData = {
     name: document.getElementById("nombre").value.trim(),
     code: document.getElementById("codigo").value.trim(),
+    modality: document.getElementById("modality").value.trim(),
     academicYear: Number(document.getElementById("anioAcademico").value),
     active: document.getElementById("activoCourse").checked
   };

@@ -159,9 +159,10 @@ function renderUsers(users, tbody, currentPage = 1, limit = 10) {
       <td>${user.dni || "-"}</td>
       <td>${user.email || "-"}</td>
       <td>${user.rol}</td>
+      <td>${formatDate(user.fechaNacimiento)}</td>
 
-      <td>${user.curso || "-"}</td>
-      <td>${user.division || "-"}</td>
+      <td>${user.activeCourse?.name || "-"}</td>
+      <td>${user.activeCourse?.modality  || "-"}</td>
       <td>${user.area || "-"}</td>
 
       <td>
@@ -182,8 +183,10 @@ function renderUsers(users, tbody, currentPage = 1, limit = 10) {
                data-email="${user.email}"
                data-rol="${user.rol}"
                data-curso="${user.curso || ""}"
-               data-division="${user.division || ""}"
-               data-area="${user.area || ""}"
+               data-legajo="${user.legajo || ''}" 
+                data-fecha-Nacimiento="${user.fechaNacimiento || ''}" 
+                data-genero="${user.genero || ''}" 
+                data-libro-Folio="${user.libroFolio || ''}" 
                data-activo="${user.activo}">
               <i class="fa fa-edit"></i>
             </a>
@@ -220,6 +223,17 @@ function renderEmptyTable(tbody) {
       </td>
     </tr>
   `;
+}
+
+// =============================
+// 🔹 Función utilitaria para formatear fechas DD/MM/YYYY
+// =============================
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  return `${d.getDate().toString().padStart(2,"0")}/${
+    (d.getMonth() + 1).toString().padStart(2,"0")
+  }/${d.getFullYear()}`;
 }
 
 // =============================
@@ -298,8 +312,19 @@ function openEditUserForm(userId, data) {
   document.getElementById("activo").checked = data.activo === "true";
 
   // Campos condicionales
-  document.getElementById("curso").value = data.curso || "";
-  document.getElementById("division").value = data.division || "";
+  document.getElementById("legajo").value = data.legajo || "";
+  document.getElementById("libroFolio").value = data.libroFolio || "";
+
+    if (data.fechaNacimiento) {
+      const date = new Date(data.fechaNacimiento);
+      const formatted = date.toISOString().split("T")[0]; // solo YYYY-MM-DD
+      document.getElementById("fechaNacimiento").value = formatted;
+    } else {
+      document.getElementById("fechaNacimiento").value = "";
+      
+    }
+  document.getElementById("genero").value = data.genero || "";
+
   document.getElementById("area").value = data.area || "";
 
   toggleRoleFields(data.rol); // 👈 importante
@@ -320,8 +345,16 @@ function openEditUserForm(userId, data) {
     dni: data.dni || "",
     email: data.email || "",
     rol: data.rol,
-    curso: data.curso || "",
-    division: data.division || "",
+
+    legajo: data.legajo || "",
+    genero: data.genero || "",
+    libroFolio: data.libroFolio || "",
+
+    // 🔹 Convertimos fechaNacimiento a YYYY-MM-DD
+    fechaNacimiento: data.fechaNacimiento 
+       ? new Date(data.fechaNacimiento).toISOString().split("T")[0]
+      : "",
+
     area: data.area || "",
     activo: data.activo === "true"
   });
