@@ -41,6 +41,7 @@ async function loadCourses(page = 1, query = "") {
       courses = result.data?.courses || [];
       const total = result.data?.total || 0;
 
+      console.log("courses: ",courses)
       renderCoursesTable(courses);
       updateCoursesTableInfo(courses.length, total);
       renderCoursesPagination(total, page);
@@ -56,10 +57,15 @@ async function loadCourses(page = 1, query = "") {
 function renderCoursesTable(data) {
   coursesTableBody.innerHTML = "";
 
+    // 🔥 Ordenar alfabéticamente por name
+    data.sort((a, b) => 
+      a.name.localeCompare(b.name, "es", { sensitivity: "base" })
+    );
+
   data.forEach((course, index) => {
     const tr = document.createElement("tr");
     
-
+    const totalStudents = course.students ? course.students.length : 0;
     tr.dataset.courseId = course._id; // 👈 CLAVE
     tr.innerHTML = `
         <td>${index + 1 + (currentPage - 1) * Number(entriesSelectCourse.value)}</td>
@@ -67,6 +73,7 @@ function renderCoursesTable(data) {
         <td>${course.code}</td>
         <td>${course.modality}</td>
         <td>${course.academicYear}</td>
+        <td>${totalStudents}</td>
         <td>
           <span class="badge ${course.active ? "bg-success" : "bg-secondary"}">
             ${course.active ? "Activo" : "Inactivo"}

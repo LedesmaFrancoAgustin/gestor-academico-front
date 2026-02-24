@@ -83,42 +83,110 @@ async function fetchUsers() {
 // 🟢 Función para registrar un usuario
 // =============================
 async function registerUser(payload) {
-  const res = await fetch(`${API_URL}/api/users/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}` // ✅ FALTABA ESTO
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
 
-  const data = await res.json();
+    const res = await fetch(`${API_URL}/api/users/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-  if (!res.ok) {
-    throw data; // ⬅️ mandamos el error al catch
+    const data = await res.json();
+
+    if (!res.ok) {
+
+      // 🔥 Manejo específico por código
+      switch (data.code) {
+
+        case "PASSWORD_REQUIRED":
+          uiToast("La contraseña es obligatoria y debe tener al menos 6 caracteres", "error");
+          break;
+
+        case "DNI_DUPLICATE":
+          uiToast("El DNI ya está registrado", "error");
+          break;
+
+        case "EMAIL_DUPLICATE":
+          uiToast("El email ya está registrado", "error");
+          break;
+
+        case "LEGAJO_DUPLICATE":
+          uiToast("El legajo ya está registrado", "error");
+          break;
+
+        default:
+          uiToast(data.message || "Error inesperado", "error");
+      }
+
+      return null;
+    }
+
+    uiToast("Usuario creado correctamente", "success");
+    return data.data;
+
+  } catch (error) {
+
+    uiToast("Error de conexión con el servidor", "error");
+    return null;
+
   }
-  return data;
 }
 // =============================
 // 🟢 Función para actualizar un usuario existente
 // =============================
 async function updateUser(userId, payload) {
-  const res = await fetch(`${API_URL}/api/users/${userId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload),
-  });
+  try {
 
-  const data = await res.json();
+    const res = await fetch(`${API_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
 
-  if (!res.ok) {
-    throw data; // ⬅️ así podés capturar err.code si viene del backend
+    const data = await res.json();
+
+    if (!res.ok) {
+
+      switch (data.code) {
+
+        case "PASSWORD_REQUIRED":
+          uiToast("La contraseña es obligatoria y debe tener al menos 6 caracteres", "error");
+          break;
+
+        case "DNI_DUPLICATE":
+          uiToast("El DNI ya está registrado", "error");
+          break;
+
+        case "EMAIL_DUPLICATE":
+          uiToast("El email ya está registrado", "error");
+          break;
+
+        case "LEGAJO_DUPLICATE":
+          uiToast("El legajo ya está registrado", "error");
+          break;
+
+        default:
+          uiToast(data.message || "Error al actualizar usuario", "error");
+      }
+
+      return null;
+    }
+
+    uiToast("Usuario actualizado correctamente", "success");
+    return data.data;
+
+  } catch (error) {
+
+    uiToast("Error de conexión con el servidor", "error");
+    return null;
+
   }
-
-  return data;
 }
 // =============================
 // 🟢 Función para eliminar usuario
@@ -155,7 +223,7 @@ function renderUsers(users, tbody, currentPage = 1, limit = 10) {
     tr.innerHTML = `
       <td>${(currentPage - 1) * limit + index + 1}</td>
 
-      <td>${user.nombre} ${user.apellido}</td>
+      <td>${user.apellido}, ${user.nombre} </td>
       <td>${user.dni || "-"}</td>
       <td>${user.email || "-"}</td>
       <td>${user.rol}</td>
@@ -180,7 +248,7 @@ function renderUsers(users, tbody, currentPage = 1, limit = 10) {
                data-nombre="${user.nombre}"
                data-apellido="${user.apellido}"
                data-dni="${user.dni || ""}"
-               data-email="${user.email}"
+               data-email="${user.email || ""}"
                data-rol="${user.rol}"
                data-curso="${user.curso || ""}"
                data-legajo="${user.legajo || ''}" 
@@ -337,12 +405,12 @@ function openEditUserForm(userId, data) {
   // Botón submit
   const submitBtn = addUserForm.querySelector('button[type="submit"]');
   submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Actualizar usuario';
-
   // Guardar original
   addUserForm.dataset.original = JSON.stringify({
     nombre: data.nombre || "",
     apellido: data.apellido || "",
     dni: data.dni || "",
+    
     email: data.email || "",
     rol: data.rol,
 
@@ -455,87 +523,68 @@ addUserForm.addEventListener("submit", async (e) => {
 
   const rol = document.getElementById("rol").value;
 
-  // 🔹 Payload base
   const payload = {
     nombre: document.getElementById("nombre").value.trim(),
     apellido: document.getElementById("apellido").value.trim(),
     dni: document.getElementById("dni").value.trim(),
     email: document.getElementById("email").value.trim(),
+    genero: document.getElementById("genero").value.trim(),
+    fechaNacimiento: document.getElementById("fechaNacimiento").value.trim(),
     rol,
     activo: document.getElementById("activo").checked,
   };
 
-  // 🔹 Campos por rol
   if (rol === "alumno") {
-    payload.curso = document.getElementById("curso").value.trim();
-    payload.division = document.getElementById("division").value.trim();
+    payload.legajo = document.getElementById("legajo").value.trim();
+    payload.libroFolio = document.getElementById("libroFolio").value.trim();
   }
 
   if (rol === "docente") {
     payload.area = document.getElementById("area").value.trim();
   }
 
-  // 🔹 Password solo si se escribe
   const password = document.getElementById("password").value.trim();
   if (password) payload.password = password;
 
-  try {
-    if (editingUserId) {
-      // 🔹 Comparar contra original
-      const original = JSON.parse(addUserForm.dataset.original || "{}");
-      const updates = {};
+  let res = null; // 🔥 CAMBIAMOS A LET
 
-      Object.keys(payload).forEach((key) => {
-        if (payload[key] !== original[key]) {
-          updates[key] = payload[key];
-        }
-      });
+  if (editingUserId) {
 
-      if (Object.keys(updates).length === 0) {
-         await Swal.fire({
-          icon: "info",
-          title: "Sin cambios",
-          text: "No se modificó ningún dato.",
-          confirmButtonText: "Aceptar"
-        });
-        return;
+    const original = JSON.parse(addUserForm.dataset.original || "{}");
+    const updates = {};
+
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] !== original[key]) {
+        updates[key] = payload[key];
       }
+    });
 
-      await updateUser(editingUserId, updates);
-      uiToast("Usuario actualizado correctamente", "success");
-
-    } else {
-      // 🔹 Crear nuevo usuario
-      await registerUser(payload);
-      uiToast(UI_MESSAGES.user.created, "success");
-
+    if (Object.keys(updates).length === 0) {
+      await Swal.fire({
+        icon: "info",
+        title: "Sin cambios",
+        text: "No se modificó ningún dato.",
+        confirmButtonText: "Aceptar"
+      });
+      return;
     }
 
+    res = await updateUser(editingUserId, updates);
+
+  } else {
+
+    res = await registerUser(payload);
+
+  }
+
+  // 🔥 Solo continúa si hubo éxito
+  if (res) {
     closeAddUserForm();
-    initUsers(); // 🔑 users.js
+    await initUsers();
     editingUserId = null;
-
-  } catch (err) {
-    if (err.code === "USER_ALREADY_EXISTS") {
-    await Swal.fire({
-      icon: "warning",
-      title: "Usuario ya registrado",
-      text: "El email o DNI ya está registrado",
-      confirmButtonText: "Entendido"
-    });
-    return;
   }
 
-     await Swal.fire({
-    icon: "error",
-    title: "Error al guardar",
-    text: "No se pudo guardar el usuario. Intentá nuevamente.",
-    confirmButtonText: "Cerrar"
-  });
-    console.error("Error guardando usuario:", err);
-  }
 });
-
 // =============================
 // 🔹 Buscar usuarios por Nombre o DNI
 // =============================

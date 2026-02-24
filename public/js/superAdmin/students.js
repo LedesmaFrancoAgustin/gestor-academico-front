@@ -70,35 +70,110 @@ async function fetchStudents() {
 // 🟢 Función para registrar un usuario
 // =============================
 async function registerUser(payload) {
-  const res = await fetch(`${API_URL}/api/users/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}` // ✅ FALTABA ESTO
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
 
-  const data = await res.json();
+    const res = await fetch(`${API_URL}/api/users/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-  if (!res.ok) {
-    throw data; // ⬅️ mandamos el error al catch
+    const data = await res.json();
+
+    if (!res.ok) {
+
+      // 🔥 Manejo específico por código
+      switch (data.code) {
+
+        case "PASSWORD_REQUIRED":
+          uiToast("La contraseña es obligatoria y debe tener al menos 6 caracteres", "error");
+          break;
+
+        case "DNI_DUPLICATE":
+          uiToast("El DNI ya está registrado", "error");
+          break;
+
+        case "EMAIL_DUPLICATE":
+          uiToast("El email ya está registrado", "error");
+          break;
+
+        case "LEGAJO_DUPLICATE":
+          uiToast("El legajo ya está registrado", "error");
+          break;
+
+        default:
+          uiToast(data.message || "Error inesperado", "error");
+      }
+
+      return null;
+    }
+
+    uiToast("Usuario creado correctamente", "success");
+    return data.data;
+
+  } catch (error) {
+
+    uiToast("Error de conexión con el servidor", "error");
+    return null;
+
   }
-  return data;
 }
-
 // =============================
 // 🟢 Función para actualizar un usuario existente
 // =============================
 async function updateUser(userId, payload) {
-  const res = await fetch(`${API_URL}/api/users/${userId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
-  });
+  try {
 
-  if (!res.ok) throw new Error("Error al actualizar el usuario");
-  return res.json();
+    const res = await fetch(`${API_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+
+      switch (data.code) {
+
+        case "PASSWORD_REQUIRED":
+          uiToast("La contraseña es obligatoria y debe tener al menos 6 caracteres", "error");
+          break;
+
+        case "DNI_DUPLICATE":
+          uiToast("El DNI ya está registrado", "error");
+          break;
+
+        case "EMAIL_DUPLICATE":
+          uiToast("El email ya está registrado", "error");
+          break;
+
+        case "LEGAJO_DUPLICATE":
+          uiToast("El legajo ya está registrado", "error");
+          break;
+
+        default:
+          uiToast(data.message || "Error al actualizar usuario", "error");
+      }
+
+      return null;
+    }
+
+    uiToast("Usuario actualizado correctamente", "success");
+    return data.data;
+
+  } catch (error) {
+
+    uiToast("Error de conexión con el servidor", "error");
+    return null;
+
+  }
 }
 // =============================
 // 🟢 Función para eliminar alumno
@@ -190,7 +265,7 @@ function renderStudents(students, tbody, currentPage = 1, limit = 10) {
     // 🔹 Render básico de fila
     tr.innerHTML = `
       <td>${(currentPage - 1) * limit + index + 1}</td>
-      <td>${user.nombre} ${user.apellido}</td>
+      <td>${user.apellido}, ${user.nombre} </td>
       <td>${user.dni || "-"}</td>
       <td>${user.email || "-"}</td>
       <td>${formatDate(user.fechaNacimiento)}</td>
@@ -212,7 +287,7 @@ function renderStudents(students, tbody, currentPage = 1, limit = 10) {
                 data-nombre="${user.nombre}" 
                 data-apellido="${user.apellido}" 
                 data-dni="${user.dni || ''}" 
-                data-email="${user.email}" 
+                data-email="${user.email || ''}" 
                 data-rol="${user.rol}" 
                 data-curso="${user.curso || ''}" 
                 data-legajo="${user.legajo || ''}" 
@@ -412,7 +487,9 @@ addUserForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value.trim();
   if (password) payload.password = password;
 
-  try {
+  let res = null;
+
+  
     if (editingUserId) {
       // 🔹 Comparar con el usuario original guardado en el dataset
       const original = JSON.parse(addUserForm.dataset.original || "{}");
@@ -422,50 +499,40 @@ addUserForm.addEventListener("submit", async (e) => {
         if (payload[key] !== original[key]) updates[key] = payload[key];
       });
 
-      // 🔹 Si no hay cambios
-      if (Object.keys(updates).length === 0) {
-         await Swal.fire({
-          icon: "info",
-          title: "Sin cambios",
-          text: "No se modificó ningún dato.",
-          confirmButtonText: "Aceptar"
-        });
-        return;
-      }
+          // 🔹 Si no hay cambios
+          if (Object.keys(updates).length === 0) {
+            await Swal.fire({
+              icon: "info",
+              title: "Sin cambios",
+              text: "No se modificó ningún dato.",
+              confirmButtonText: "Aceptar"
+            });
+            return;
+          }
 
       // 🔹 Actualizar solo los campos modificados
-      await updateUser(editingUserId, updates);
-      uiToast("Usuario actualizado correctamente", "success");
+      res = await updateUser(editingUserId, updates);
+      
 
     } else {
       // 🔹 Registrar nuevo alumno
-      await registerUser(payload);
-       uiToast(UI_MESSAGES.user.created, "success");
+      res = await registerUser(payload);
+       
     }
 
-    closeAddStudentForm();
+  
     initStudents();
     editingUserId = null;
 
-  } catch (err) {
-     if (err.code === "USER_ALREADY_EXISTS") {
-    await Swal.fire({
-      icon: "warning",
-      title: "Usuario ya registrado",
-      text: "El email o DNI ya está registrado",
-      confirmButtonText: "Entendido"
-    });
-     return;
-  }
-     await Swal.fire({
-    icon: "error",
-    title: "Error al guardar",
-    text: "No se pudo guardar el usuario. Intentá nuevamente.",
-    confirmButtonText: "Cerrar"
-  });
-    console.error("Error guardando usuario:", err);
+      // 🔥 Solo continúa si hubo éxito
+    if (res) {
+      closeAddStudentForm();
+      await initUsers();
+      editingUserId = null;
+    }
+   
     
-  }
+  
 });
 
 // =============================

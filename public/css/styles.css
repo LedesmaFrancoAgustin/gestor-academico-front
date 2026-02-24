@@ -912,4 +912,32 @@ main {
   width: 100%;
 }
 
+.login-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CONTENEDORES */
+.logo-gestor-container {
+  margin-bottom: 25px;
+}
+
+.logo-institucional-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* IMÁGENES */
+.logo-gestor {
+  width: 90px; /* tamaño fijo real */
+  height: auto;
+}
+
+.logo-institucional {
+  width: 320px;
+  height: auto;
+}
+
 /*# sourceMappingURL=styles.css.map */
