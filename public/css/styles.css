@@ -91,6 +91,14 @@ header {
 }
 
 /* ==============================
+   LOGO Institucion
+============================== */
+.logo-institucion {
+  width: 55px;
+  height: 35px;
+}
+
+/* ==============================
    TITLE
 ============================== */
 .titleName {
@@ -936,8 +944,24 @@ main {
 }
 
 .logo-institucional {
-  width: 320px;
+  width: 310px;
   height: auto;
+}
+
+/* =========================
+   MEDIA QUERY PARA MÓVIL
+   Pantallas menores a 576px
+========================= */
+@media (max-width: 576px) {
+  .logo-gestor {
+    width: 60px; /* más chico en móvil */
+  }
+  .logo-institucional {
+    width: 180px; /* más chico en móvil */
+  }
+  .logo-gestor-container {
+    margin-bottom: 15px; /* menos espacio en móvil */
+  }
 }
 
 /*# sourceMappingURL=styles.css.map */

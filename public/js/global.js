@@ -9,6 +9,8 @@ let currentPage = 1;
 let sessionTimeoutId = null;
 let logoutTimeoutId = null;
 
+document.querySelector("#name-institution").textContent = "EES Nº 3 Glew";
+
 
 (function init() {
 

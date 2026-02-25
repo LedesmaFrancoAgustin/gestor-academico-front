@@ -38,10 +38,10 @@ async function loadCourses(page = 1, query = "") {
 
     const result = await res.json();
     if (res.ok) {
+      
       courses = result.data?.courses || [];
       const total = result.data?.total || 0;
 
-      console.log("courses: ",courses)
       renderCoursesTable(courses);
       updateCoursesTableInfo(courses.length, total);
       renderCoursesPagination(total, page);
@@ -56,11 +56,6 @@ async function loadCourses(page = 1, query = "") {
 // ===================== RENDER TABLA =====================
 function renderCoursesTable(data) {
   coursesTableBody.innerHTML = "";
-
-    // 🔥 Ordenar alfabéticamente por name
-    data.sort((a, b) => 
-      a.name.localeCompare(b.name, "es", { sensitivity: "base" })
-    );
 
   data.forEach((course, index) => {
     const tr = document.createElement("tr");
