@@ -8,8 +8,10 @@ form.addEventListener("submit", async (e) => {
 
   if (!identifier) {
     uiToast("Debes ingresar email o DNI", "error");
+    return;
   } else if (!/^\d+$/.test(identifier) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
     uiToast("Debe ser un correo válido o un DNI numérico", "error");
+    return;
   }
 
   try {

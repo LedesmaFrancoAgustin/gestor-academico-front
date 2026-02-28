@@ -429,19 +429,21 @@
 
 .preceptor-attendance-content {
   width: 80%;
+  max-height: 800px;
+  overflow-y: auto;
 }
 
 /* ================= Tabla General ================= */
 #preceptorAttendanceTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   color: #333;
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
-  overflow: hidden;
 }
 
 /* ================= Encabezado ================= */
@@ -450,14 +452,23 @@
   color: #fff;
   padding: 10px 6px;
   text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   border-bottom: 2px solid #285d9f;
   font-weight: 600;
+  position: sticky;
 }
 
-/* Sticky columnas iniciales */
+/* Primera fila */
+#preceptorAttendanceTable thead tr:first-child th {
+  top: 0;
+  z-index: 60;
+}
+
+/* Segunda fila */
+#preceptorAttendanceTable thead tr:nth-child(2) th {
+  top: 40px; /* AJUSTAR A LA ALTURA REAL */
+  z-index: 55;
+}
+
 .sticky-col {
   position: sticky;
   left: 0;
@@ -465,6 +476,7 @@
   z-index: 5;
   text-align: center;
   font-weight: 500;
+  top: auto;
 }
 
 /* Índice y nombre con más peso */
@@ -507,12 +519,16 @@
   text-align: center;
 }
 
+.tr-Header {
+  margin-bottom: 5px;
+}
+
 .attendance-cell {
   position: relative;
 }
 
 /* Celdas de asistencia */
-.attendance-cell input {
+.attendance-input {
   border: 1px solid #ccc;
   border-radius: 4px;
   height: 28px;
@@ -523,6 +539,31 @@
   color: #555;
   transition: all 0.15s ease;
   background-color: #fefefe;
+}
+
+/* P - Presente */
+.attendance-p {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+/* T - Tarde */
+.attendance-t {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #dc3545;
+}
+
+/* A - Ausente */
+.attendance-a {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* J - Justificado */
+.attendance-j {
+  background-color: #e2d4f8;
+  color: #4b0082;
 }
 
 /* =========================
@@ -607,7 +648,6 @@ input.modified {
 /* =========================
 
 ========================= */
-/* Fines de semana */
 /* Inicial del día */
 .day-initial {
   font-weight: 600;
@@ -640,33 +680,42 @@ input.modified {
 }
 
 /* ================= Tooltip estilo moderno ================= */
-.attendance-cell input[title] {
-  position: relative;
+.attendance-input.has-note {
+  border-bottom: 2px solid #eeec6b;
   cursor: pointer;
 }
 
-.attendance-cell input[title]:hover::after {
-  content: attr(title);
+.attendance-tooltip {
   position: absolute;
-  top: -38px;
+  bottom: 120%;
   left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.85);
+  transform: translateX(-50%) translateY(5px);
+  background: #111827;
   color: #fff;
-  font-size: 11px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  white-space: pre-line;
-  z-index: 100;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  max-width: 240px;
+  opacity: 0;
   pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.attendance-cell.has-tooltip:hover .attendance-tooltip {
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* =========================
    Icono para modal de faltas / Justificacion
 ========================= */
+/* =========================
+   Icono para modal
+========================= */
 .edit-note-icon {
-  display: none;
   position: absolute;
   top: -10px;
   right: -10px;
@@ -676,14 +725,13 @@ input.modified {
   padding: 4px;
   border-radius: 6px;
   cursor: pointer;
+  z-index: 60;
   opacity: 0;
   transform: scale(0.8);
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.attendance-cell:hover .edit-note-icon,
-.attendance-cell .edit-note-icon {
+.attendance-cell.show-icon .edit-note-icon {
   opacity: 1;
   transform: scale(1);
 }
@@ -695,26 +743,46 @@ input.modified {
 /* =========================
    Modal de faltas / Justificacion 
 ========================= */
-.attendance-popover {
-  position: absolute;
-  width: 240px;
+/* =========================
+   Modal de faltas / Observación
+   (MISMO ESTILO QUE attendance-popover)
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Contenedor principal */
+.attendance-modal {
+  width: 260px; /* apenas más grande que el popover */
   background: white;
   border-radius: 12px;
   padding: 14px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  z-index: 9999;
-  animation: fadeIn 0.2s ease;
   font-size: 13px;
+  animation: fadeIn 0.2s ease;
 }
 
-.popover-header {
+/* Header estilo popover */
+.attendance-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.popover-header button {
+.attendance-modal-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.attendance-modal-header button {
   border: none;
   background: none;
   font-size: 16px;
@@ -722,43 +790,67 @@ input.modified {
   color: #64748b;
 }
 
-.popover-check {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 6px 0;
+/* Fecha */
+.attendance-modal p {
+  margin: 4px 0 8px 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
-.attendance-popover input[type=number],
-.attendance-popover textarea {
+/* Textarea */
+.attendance-modal textarea {
   width: 100%;
   margin-top: 6px;
   padding: 6px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
   font-size: 12px;
-}
-
-.attendance-popover textarea {
   resize: none;
+  outline: none;
 }
 
-.save-popover {
+.attendance-modal textarea:focus {
+  border-color: #3b82f6;
+}
+
+/* Botones */
+.modal-buttons {
   margin-top: 10px;
-  width: 100%;
-  padding: 6px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.modal-buttons button {
+  padding: 6px 10px;
   border-radius: 8px;
   border: none;
-  background: #3b82f6;
-  color: white;
+  font-size: 12px;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.save-popover:hover {
+/* Cancelar */
+#cancelNote {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+#cancelNote:hover {
+  background: #e2e8f0;
+}
+
+/* Guardar */
+#saveNote {
+  background: #3b82f6;
+  color: white;
+}
+
+#saveNote:hover {
   background: #2563eb;
 }
 
+/* Animación original */
 @keyframes fadeIn {
   from {
     opacity: 0;

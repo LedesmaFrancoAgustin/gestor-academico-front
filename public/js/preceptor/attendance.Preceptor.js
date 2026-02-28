@@ -6,29 +6,22 @@ const courseSelect = document.getElementById("courseSelect");
 const monthSelect = document.getElementById("monthSelect");
 const searchInput = document.getElementById("attendanceSearch");
 
+
 const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
-
-
-const attendanceTable = document.getElementById("attendanceTable");
-
-const tooltip = document.getElementById("attendanceTooltip");
-
 
 let selectedYear = null
 let selectedCourse = null
 let selectedMonth = null
+let selectedSearchInput = null
 
 let studentsInfo = [];
-let attendanceRows = [];
-let cachedAttendance = [];
+let studentsGrades = []  // Estudiante con informmacion y asistencia/ausentes
 
-let studentsGrades = []; //  Estudiantes mapeados con notas
-let attendanceChanges = []; // Guardar asistencia / inacistencia
+let currentMonthDates = [];
 
-const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const trimester = 1;
 
-
+const attendanceChanges = new Map();  //Map para evitar duplicados por alumno + fecha.
 // ===========================================================================
 // 🟢 Event listeners
 // ===========================================================================
@@ -38,11 +31,8 @@ const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
 // =============================
 academicYearSelect.addEventListener("change", async () => {
   selectedYear = academicYearSelect.value;
-  //console.log("Año seleccionado:", selectedYear);
-
   const courses = await fetchGetCoursesByYear(selectedYear);
-  //console.log("Courses:", courses);
-
+ 
   courseSelect.innerHTML =
     '<option value="" selected disabled>Seleccione un curso</option>';
 
@@ -65,78 +55,106 @@ academicYearSelect.addEventListener("change", async () => {
 // =============================
 //  Selector del curso
 // =============================
-courseSelect.addEventListener("change",  async () => {
-    // Habilitar select de cursos
-    selectedCourse = courseSelect.value;
-
-    studentsInfo = await fetchGetStudentsByCourse(selectedCourse)
-
-    monthSelect.disabled = false;
+courseSelect.addEventListener("change", async () => {
+  selectedCourse = courseSelect.value;
+  monthSelect.disabled = false;
+  await loadAndRenderAttendance();
 });
-
 // =============================
 //  Selector del del mes
 // =============================
 monthSelect.addEventListener("change", async () => {
   selectedMonth = monthSelect.value;
-
-  const attendanceMonth = await fetchGetAttendanceForMonth(
-    selectedCourse,
-    selectedYear,
-    selectedMonth
-  );
-
-
-  //console.log("studentsInfo: ", studentsInfo)
-  //console.log("attendanceMonth: ", attendanceMonth)
-  studentsGrades =  mapStudentsForTable(studentsInfo , attendanceMonth )
-
-  console.log("studentsGrades: ", studentsGrades)
-
-  //const sortedAttendance = sortStudentsByName(attendanceMonth);
-
-  const isDesktop = window.innerWidth > 768;
-
-  if (isDesktop) {
-    //console.log("sortedAttendance: ",sortedAttendance)
-    renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
-  } else {
-  }
-
-
   searchInput.value = "";
+  await loadAndRenderAttendance();
 });
-// =============================
-//  Guardar asistencias / inasistencias
-// =============================
-document
-  .getElementById("saveAttendanceBtn")
-  .addEventListener("click", saveAttendanceMassive);
+
+
+
+searchInput.addEventListener("input", () => {
+  const value = searchInput.value.trim().toLowerCase();
+
+  const tbody = document.querySelector("#preceptorAttendanceTable tbody");
+  const rows = tbody.querySelectorAll("tr");
+
+  rows.forEach(tr => {
+    const name = tr.children[1]?.textContent.toLowerCase() || "";
+    const dni  = tr.children[2]?.textContent.toLowerCase() || "";
+
+    const match = name.includes(value) || dni.includes(value);
+    tr.style.display = match ? "" : "none";
+  });
+
+  // 🔥 opcional: recalcular totales solo visibles
+  //recalculateFooter(tbody, getCurrentMonthDates());
+});
 
 // =============================
-//  Mensaje de advertensia que no se guardo la asistencia
+//  Boton guardar asistencias Masivas
 // =============================
-  window.addEventListener("beforeunload", function (e) {
+saveAttendanceBtn.addEventListener("click", async () => {
+   // 🔥 Guardar en el backend
+   await fetchPostAttendanceForMonth(selectedCourse , selectedYear , trimester , attendanceChanges );
+});
 
-  if (attendanceChanges.length > 0) {
-    e.preventDefault();
-    e.returnValue = ""; // necesario para que el navegador muestre el mensaje
+
+// ===========================================================================
+// 🟢 Event listeners - Para Render
+// ===========================================================================
+
+document.addEventListener("input", async (e) => {
+
+  if (!e.target.classList.contains("attendance-input")) return;
+
+  const input = e.target;
+  let value = input.value.toUpperCase();
+
+  // Solo permitir P, T, A, J o vacío
+  if (!["P", "T", "A", "J", ""].includes(value)) {
+    input.value = "";
+    return;
   }
 
-});
-// =============================
-//  Icono para editar asistencia/inasistencia - (Tarde,Justificativo)
-// =============================
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".attendance-cell")) {
-    document.querySelectorAll(".edit-note-icon").forEach(icon => icon.remove());
+  input.value = value;
+  applyAttendanceStyle(input);  // Apñcar estilo de colores
+
+  updateIconState(input); // Apñcar el icono cuando es valido
+
+  const originalValue = input.dataset.originalValue || "";
+
+  const key = `${input.dataset.userId}_${input.dataset.date}`;
+
+  // 🔥 Si volvió al valor original → quitar del buffer
+if (value === originalValue) {
+  attendanceChanges.delete(key);
+} else {
+  const payload = buildAttendancePayload(input);
+  attendanceChanges.set(key, payload);
+}
+
+ // updateIconVisibility(input);
+
+  console.log("Cambios acumulados:", [...attendanceChanges.values()]);
+
+  if (attendanceChanges.size > 0) {
+    saveAttendanceBtn.disabled = false; // hay cambios → habilitar
+  } else {
+    saveAttendanceBtn.disabled = true; // no hay cambios → deshabilitar
   }
+    
+ 
+
 });
+
+
 // =======================================================================================
-// 🟢 Render
+// 🟢 Render 
 // =======================================================================================
-//Render principal
-function renderAttendanceTable(students, year, month) {
+function renderAttendanceTable(studentsGrades, year, month) {
+
+  if (!month || !year) {
+    return;
+  }
   const attendanceTable = document.getElementById("preceptorAttendanceTable");
   const thead = attendanceTable.querySelector("thead");
   const tbody = attendanceTable.querySelector("tbody");
@@ -144,18 +162,73 @@ function renderAttendanceTable(students, year, month) {
   thead.innerHTML = "";
   tbody.innerHTML = "";
 
-  const monthDates = getMonthDays(year, month);
+  currentMonthDates  = getMonthDays(year, month);
 
-  renderHeader(thead, monthDates);
-  renderBody(tbody, students, monthDates);
-  renderFooterTotals(tbody, monthDates);
+  renderHeader(thead, currentMonthDates );
+  renderBody(tbody, studentsGrades, currentMonthDates );
+  renderFooterTotals(tbody, currentMonthDates );
 
-  updateTotals(tbody, monthDates);
+  //updateTotals(tbody, monthDates);
 }
+
 //Render Header
 function renderHeader(thead, monthDates) {
+
   const dayInitials = ["D", "L", "M", "M", "J", "V", "S"];
+
+  // ==================================================
+  // 🟢 FILA SUPERIOR (AGRUPADORA)
+  // ==================================================
+
+  const groupRow = document.createElement("tr");
+  groupRow.classList.add("tr-Header");
+
+  // 3 columnas fijas
+  ["", "", ""].forEach(() => {
+    const th = document.createElement("th");
+    th.classList.add("sticky-col");
+    groupRow.appendChild(th);
+  });
+
+  // columnas por día
+  monthDates.forEach(() => {
+    const th = document.createElement("th");
+    groupRow.appendChild(th);
+  });
+
+  // espacio
+  const thSpaceTop = document.createElement("th");
+  thSpaceTop.classList.add("total-col-space");
+  groupRow.appendChild(thSpaceTop);
+
+  // Asistencia
+  const thAsistencia = document.createElement("th");
+  thAsistencia.colSpan = 2;
+  groupRow.appendChild(thAsistencia);
+
+  // 🔥 INASISTENCIAS agrupado
+  const thInasistencias = document.createElement("th");
+  thInasistencias.colSpan = 3;
+  thInasistencias.textContent = "INASISTENCIAS";
+  thInasistencias.classList.add("text-center");
+  groupRow.appendChild(thInasistencias);
+
+  // espacio
+  const thEmpty = document.createElement("th");
+  groupRow.appendChild(thEmpty);
+
+  // total
+  const thTotal = document.createElement("th");
+  groupRow.appendChild(thTotal);
+
+  thead.appendChild(groupRow);
+
+  // ==================================================
+  // 🟢 FILA INFERIOR (LA ORIGINAL)
+  // ==================================================
+
   const headRow = document.createElement("tr");
+  headRow.classList.add("tr-Header");
 
   ["#", "Alumno", "DNI"].forEach(text => {
     const th = document.createElement("th");
@@ -165,7 +238,8 @@ function renderHeader(thead, monthDates) {
   });
 
   monthDates.forEach(date => {
-    const dayOfWeek = getDayOfWeek(date); // ✅ seguro
+
+    const dayOfWeek = getDayOfWeek(date);
     const th = document.createElement("th");
     th.classList.add("day-col");
 
@@ -188,7 +262,7 @@ function renderHeader(thead, monthDates) {
   thSpace.classList.add("total-col-space");
   headRow.appendChild(thSpace);
 
-  ["T/P", "T/A"].forEach(text => {
+  ["Asistencia", "", "J", "A", "EF", "", "TOTAL"].forEach(text => {
     const th = document.createElement("th");
     th.classList.add("total-col");
     th.textContent = text;
@@ -197,370 +271,703 @@ function renderHeader(thead, monthDates) {
 
   thead.appendChild(headRow);
 }
-//Render Body
-function renderBody(tbody, students, monthDates) {
 
+function renderBody(tbody, studentsGrades, monthDates) {
 
-  students.forEach((student, index) => {
+  studentsGrades.forEach((student, index) => {
+
     const tr = document.createElement("tr");
 
-    tr.innerHTML = `
-      <td class="sticky-col index">${index + 1}</td>
-      <td class="sticky-col name" title="${student.name}">${student.name}</td>
-      <td class="sticky-col dni">${student.dni}</td>
-    `;
+      tr.dataset.userId = student.userId;
+      tr.dataset.gender = student.genero?.toLowerCase() || "";
+
+    // ==================================================
+    // 🟢 Columnas fijas
+    // ==================================================
+
+    const tdIndex = document.createElement("td");
+    tdIndex.classList.add("sticky-col");
+    tdIndex.textContent = index + 1;
+    tr.appendChild(tdIndex);
+
+    const tdName = document.createElement("td");
+    tdName.classList.add("sticky-col");
+    tdName.textContent = student.name;
+    tr.appendChild(tdName);
+
+    const tdDni = document.createElement("td");
+    tdDni.classList.add("sticky-col");
+    tdDni.textContent = student.dni;
+    tr.appendChild(tdDni);
+
+    // ==================================================
+    // 🟢 Crear mapa rápido por fecha
+    // ==================================================
+
+    const detailsMap = new Map();
+
+    (student.details || []).forEach(d => {
+      if (!detailsMap.has(d.date)) {
+        detailsMap.set(d.date, []);
+      }
+      detailsMap.get(d.date).push(d);
+    });
+
+    let totalPresents = 0;
+    let totalAbsents = 0;
+    let totalAbsentsED = 0;
+    let totalJustified = 0;
+
+    // ==================================================
+    // 🟢 Columnas por día
+    // ==================================================
 
     monthDates.forEach(date => {
-      const dayOfWeek = getDayOfWeek(date); // ✅ seguro
+
       const td = document.createElement("td");
       td.classList.add("attendance-cell");
 
-     /* // 🔥 Boton 
-      td.addEventListener("click", () => {
+      const dayOfWeek = getDayOfWeek(date);
 
-        if (td.querySelector(".edit-note-icon")) return;
-
-        document.querySelectorAll(".edit-note-icon").forEach(icon => icon.remove());
-
-        const icon = document.createElement("i");
-        icon.className = "edit-note-icon fa-solid fa-pencil";
-
-        icon.dataset.userId = student.id;
-        icon.dataset.date = date;
-
-        icon.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          openAttendanceDetailModal({
-            userId: icon.dataset.userId,
-            date: icon.dataset.date
-          });
-        });
-
-        td.appendChild(icon);
-      });
-*/
+      // 🚫 Fin de semana vacío
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         td.classList.add("weekend");
         tr.appendChild(td);
         return;
       }
 
-      const att = student.details.find(d => d.date === date);
+      const records = detailsMap.get(date) || [];
+
+      let code = "";
+      let noteText = "";
+
+      records.forEach(record => {
+
+        // 🚫 EDUCACIÓN FÍSICA → NO SE MUESTRA
+        if (record.attendanceType === "physical_education") {
+
+          if (record.status === "absent") {
+            totalAbsentsED += 0.5; // media falta
+          }
+
+          return; // no mostrar nada en la celda
+        }
+
+        // 🟢 REGULAR (se muestra)
+        if (record.attendanceType === "regular") {
+
+          if (record.notes && record.notes.trim() !== "") {
+            noteText = record.notes;
+          }
+
+          if (record.status === "present") {
+
+            if (record.late?.isLate) {
+              code = "T";
+              totalAbsents += 0.25;
+            } else {
+              code = "P";
+            }
+
+            totalPresents++;
+
+          } else if (record.status === "absent") {
+
+            if (record.justification?.isJustified) {
+              code = "J";
+              totalJustified++;
+            } else {
+              code = "A";
+              totalAbsents++;
+            }
+
+            
+          }
+        }
+
+      });
 
       const input = document.createElement("input");
       input.type = "text";
       input.maxLength = 1;
-      input.style.width = "28px";
-      input.style.textAlign = "center";
-      input.dataset.userId = student.id;   // o como tengas el id
-      input.dataset.date = date;            // YYYY-MM-DD
-      
+      input.classList.add("attendance-input");
+        input.dataset.userId = student.userId;
+        input.dataset.date = date;
+        input.dataset.attendanceType = "regular";
+      input.value = code || ""; // ← si tenía P/A/T/J lo carga
+      input.dataset.originalValue = input.value || "";
 
-      if (att) {
+          // Mostrar icono al enfocar si el valor es válido
+          input.addEventListener("focus", () => {
+            const td = input.closest("td.attendance-cell");
+            if (!td) return;
 
-        
-        input.addEventListener("mouseenter", (e) => {
-
-          const lines = [];
-
-          // Fecha siempre
-          lines.push(`<strong>${att.date}</strong>`);
-
-          // Tarde
-          if (att.late?.isLate) {
-            lines.push(`⏰ Llegó tarde (${att.late.minutes} min)`);
-          }
-
-          // Justificación
-          if (att.attendanceStatus === "absent") {
-
-            if (att.justification?.isJustified) {
-              lines.push("📄 Justificado");
-            } else {
-              lines.push("❌ No justificado");
+            if (["P", "A", "T", "J"].includes(input.value.toUpperCase())) {
+              td.classList.add("show-icon");
             }
-
-          }
-
-          // Notas
-          if (att.notes) {
-            lines.push(`📝 ${att.notes}`);
-          }
-
-          tooltip.innerHTML = lines.join("<br>");
-
-          tooltip.style.left = e.pageX + 15 + "px";
-          tooltip.style.top = e.pageY + 15 + "px";
-          tooltip.classList.add("show");
-
-        });
-
-        input.addEventListener("mousemove", (e) => {
-          tooltip.style.left = e.pageX + 15 + "px";
-          tooltip.style.top = e.pageY + 15 + "px";
-        });
-
-        input.addEventListener("mouseleave", () => {
-          tooltip.classList.remove("show");
-        });
-
-      }
-        if (!att) {
-        input.value = "";
-        input.classList.add("empty");
-        } else if (att.attendanceStatus === "present") {
-        input.value = "P";
-
-          if (att.late?.isLate) {
-            input.classList.add("present-late");
-          } else {
-            input.classList.add("present-normal");
-          }
-
-      } else if (att.attendanceStatus === "absent") {
-        input.value = "A";
-
-          if (att.justification?.isJustified) {
-            input.classList.add("absent-justified");
-          } else {
-            input.classList.add("absent-unjustified");
-          }
-      }
-
-      input.dataset.original = input.value;  // 🔹 Guardamos el estado original
-
-      input.addEventListener("input", e => {
-
-      
-      let val = e.target.value.toUpperCase();
-
-      if (val !== "P" && val !== "A") {
-        val = "";
-      }
-
-      e.target.value = val;
-
-      // 🔥 Estado visual base
-      e.target.classList.remove("present", "absent", "empty");
-
-      if (val === "P") {
-        e.target.classList.add("present");
-      } else if (val === "A") {
-        e.target.classList.add("absent");
-      } else {
-        e.target.classList.add("empty");
-      }
-
-      // 🔥 Detectar modificación
-      if (val !== e.target.dataset.original) {
-        e.target.classList.add("modified");
-      } else {
-        e.target.classList.remove("modified");
-      }
-
-      
-
-      const userId = e.target.dataset.userId;
-      const date = e.target.dataset.date;
-
-      let attendanceStatus = null;
-      let action = "update";
-
-        /*
-        ========================
-        Si el usuario limpia el input
-        → no borramos
-        → solo no registramos estado
-        ========================
-        */
-
-        if (val === "") {
-
-          registerChange({
-            userId,
-            date,
-            action: "delete"
           });
 
-          return;
-        }
+          // Ocultar al salir
+          input.addEventListener("blur", () => {
+            const td = input.closest("td.attendance-cell");
+            if (!td) return;
 
-        if (val === "P") attendanceStatus = "present";
-        if (val === "A") attendanceStatus = "absent";
+            td.classList.remove("show-icon");
+          });
 
-      registerChange({
-        userId,
-        date,
-        action,
-        attendanceStatus: attendanceStatus,
-      });
+          // 🔥 CLAVE: reaccionar cuando escribe
+          input.addEventListener("input", () => {
+            const td = input.closest("td.attendance-cell");
+            if (!td) return;
 
-      updateTotals(tbody, monthDates);
+            const value = input.value.toUpperCase();
 
-      updateIconVisibility(e.target);
-      saveAttendanceBtn.disabled = false;
-    });
+            if (["P", "A", "T", "J"].includes(value)) {
+              td.classList.add("show-icon");
+            } else {
+              td.classList.remove("show-icon");
+            }
 
-      input.addEventListener("focus", () => {
-    updateIconVisibility(input);
-  });
+            // 🔥 Actualiza solo esta fila
+            const tr = input.closest("tr");
+            recalculateRowTotals(tr);
+            // 🔥 ACTUALIZA TOTALES
+            recalculateFooter(tbody, monthDates);
+     
+          });
 
-  input.addEventListener("blur", () => {
-  setTimeout(() => updateIconVisibility(input), 150);
-});
+      applyAttendanceStyle(input);  // Apñcar estilo de colores
 
-    
+      updateIconState(input); // Apñcar el icono cuando es valido
+
+      const icon = document.createElement("i");
+      icon.className = "edit-note-icon fa-solid fa-pencil";
+
+          if (noteText) {
+
+            input.dataset.note = noteText;
+            input.classList.add("has-note");
+
+            const tooltip = document.createElement("div");
+            tooltip.className = "attendance-tooltip";
+            tooltip.textContent = noteText;
+
+            td.appendChild(tooltip);
+            td.classList.add("has-tooltip");
+          }
+
+        // Mostrar modal para notes
+          icon.addEventListener("click", (e) => {
+            e.stopPropagation();
+            console.log("click")
+            openAttendanceDetailModal({
+              userId: input.dataset.userId,
+              date: input.dataset.date,
+              attendanceType: input.dataset.attendanceType,
+              input // 👈 PASAMOS EL INPUT REAL
+            });
+          });
+
+      // 🔹 Agregamos input + icon dentro del td
       td.appendChild(input);
+      td.appendChild(icon);
+
       tr.appendChild(td);
     });
+
+    // ==================================================
+    // 🟢 Espacio visual
+    // ==================================================
 
     const tdSpace = document.createElement("td");
     tdSpace.classList.add("total-col-space");
     tr.appendChild(tdSpace);
 
-    const tdPresent = document.createElement("td");
-    tdPresent.classList.add("total-col", "present");
-    tr.appendChild(tdPresent);
+     // ==================================================
+    // 🟢 Totales Aistencias
+    // ==================================================
 
-    const tdAbsent = document.createElement("td");
-    tdAbsent.classList.add("total-col", "absent");
-    tr.appendChild(tdAbsent);
+     const tdTotalP = document.createElement("td");
+    tdTotalP.classList.add("total-col","total-p");
+    tdTotalP.textContent = totalPresents;
+    tr.appendChild(tdTotalP);
+
+    // ==================================================
+    // 🟢 Espacio visual
+    // ==================================================
+
+    const tdSpace1 = document.createElement("td");
+    tdSpace1.classList.add("total-col-space");
+    tr.appendChild(tdSpace1);
+
+     // ==================================================
+    // 🟢 Totales Justificados
+    // ==================================================
+
+    const tdTotalJ = document.createElement("td");
+    tdTotalJ.classList.add("total-col","total-j");
+    tdTotalJ.textContent = totalJustified;
+    tr.appendChild(tdTotalJ);
+
+    // ==================================================
+    // 🟢 Totales Ausentes
+    // ==================================================
+
+    const tdTotalA = document.createElement("td");
+    tdTotalA.classList.add("total-col","total-a");
+    tdTotalA.textContent = totalAbsents;
+    tr.appendChild(tdTotalA);
+
+    // ==================================================
+    // 🟢 Totales ED
+    // ==================================================
+    const tdTotalAED = document.createElement("td");
+    tdTotalAED.classList.add("total-col","total-aed");
+    tdTotalAED.textContent = totalAbsentsED;
+    tr.appendChild(tdTotalAED);
+
+    // ==================================================
+    // 🟢 Espacio visual
+    // ==================================================
+    const tdSpace3 = document.createElement("td");
+    tdSpace3.classList.add("total-col-space");
+    tr.appendChild(tdSpace3);
+
+    const tdTotalAGeneral = document.createElement("td");
+    tdTotalAGeneral.classList.add("total-col","total-a-general");
+    tdTotalAGeneral.textContent = totalAbsents + totalAbsentsED ;
+    tr.appendChild(tdTotalAGeneral);
 
     tbody.appendChild(tr);
   });
 }
-//Render Footer
+
 function renderFooterTotals(tbody, monthDates) {
-  const spacerRow = document.createElement("tr");
-  spacerRow.innerHTML = `
-    <td class="sticky-col index"></td>
-    <td class="sticky-col name"></td>
-    <td class="sticky-col dni"></td>
-  `;
-  monthDates.forEach(() => spacerRow.innerHTML += `<td></td>`);
-  spacerRow.innerHTML += `<td class="total-col-space"></td>`;
-  tbody.appendChild(spacerRow);
 
-  const totalAbsentRow = document.createElement("tr");
-  totalAbsentRow.classList.add("total-absent-row");
-  totalAbsentRow.innerHTML = `
-    <td class="sticky-col index"></td>
-    <td class="sticky-col name">Total Ausente</td>
-    <td class="sticky-col dni"></td>
-  `;
-  monthDates.forEach(() => totalAbsentRow.innerHTML += `<td class="total-col absent">0</td>`);
-  totalAbsentRow.innerHTML += `<td class="total-col-space"></td><td></td><td></td>`;
-  tbody.appendChild(totalAbsentRow);
+  const dateIndexMap = {};
+  monthDates.forEach((date, i) => {
+    dateIndexMap[date] = i;
+  });
 
-  const totalPresentRow = document.createElement("tr");
-  totalPresentRow.classList.add("total-present-row");
-  totalPresentRow.innerHTML = `
-    <td class="sticky-col index"></td>
-    <td class="sticky-col name">Total Presente</td>
-    <td class="sticky-col dni"></td>
-  `;
-  monthDates.forEach(() => totalPresentRow.innerHTML += `<td class="total-col present">0</td>`);
-  totalPresentRow.innerHTML += `<td class="total-col-space"></td><td></td><td></td>`;
-  tbody.appendChild(totalPresentRow);
-}
-//calcular totales
-function updateTotals(tbody, monthDates) {
-  const rows = tbody.querySelectorAll("tr");
-  const dayCounts = monthDates.map(() => ({ present: 0, absent: 0 }));
+  const rows = tbody.querySelectorAll("tr[data-gender]");
 
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll("td.attendance-cell input");
-    let rowPresent = 0;
-    let rowAbsent = 0;
+  const totals = {
+    masculino: {
+      P: Array(monthDates.length).fill(0),
+      A: Array(monthDates.length).fill(0),
+      COUNT: 0
+    },
+    femenino: {
+      P: Array(monthDates.length).fill(0),
+      A: Array(monthDates.length).fill(0),
+      COUNT: 0
+    }
+  };
 
-    inputs.forEach((input, i) => {
-      const dayOfWeek = getDayOfWeek(monthDates[i]); // ✅ seguro
+  const dayHasData = Array(monthDates.length).fill(false);
+
+  rows.forEach(tr => {
+
+    const gender = tr.dataset.gender;
+    if (!totals[gender]) return;
+
+    totals[gender].COUNT++;
+
+    const inputs = tr.querySelectorAll("td input.attendance-input");
+
+    inputs.forEach((input) => {
+
+      const date = input.dataset.date;
+      const realIndex = dateIndexMap[date];
+
+      const dayOfWeek = getDayOfWeek(date);
       if (dayOfWeek === 0 || dayOfWeek === 6) return;
 
-      if (input.value === "P") {
-        rowPresent++;
-        dayCounts[i].present++;
-      } else if (input.value === "A") {
-        rowAbsent++;
-        dayCounts[i].absent++;
+      const value = input.value.toUpperCase();
+
+      if (["P", "T", "A", "J"].includes(value)) {
+        dayHasData[realIndex] = true;
       }
+
+      if (value === "P" || value === "T") {
+        totals[gender].P[realIndex]++;
+      }
+
+      if (value === "A" || value === "J") {
+        totals[gender].A[realIndex]++;
+      }
+
     });
 
-    const totalPresentTd = row.querySelector(".total-col.present");
-    const totalAbsentTd = row.querySelector(".total-col.absent");
-
-    if (totalPresentTd) totalPresentTd.textContent = rowPresent;
-    if (totalAbsentTd) totalAbsentTd.textContent = rowAbsent;
   });
 
-  const totalPresentRow = tbody.querySelector(".total-present-row");
-  const totalAbsentRow = tbody.querySelector(".total-absent-row");
+  // =========================
+  // 🔹 CREAR FILAS
+  // =========================
+  createEmptyRow(tbody, monthDates);
 
+  createFooterRowByDay(tbody, "VARONES PRESENTES", totals.masculino.P, monthDates, dayHasData);
+  createFooterRowByDay(tbody, "VARONES AUSENTES", totals.masculino.A, monthDates, dayHasData);
+  createFooterRowByDay(
+    tbody,
+    "TOTAL VARONES",
+    Array(monthDates.length).fill(totals.masculino.COUNT),
+    monthDates,
+    dayHasData
+  );
+
+  createEmptyRow(tbody, monthDates);
+
+  createFooterRowByDay(tbody, "MUJERES PRESENTES", totals.femenino.P, monthDates, dayHasData);
+  createFooterRowByDay(tbody, "MUJERES AUSENTES", totals.femenino.A, monthDates, dayHasData);
+  createFooterRowByDay(
+    tbody,
+    "TOTAL MUJERES",
+    Array(monthDates.length).fill(totals.femenino.COUNT),
+    monthDates,
+    dayHasData
+  );
+
+  createEmptyRow(tbody, monthDates);
+
+  const totalPresentes = monthDates.map((_, i) =>
+    totals.masculino.P[i] + totals.femenino.P[i]
+  );
+
+  const totalAusentes = monthDates.map((_, i) =>
+    totals.masculino.A[i] + totals.femenino.A[i]
+  );
+
+  const totalInscriptos = Array(monthDates.length).fill(
+    totals.masculino.COUNT + totals.femenino.COUNT
+  );
+
+  createFooterRowByDay(tbody, "PRESENTES TOTALES", totalPresentes, monthDates, dayHasData);
+  createFooterRowByDay(tbody, "AUSENTES TOTALES", totalAusentes, monthDates, dayHasData);
+  createFooterRowByDay(tbody, "TOTAL INSCRIPTOS", totalInscriptos, monthDates, dayHasData);
+}
+
+// =======================================================================================
+// 🟢 Funciones  Para el render - principal
+// =======================================================================================
+async function loadAndRenderAttendance() {
+
+  // 🔒 Validaciones
+  if (!selectedCourse || !selectedYear || !selectedMonth) {
+    return;
+  }
+
+  try {
+
+    // 1️⃣ Traer alumnos del curso
+    studentsInfo = await fetchGetStudentsByCourse(selectedCourse);
+
+    // 2️⃣ Traer asistencia del mes
+    const attendanceMonth = await fetchGetAttendanceForMonth(
+      selectedCourse,
+      selectedYear,
+      selectedMonth
+    );
+
+    // 3️⃣ Mapear para la tabla
+    studentsGrades = mapStudentsForTable(studentsInfo, attendanceMonth);
+
+    // 4️⃣ Render
+    renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
+
+  } catch (error) {
+    console.error("Error cargando asistencia:", error);
+  }
+}
+// =======================================================================================
+// 🟢 Funciones  Para el render
+// =======================================================================================
+//Atualiza totales por alumnos 
+function recalculateRowTotals(tr) {
+
+  let totalPresents = 0;
+  let totalAbsents = 0;
+  let totalJustified = 0;
+
+  const inputs = tr.querySelectorAll("input.attendance-input");
+
+  inputs.forEach(input => {
+
+    const value = input.value.toUpperCase();
+
+    if (value === "P") totalPresents++;
+    if (value === "T") {
+      totalPresents++;
+      totalAbsents += 0.25;
+    }
+    if (value === "A") totalAbsents++;
+    if (value === "J") totalJustified++;
+
+  });
+
+  const tdP = tr.querySelector(".total-p");
+  const tdJ = tr.querySelector(".total-j");
+  const tdA = tr.querySelector(".total-a");
+  const tdAGeneral = tr.querySelector(".total-a-general");
+
+  if (tdP) tdP.textContent = totalPresents;
+  if (tdJ) tdJ.textContent = totalJustified;
+  if (tdA) tdA.textContent = totalAbsents;
+  if (tdAGeneral) tdAGeneral.textContent = totalAbsents; // si no incluís ED acá
+
+}
+//createFooterRow alineado perfecto
+function createFooterRowByDay(tbody, label, valuesArray, monthDates, dayHasData) {
+
+  const tr = document.createElement("tr");
+  tr.classList.add("table-secondary", "fw-bold", "footer-row");
+
+  // 🔹 3 columnas fijas
+  tr.appendChild(document.createElement("td"));
+
+  const tdName = document.createElement("td");
+  tdName.textContent = label;
+  tr.appendChild(tdName);
+
+  tr.appendChild(document.createElement("td"));
+
+  // 🔹 Columnas por día
   monthDates.forEach((date, i) => {
-    const dayOfWeek = getDayOfWeek(date); // ✅ seguro
+
+    const td = document.createElement("td");
+    const dayOfWeek = getDayOfWeek(date);
 
     if (dayOfWeek === 0 || dayOfWeek === 6) {
-      if (totalPresentRow)
-        totalPresentRow.querySelectorAll("td.total-col.present")[i].textContent = "";
-      if (totalAbsentRow)
-        totalAbsentRow.querySelectorAll("td.total-col.absent")[i].textContent = "";
-      return;
+      td.classList.add("weekend");
+      td.textContent = "";
+    } else {
+      td.textContent = dayHasData[i] ? valuesArray[i] : "";
     }
 
-    if (totalPresentRow)
-      totalPresentRow.querySelectorAll("td.total-col.present")[i].textContent =
-        dayCounts[i].present;
-
-    if (totalAbsentRow)
-      totalAbsentRow.querySelectorAll("td.total-col.absent")[i].textContent =
-        dayCounts[i].absent;
+    tr.appendChild(td);
   });
+
+  // 🔹 8 columnas finales vacías
+  for (let i = 0; i < 8; i++) {
+    tr.appendChild(document.createElement("td"));
+  }
+
+  tbody.appendChild(tr);
 }
-// =======================================================================================
-// 🟢 Funciones 
-// =======================================================================================
-  // =============================
-  // Ordenar alfabeticamente
-  // =============
-function sortStudentsByName(students) {
-  return [...students].sort((a, b) =>
-    a.name.localeCompare(b.name, "es", { sensitivity: "base" })
+//Actualiozar los totales 
+function recalculateFooter(tbody, monthDates) {
+
+  // 🔥 Eliminar solo footers
+  const oldFooters = tbody.querySelectorAll(".footer-row");
+  oldFooters.forEach(row => row.remove());
+
+  // 🔥 Volver a generar
+  renderFooterTotals(tbody, monthDates);
+}
+//EmptyRow fila vacia para espacio
+function createEmptyRow(tbody, monthDates) {
+
+  const tr = document.createElement("tr");
+  const td = document.createElement("td");
+
+  tr.classList.add("footer-row");
+
+  td.colSpan = 3 + monthDates.length + 8;
+  td.innerHTML = "&nbsp;";
+
+  tr.appendChild(td);
+  tbody.appendChild(tr);
+}
+function openAttendanceDetailModal({ userId, date, attendanceType, input }) {
+
+  const key = `${userId}_${date}`;
+
+  // 🔎 Obtener nota actual (buffer o dataset)
+  let currentNote = attendanceChanges.get(key)?.notes;
+
+  if (currentNote === undefined) {
+    currentNote = input.dataset.note || "";
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  const modal = document.createElement("div");
+  modal.className = "attendance-modal";
+
+  modal.innerHTML = `
+    <div class="attendance-modal-header">
+      <h3>Observación</h3>
+      <button id="cancelNote">&times;</button>
+    </div>
+
+    <p><strong>Fecha:</strong> ${date}</p>
+
+    <textarea 
+      id="attendanceNote" 
+      rows="3" 
+      placeholder="Escribí la observación..."
+    ></textarea>
+
+    <div class="modal-buttons">
+      <button id="saveNote">Guardar</button>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // ✅ Insertar valor de forma segura (sin innerHTML dinámico)
+  const textarea = modal.querySelector("#attendanceNote");
+  textarea.value = currentNote || "";
+  textarea.focus();
+
+  modal.querySelector("#cancelNote").onclick = () => overlay.remove();
+
+  modal.querySelector("#saveNote").onclick = () => {
+
+    const note = textarea.value.trim();
+    const originalNote = input.dataset.note || "";
+    const originalValue = input.dataset.originalValue || "";
+
+    // ==================================================
+    // 🔥 Detectar cambio real (nota + asistencia)
+    // ==================================================
+
+    if (
+      note === originalNote &&
+      input.value === originalValue
+    ) {
+      attendanceChanges.delete(key);
+    } else {
+      const payload = buildAttendancePayload(input, note);
+      attendanceChanges.set(key, payload);
+    }
+
+    // ==================================================
+    // 🔥 Actualizar dataset para mantener sincronizado
+    // ==================================================
+
+    input.dataset.note = note;
+
+    // ==================================================
+    // 🔥 Tooltip dinámico
+    // ==================================================
+
+    const td = input.closest("td");
+    let tooltip = td.querySelector(".attendance-tooltip");
+
+    if (!tooltip && note !== "") {
+      tooltip = document.createElement("div");
+      tooltip.className = "attendance-tooltip";
+      td.appendChild(tooltip);
+    }
+
+    if (tooltip) {
+      tooltip.textContent = note;
+    }
+
+    td.classList.toggle("has-tooltip", note !== "");
+    input.classList.toggle("has-note", note !== "");
+
+    // ==================================================
+    // 🔥 Control botón guardar masivo
+    // ==================================================
+
+    saveAttendanceBtn.disabled = attendanceChanges.size === 0;
+
+    overlay.remove();
+  };
+}
+//Para hacer visible el icono de agregar observaciones - Cuando tiene las opciones (A-P-J-T)
+function updateIconState(input) {
+
+  const td = input.closest("td.attendance-cell");
+  if (!td) return;
+
+  const value = input.value.toUpperCase();
+
+  if (["P", "A", "T", "J"].includes(value)) {
+    td.classList.add("has-attendance");
+  } else {
+    td.classList.remove("has-attendance");
+  }
+}
+//Función que convierte letra → payload
+function buildAttendancePayload(input, note = null) {
+
+  const value = input.value.toUpperCase();
+
+  let attendanceStatus = null;
+  let late = { isLate: false };
+  let justification = { isJustified: false };
+
+  switch (value) {
+
+    case "P":
+      attendanceStatus = "present";
+      break;
+
+    case "T":
+      attendanceStatus = "present";
+      late = { isLate: true };
+      break;
+
+    case "A":
+      attendanceStatus = "absent";
+      break;
+
+    case "J":
+      attendanceStatus = "absent";
+      justification = { isJustified: true };
+      break;
+
+    case "":
+      attendanceStatus = null;
+      break;
+  }
+
+  return {
+    userId: input.dataset.userId,
+    courseId: selectedCourse,
+    academicYear: selectedYear,
+    trimester: Number(trimester),
+    date: input.dataset.date,
+    attendanceType: input.dataset.attendanceType,
+    attendanceStatus,
+    late,
+    justification,
+    notes: note ?? ""
+  };
+}
+//Función para aplicar estilos
+function applyAttendanceStyle(input) {
+
+  input.classList.remove(
+    "attendance-p",
+    "attendance-a",
+    "attendance-t",
+    "attendance-j"
   );
+
+  const value = input.value.toUpperCase();
+
+  switch (value) {
+    case "P":
+      input.classList.add("attendance-p");
+      break;
+    case "T":
+      input.classList.add("attendance-t");
+      break;
+    case "A":
+      input.classList.add("attendance-a");
+      break;
+    case "J":
+      input.classList.add("attendance-j");
+      break;
+  }
 }
-  // =============================
-  // Función para mapear alumnos con sus faltas
-  // ============================
-function mapStudentsForTable(studentsInfo, attendanceMonth) {
-  // Crear un mapa para acceder rápido por DNI
-  const attendanceMap = {};
-  attendanceMonth.forEach(record => {
-    attendanceMap[record._id] = record;
-  });
 
-  // Mapear estudiantes con su info y detalles
-  const studentsGrades = studentsInfo.map(student => {
-    const attendance = attendanceMap[student._id] || { details: [], absents: 0, presents: 0 };
-
-    return {
-      id: student._id,
-      name: student.name,
-      dni: student.dni,
-      email: student.email,
-      details: attendance.details.map(detail => ({
-        id: detail._id || null,   // si cada detalle tiene id
-        date: detail.date,
-        attendanceStatus: detail.status, // 👈 cambiar esto
-        notes: detail.notes,
-        late: detail.late,
-        justification: detail.justification
-      })),
-      absents: attendance.absents || 0,
-      presents: attendance.presents || 0
-    };
-  });
-
-  return studentsGrades;
-}
 //generar todas las fechas del mes
 function getMonthDays(year, month) {
   const days = [];
@@ -577,288 +984,54 @@ function getMonthDays(year, month) {
 
   return days;
 }
+
 // para día de semana
 // 🔒 Fecha segura (sin UTC)
 function getDayOfWeek(dateString) {
   const [year, month, day] = dateString.split("-").map(Number);
   return new Date(year, month - 1, day).getDay();
 }
-//"YYYY-MM-DD" con ceros a la izquierda:
-function formatDate(dateString) {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-// ========================================== 
-// Guardar asistencias / inasistencias
-// ======================================= 
-async function saveAttendanceMassive() {
+// =======================================================================================
+// 🟢 Funciones 
+// =======================================================================================
+function mapStudentsForTable(studentsInfo = [], attendanceMonth = []) {
 
-  if (!attendanceChanges || attendanceChanges.length === 0) {
-    uiToast("No hay cambios para guardar", "info");
-    return;
-  }
+    if (!Array.isArray(studentsInfo)) return [];
 
-  console.log("attendanceChanges: ",attendanceChanges)
+    // 1️⃣ Ordenamos A → Z por nombre
+    const sortedStudents = [...studentsInfo].sort((a, b) =>
+        a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+    );
 
-  const result = await fetchPostAttendanceForMonth(
-    selectedCourse,
-    selectedYear,
-    1,
-    attendanceChanges
-  );
+    // 2️⃣ Convertimos attendanceMonth en mapa por ID
+    const attendanceMap = new Map(
+        (attendanceMonth || []).map(a => [
+            a.userId?.toString() || a._id?.toString(),
+            a
+        ])
+    );
 
-  if (result) {
-    attendanceChanges = []; // 🔥 limpiar cambios
-    uiToast("Asistencia guardada correctamente", "success");
+    // 3️⃣ Armamos estructura final
+    const studentsGrades = sortedStudents.map(student => {
 
-    document.querySelectorAll(".modified").forEach(input => {
-      input.classList.remove("modified");
-      input.dataset.original = input.value;
-    });
-  }
-}
-//Función registerChange (anti-duplicados)
-function registerChange(change) {
+        const attendance = attendanceMap.get(student._id.toString());
 
-  const index = attendanceChanges.findIndex(item =>
-    item.userId === change.userId &&
-    item.date === change.date
-  );
-
-  const input = document.querySelector(
-    `input[data-user-id="${change.userId}"][data-date="${change.date}"]`
-  );
-
-  if (!input) return;
-
-  const originalValue = input.dataset.original || "";
-  /*
-  ================================
-  NORMAL UPDATE
-  ================================
-  */
-
-  const currentValue =
-    change.attendanceStatus === "present" ? "P" :
-    change.attendanceStatus === "absent" ? "A" :
-    "";
-
-  // 🔥 Si vuelve al valor original → eliminar cambio
-  if (currentValue === originalValue) {
-
-    if (index !== -1) {
-      attendanceChanges.splice(index, 1);
-    }
-
-    input.classList.remove("modified");
-
-  } else {
-
-    if (index !== -1) {
-
-      attendanceChanges[index] = {
-        ...attendanceChanges[index],
-        ...change
-      };
-
-    } else {
-      attendanceChanges.push(change);
-    }
-
-    input.classList.add("modified");
-  }
-
-  console.log("Cambios actuales:", attendanceChanges);
-
-  updateSaveButtonState();
-}
-function updateSaveButtonState() {
-  if (!saveAttendanceBtn) return;
-
-  saveAttendanceBtn.disabled = attendanceChanges.length === 0;
-
-  if (attendanceChanges.length === 0) {
-    saveAttendanceBtn.classList.add("disabled");
-  } else {
-    saveAttendanceBtn.classList.remove("disabled");
-  }
-}
-// ========================================== 
-// Abreir modal editar  asistencias / inasistencias (Tarde-Observacion) 
-// ======================================= 
-function openAttendanceDetailModal({ userId, date }) {
-
-  const existing = document.querySelector(".attendance-popover");
-  if (existing) existing.remove();
-
-  // 🔥 Buscar student y attendance detail
-  const student = studentsGrades.find(s => s.id === userId);
-  const att = student?.details?.find(d => d.date === date);
-/*
-    const hasAttendance =
-    att &&
-    (att.attendanceStatus === "present" ||
-    att.attendanceStatus === "absent");
-
-  if (!hasAttendance) return;
-*/
-  const popover = document.createElement("div");
-  popover.className = "attendance-popover";
-
-  popover.innerHTML = `
-    <div class="popover-header">
-      <strong>Detalle</strong>
-      <button class="close-popover">&times;</button>
-    </div>
-
-    <label class="popover-check">
-      <input type="checkbox" id="lateCheck"> Llegó tarde
-    </label>
-
-    <input type="number" id="lateMinutes" placeholder="Minutos" min="1" style="display:none;">
-
-    <label class="popover-check">
-      <input type="checkbox" id="justifiedCheck"> Justificado
-    </label>
-
-    <textarea id="attendanceNote" rows="3" placeholder="Observación..."></textarea>
-
-    <button class="save-popover">Guardar</button>
-  `;
-
-  document.body.appendChild(popover);
-
-  // 🔥 Referencias
-  const lateCheck = popover.querySelector("#lateCheck");
-  const lateMinutes = popover.querySelector("#lateMinutes");
-  const justifiedCheck = popover.querySelector("#justifiedCheck");
-  const noteArea = popover.querySelector("#attendanceNote");
-
-  // ==============================
-  // 🔥 PRELOAD DATOS SI EXISTEN
-  // ==============================
-
-  if (att) {
-
-    if (att.late?.isLate) {
-      lateCheck.checked = true;
-      lateMinutes.style.display = "block";
-      lateMinutes.value = att.late.minutes || "";
-    }
-
-    if (att.justification?.isJustified) {
-      justifiedCheck.checked = true;
-    }
-
-    if (att.notes) {
-      noteArea.value = att.notes;
-    }
-  }
-
-  // Mostrar minutos solo si está checkeado
-  lateCheck.addEventListener("change", () => {
-    lateMinutes.style.display = lateCheck.checked ? "block" : "none";
-  });
-
-  // 🔥 Posicionar cerca del icono
-  const icon = document.querySelector(
-    `.edit-note-icon[data-user-id="${userId}"][data-date="${date}"]`
-  );
-
-  if (icon) {
-    const rect = icon.getBoundingClientRect();
-
-    popover.style.top = rect.bottom + window.scrollY + 5 + "px";
-    popover.style.left = rect.left + window.scrollX - 180 + "px";
-  }
-
-  // Cerrar modal
-  popover.querySelector(".close-popover").addEventListener("click", () => {
-    popover.remove();
-  });
-
-  // Guardar
-  popover.querySelector(".save-popover").addEventListener("click", () => {
-
-  registerChange({
-    userId,
-    date,
-    action: "update",
-
-    late: {
-      isLate: lateCheck.checked,
-      minutes: lateCheck.checked
-        ? parseInt(lateMinutes.value) || 0
-        : null
-    },
-
-    justification: {
-      isJustified: justifiedCheck.checked
-    },
-
-    notes: noteArea.value
-  });
-
-  popover.remove();
-});
-
-  // Click afuera
-  setTimeout(() => {
-    document.addEventListener("click", function handler(e) {
-      if (!popover.contains(e.target) &&
-          !e.target.classList.contains("edit-note-icon")) {
-
-        popover.remove();
-        document.removeEventListener("click", handler);
-      }
-    });
-  }, 0);
-}
-
-// ========================================== 
-// Hacer visible el icono ver modal (Justificado-Tarde-Notas) 
-// ======================================= 
-  function updateIconVisibility(input) {
-
-  const value = input.value.trim();
-  const td = input.parentElement;
-
-  let icon = td.querySelector(".edit-note-icon");
-
-  // 🔥 Solo mostrar si:
-  // - input está focus
-  // - valor es P o A
-  if (
-    document.activeElement !== input ||
-    !value ||
-    (value !== "P" && value !== "A")
-  ) {
-
-    if (icon) icon.remove();
-    return;
-  }
-
-  // Crear icono si no existe
-  if (!icon) {
-
-    icon = document.createElement("i");
-    icon.className = "edit-note-icon fa-solid fa-pencil";
-
-    icon.dataset.userId = input.dataset.userId;
-    icon.dataset.date = input.dataset.date;
-
-    icon.addEventListener("click", ev => {
-      ev.stopPropagation();
-
-      openAttendanceDetailModal({
-        userId: icon.dataset.userId,
-        date: icon.dataset.date
-      });
+        return {
+            userId: student._id,
+            dni: student.dni,
+            name: student.name,
+            email: student.email,
+            genero: student.genero,
+            status: student.status,
+            presents: attendance?.presents ?? 0,
+            absents: attendance?.absents ?? 0,
+            details: attendance?.details ?? []
+        };
     });
 
-    td.appendChild(icon);
-  }
+    return studentsGrades;
 }
+
 
 // =======================================================================================
 // 🟢 Fetch 
@@ -900,6 +1073,7 @@ async function fetchGetCoursesByYear(year) {
     return result?.data ?? [];
 
   } catch (error) {
+    uiToast("Error al obtener cursos en servidor", "error");
     console.error("fetchCoursesByYear:", error.message);
     return [];
   }
@@ -935,12 +1109,12 @@ async function fetchGetStudentsByCourse(courseId) {
     }
 
     const result = await response.json();
-
     // Normalizar datos: asegurarse de que cada estudiante tenga status
     return Array.isArray(result?.data)
       ? result.data.map(s => ({
           _id: s.student._id,
-          name: s.student ? `${s.student.nombre} ${s.student.apellido}` : "Alumno no encontrado",
+          name: s.student ? `${s.student.apellido} ${s.student.nombre}` : "Alumno no encontrado",
+          genero: s.student.genero || "No asignado" ,
           dni: s.student?.dni || "-",
           email: s.student?.email || "-",
           status: s.status || "No asignado"
@@ -948,6 +1122,7 @@ async function fetchGetStudentsByCourse(courseId) {
       : [];
 
   } catch (error) {
+    uiToast("Error al obtener informacion sobre el curso en el servidor", "error");
     console.error("fetchGetStudentsByCourse:", error.message);
     return [];
   }
@@ -986,10 +1161,16 @@ async function fetchGetAttendanceForMonth(courseId, year, month) {
 //  🟢 Fetch Cargar asistencias/inasistencias Masiva
 // =============================
 
-async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, attendanceChanges) {
-  console.log("attendanceChanges: ",attendanceChanges)
+async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, attendanceChanges ) {
+
+  if (!attendanceChanges || attendanceChanges.size === 0) {
+    uiToast("No hay cambios para guardar", "info");
+    return null;
+  }
+
   try {
-    const token = localStorage.getItem("token")
+
+    const token = localStorage.getItem("token");
 
     const response = await fetch(`${API_URL}/api/attendance/massive`, {
       method: "POST",
@@ -1000,8 +1181,9 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
       body: JSON.stringify({
         courseId,
         academicYear,
-        trimester,
-        changes: attendanceChanges
+        trimester: Number(trimester),
+        attendanceType: "regular",
+        changes: [...attendanceChanges.values()] // 🔥 convertimos Map → Array
       })
     });
 
@@ -1012,9 +1194,19 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
       return null;
     }
 
-    console.log("Resultado:", data);
+    uiToast("Asistencias guardadas correctamente", "success");
 
-    return data; // 🔥 ahora sí devuelve algo
+    // 🔥 limpiar buffer
+    attendanceChanges.clear();
+
+    // 🔥 actualizar valores originales
+    document.querySelectorAll(".attendance-input").forEach(input => {
+      input.dataset.originalValue = input.value;
+    });
+
+    saveAttendanceBtn.disabled = true;
+
+    return data;
 
   } catch (error) {
     console.error("Error:", error);
@@ -1022,18 +1214,3 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
     return null;
   }
 }
-
-
-
-
-/*
-Si está:
-
-⏰ tarde → pequeño puntito naranja
-
-📄 justificado → pequeño iconito azul
-
-📝 nota → pequeño indicador gris
-
-
-*/
