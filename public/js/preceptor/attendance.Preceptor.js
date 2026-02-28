@@ -1037,14 +1037,20 @@ function mapStudentsForTable(studentsInfo = [], attendanceMonth = []) {
 // 🟢 Fetch 
 // =======================================================================================
 // =============================
-// 🟢 Fetch - Buscar cursos por año (Preceptor)
+// 🟢 Fetch - Obtener cursos asignados a un preceptor por año (userId desde localStorage)
 // =============================
 async function fetchGetCoursesByYear(year) {
   try {
     const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user")); // recordá parsear el JSON
 
     if (!token) {
       console.warn("No hay token disponible");
+      return [];
+    }
+
+    if (!user?.id) {
+      console.warn("No hay usuario logueado");
       return [];
     }
 
@@ -1053,8 +1059,12 @@ async function fetchGetCoursesByYear(year) {
       return [];
     }
 
+    const usersId = user.id;
+
+    console.log(usersId, year)
+    // Llamada al endpoint
     const response = await fetch(
-      `${API_URL}/api/course/${year}/listCourse`,
+      `${API_URL}/api/course/${usersId}/AssignedToCourse?year=${year}`,
       {
         method: "GET",
         headers: {
@@ -1069,16 +1079,14 @@ async function fetchGetCoursesByYear(year) {
     }
 
     const result = await response.json();
-
     return result?.data ?? [];
 
   } catch (error) {
     uiToast("Error al obtener cursos en servidor", "error");
-    console.error("fetchCoursesByYear:", error.message);
+    console.error("fetchGetCoursesByYear:", error.message);
     return [];
   }
 }
-
 // =============================
 // 🟢 Fetch - Buscar estudiantes de un curso
 // =============================
