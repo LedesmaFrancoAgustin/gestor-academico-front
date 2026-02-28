@@ -1,5 +1,5 @@
 // Actualizacion del año copy
-const API_URL = "https://gestor-academico-back.vercel.app";
+const API_URL = "https://gestor-academico-back-law4vgtnu-ledesmafrancoagustins-projects.vercel.app";
 const token = localStorage.getItem("token");
 const WARNING_TIME = 60 * 1000;
 
