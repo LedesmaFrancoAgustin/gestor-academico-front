@@ -4,6 +4,7 @@
 const academicYearSelect = document.getElementById("academicYearSelect");
 const courseSelect = document.getElementById("courseSelect");
 const monthSelect = document.getElementById("monthSelect");
+const typeClassSelect = document.getElementById("attendanceTypeSelect")
 const searchInput = document.getElementById("attendanceSearch");
 
 
@@ -13,6 +14,7 @@ let selectedYear = null
 let selectedCourse = null
 let selectedMonth = null
 let selectedSearchInput = null
+let selectedType = "regular"          // Tipo de asistencia ED O Clase
 
 let studentsInfo = [];
 let studentsGrades = []  // Estudiante con informmacion y asistencia/ausentes
@@ -69,6 +71,21 @@ monthSelect.addEventListener("change", async () => {
   await loadAndRenderAttendance();
 });
 
+// =======================================================================================
+// 🔹 Select para cambiar tipo de asistencia
+// =======================================================================================
+
+typeClassSelect.addEventListener("change", (e) => {
+  selectedType = e.target.value;
+  const year = selectedYear;
+  const month = selectedMonth;
+
+  if (selectedType === "regular") {
+    renderAttendanceTable(studentsGrades, year, month);
+  } else if (selectedType === "physical_education") {
+    renderPhysicalEducationTable(studentsGrades, year, month);
+  }
+});
 
 
 searchInput.addEventListener("input", () => {
@@ -93,57 +110,114 @@ searchInput.addEventListener("input", () => {
 //  Boton guardar asistencias Masivas
 // =============================
 saveAttendanceBtn.addEventListener("click", async () => {
-   // 🔥 Guardar en el backend
-   await fetchPostAttendanceForMonth(selectedCourse , selectedYear , trimester , attendanceChanges );
+
+  // 🔥 AUTO COMPLETAR P PARA LOS DEMÁS VACÍOS SOLO EN DÍAS CON A/J/T
+  const allInputs = document.querySelectorAll(".attendance-input");
+
+  allInputs.forEach(input => {
+    const value = input.value.toUpperCase();
+    const type = input.dataset.attendanceType;
+
+    // Solo si es A, J o T
+    if (["A", "J", "T"].includes(value)) {
+      const date = input.dataset.date;
+
+      // Buscar todos los inputs del mismo día y tipo
+      const sameDayInputs = document.querySelectorAll(
+        `.attendance-input[data-date="${date}"][data-attendance-type="${type}"]`
+      );
+
+      sameDayInputs.forEach(otherInput => {
+        if (otherInput.value === "") {
+          // Completar con P
+          otherInput.value = "P";
+          applyAttendanceStyle(otherInput);
+          updateIconState(otherInput);
+
+          const otherKey = `${otherInput.dataset.userId}_${otherInput.dataset.date}_${type}`;
+          const otherPayload = buildAttendancePayload(otherInput);
+
+          attendanceChanges.set(otherKey, otherPayload);
+        }
+      });
+    }
+  });
+
+  // 🔥 Guardar en el backend
+  await fetchPostAttendanceForMonth(selectedCourse, selectedYear, trimester, attendanceChanges);
 });
+
 
 
 // ===========================================================================
 // 🟢 Event listeners - Para Render
 // ===========================================================================
 
-document.addEventListener("input", async (e) => {
+// ===========================================================================
+//  Presente a todos los alumnos por fecha
+// ===========================================================================
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".fill-present-btn")) return;
 
+  const btn = e.target.closest(".fill-present-btn");
+  const date = btn.dataset.date;
+
+  const inputs = document.querySelectorAll(`.attendance-input[data-date="${date}"]`);
+
+  inputs.forEach(input => {
+    if (input.value === "") {
+      input.value = "P";
+      applyAttendanceStyle(input);
+      updateIconState(input);
+
+      const key = `${input.dataset.userId}_${input.dataset.date}_${input.dataset.attendanceType}`;
+      const payload = buildAttendancePayload(input);
+      attendanceChanges.set(key, payload);
+    }
+  });
+
+  saveAttendanceBtn.disabled = attendanceChanges.size === 0 ? true : false;
+  //uiToast(`Todos los alumnos marcados como presentes el ${date}`, "success");
+});
+
+// ===========================================================================
+//  Interacion con cada imput
+// ===========================================================================
+document.addEventListener("input", async (e) => {
   if (!e.target.classList.contains("attendance-input")) return;
 
   const input = e.target;
+  //const type = input.dataset.attendanceType; // "regular" o "physical_education"
   let value = input.value.toUpperCase();
 
-  // Solo permitir P, T, A, J o vacío
-  if (!["P", "T", "A", "J", ""].includes(value)) {
-    input.value = "";
-    return;
+  // Validación según tipo
+  if (selectedType === "regular") {
+    if (!["P", "T", "A", "J", ""].includes(value)) {
+      input.value = "";
+      return;
+    }
+  } else if (selectedType === "physical_education") {
+    if (!["P", "A", ""].includes(value)) {
+      input.value = "";
+      return;
+    }
   }
 
   input.value = value;
-  applyAttendanceStyle(input);  // Apñcar estilo de colores
-
-  updateIconState(input); // Apñcar el icono cuando es valido
+  applyAttendanceStyle(input);
+  updateIconState(input);
 
   const originalValue = input.dataset.originalValue || "";
+  const key = `${input.dataset.userId}_${input.dataset.date}_${selectedType}`; // 🔹 incluir tipo
 
-  const key = `${input.dataset.userId}_${input.dataset.date}`;
-
-  // 🔥 Si volvió al valor original → quitar del buffer
-if (value === originalValue) {
-  attendanceChanges.delete(key);
-} else {
-  const payload = buildAttendancePayload(input);
-  attendanceChanges.set(key, payload);
-}
-
- // updateIconVisibility(input);
-
-  console.log("Cambios acumulados:", [...attendanceChanges.values()]);
-
-  if (attendanceChanges.size > 0) {
-    saveAttendanceBtn.disabled = false; // hay cambios → habilitar
+  if (value === originalValue) {
+    attendanceChanges.delete(key);
   } else {
-    saveAttendanceBtn.disabled = true; // no hay cambios → deshabilitar
+    const payload = buildAttendancePayload(input);
+    attendanceChanges.set(key, payload);
   }
-    
- 
 
+  saveAttendanceBtn.disabled = attendanceChanges.size === 0 ? true : false;
 });
 
 
@@ -177,50 +251,20 @@ function renderHeader(thead, monthDates) {
   const dayInitials = ["D", "L", "M", "M", "J", "V", "S"];
 
   // ==================================================
-  // 🟢 FILA SUPERIOR (AGRUPADORA)
+  // 🟢 FILA SUPERIOR (TÍTULO GENERAL)
   // ==================================================
-
   const groupRow = document.createElement("tr");
   groupRow.classList.add("tr-Header");
 
-  // 3 columnas fijas
-  ["", "", ""].forEach(() => {
-    const th = document.createElement("th");
-    th.classList.add("sticky-col");
-    groupRow.appendChild(th);
-  });
+  const totalCols = 3 + monthDates.length + 8; // columnas fijas + días + totales
+  const thTitle = document.createElement("th");
+  thTitle.colSpan = totalCols;
+  thTitle.textContent = "Registro de asistencia de clases";
+  thTitle.classList.add("text-center");
+  thTitle.style.fontWeight = "bold";
+  thTitle.style.fontSize = "1.1em";
 
-  // columnas por día
-  monthDates.forEach(() => {
-    const th = document.createElement("th");
-    groupRow.appendChild(th);
-  });
-
-  // espacio
-  const thSpaceTop = document.createElement("th");
-  thSpaceTop.classList.add("total-col-space");
-  groupRow.appendChild(thSpaceTop);
-
-  // Asistencia
-  const thAsistencia = document.createElement("th");
-  thAsistencia.colSpan = 2;
-  groupRow.appendChild(thAsistencia);
-
-  // 🔥 INASISTENCIAS agrupado
-  const thInasistencias = document.createElement("th");
-  thInasistencias.colSpan = 3;
-  thInasistencias.textContent = "INASISTENCIAS";
-  thInasistencias.classList.add("text-center");
-  groupRow.appendChild(thInasistencias);
-
-  // espacio
-  const thEmpty = document.createElement("th");
-  groupRow.appendChild(thEmpty);
-
-  // total
-  const thTotal = document.createElement("th");
-  groupRow.appendChild(thTotal);
-
+  groupRow.appendChild(thTitle);
   thead.appendChild(groupRow);
 
   // ==================================================
@@ -237,7 +281,7 @@ function renderHeader(thead, monthDates) {
     headRow.appendChild(th);
   });
 
-  monthDates.forEach(date => {
+    monthDates.forEach(date => {
 
     const dayOfWeek = getDayOfWeek(date);
     const th = document.createElement("th");
@@ -248,9 +292,12 @@ function renderHeader(thead, monthDates) {
       th.innerHTML = "";
     } else {
       th.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
           <span class="day-initial">${dayInitials[dayOfWeek]}</span>
           <span class="day-number">${date.split("-")[2]}</span>
+          <button class="fill-present-btn" data-date="${date}" title="Completar P todos">
+            <i class="fa fa-arrow-down"></i>
+          </button>
         </div>
       `;
     }
@@ -648,6 +695,225 @@ function renderFooterTotals(tbody, monthDates) {
 }
 
 // =======================================================================================
+// 🟢 Render  Educacion fisica
+// =======================================================================================
+
+// =======================================================================================
+// Render  Educacion fisica -Hender
+// =======================================================================================
+function renderHeaderED(thead, monthDates) {
+  const dayInitials = ["D", "L", "M", "M", "J", "V", "S"];
+
+  // ========================
+  // Fila 1: título general
+  // ========================
+  const trTitle = document.createElement("tr");
+  const thTitle = document.createElement("th");
+  thTitle.colSpan = 3 + monthDates.length + 2; // columnas fijas + días + totales
+  thTitle.textContent = "Registro de asistencia Educación Física";
+  thTitle.classList.add("attendance-title");
+  thTitle.style.textAlign = "center";
+  thTitle.style.fontWeight = "bold";
+  thTitle.style.fontSize = "1.1em";
+  trTitle.appendChild(thTitle);
+  thead.appendChild(trTitle);
+
+  // ========================
+  // Fila 2: columnas fijas + días + totales
+  // ========================
+  const tr = document.createElement("tr");
+
+  // Columnas fijas
+  ["#", "Nombre", "DNI"].forEach(text => {
+    const th = document.createElement("th");
+    th.classList.add("sticky-col");
+    th.textContent = text;
+    tr.appendChild(th);
+  });
+
+  // Columnas por día
+  monthDates.forEach(date => {
+    const dayOfWeek = getDayOfWeek(date);
+    const th = document.createElement("th");
+    th.classList.add("attendance-day-header");
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      th.textContent = ""; // fin de semana vacío
+    } else {
+      th.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span class="day-initial">${dayInitials[dayOfWeek]}</span>
+          <span class="day-number">${date.split("-")[2]}</span>
+          <button class="fill-present-btn" data-date="${date}" title="Completar P todos">
+            <i class="fa fa-arrow-down"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    tr.appendChild(th);
+  });
+
+  // Totales ED: presentes y ausentes
+  const thTotalP = document.createElement("th");
+  thTotalP.classList.add("total-col");
+  thTotalP.textContent = "Total P";
+  tr.appendChild(thTotalP);
+
+  const thTotalA = document.createElement("th");
+  thTotalA.classList.add("total-col");
+  thTotalA.textContent = "Total A";
+  tr.appendChild(thTotalA);
+
+  thead.appendChild(tr);
+}
+// =======================================================================================
+// 🟢 Render body Educación Física
+// =======================================================================================
+function renderPhysicalEducationTable(studentsGrades, year, month) {
+  if (!month || !year) return;
+
+  const attendanceTable = document.getElementById("preceptorAttendanceTable");
+  const thead = attendanceTable.querySelector("thead");
+  const tbody = attendanceTable.querySelector("tbody");
+
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  const monthDates = getMonthDays(year, month);
+
+  // Render header
+  renderHeaderED(thead, monthDates);
+
+  // Render body
+  studentsGrades.forEach((student, index) => {
+    const tr = document.createElement("tr");
+    tr.dataset.userId = student.userId;
+
+    // =======================
+    // Columnas fijas
+    // =======================
+    const tdIndex = document.createElement("td");
+    tdIndex.classList.add("sticky-col");
+    tdIndex.textContent = index + 1;
+    tr.appendChild(tdIndex);
+
+    const tdName = document.createElement("td");
+    tdName.classList.add("sticky-col");
+    tdName.textContent = student.name;
+    tr.appendChild(tdName);
+
+    const tdDni = document.createElement("td");
+    tdDni.classList.add("sticky-col");
+    tdDni.textContent = student.dni;
+    tr.appendChild(tdDni);
+
+    // =======================
+    // Mapa de detalles por fecha (solo ED)
+    // =======================
+    const detailsMap = new Map();
+    (student.details || []).forEach(d => {
+      if (d.attendanceType === "physical_education") {
+        if (!detailsMap.has(d.date)) detailsMap.set(d.date, []);
+        detailsMap.get(d.date).push(d);
+      }
+    });
+
+    let totalPresents = 0;
+    let totalAbsents = 0;
+
+    monthDates.forEach(date => {
+      const td = document.createElement("td");
+      td.classList.add("attendance-cell");
+
+      const dayOfWeek = getDayOfWeek(date);
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        td.classList.add("weekend");
+        tr.appendChild(td);
+        return;
+      }
+
+      const records = detailsMap.get(date) || [];
+      let code = "";
+
+      records.forEach(record => {
+        if (record.status === "present") {
+          code = "P";
+          totalPresents++;
+        } else if (record.status === "absent") {
+          code = "A";
+          totalAbsents += 0.5; // media falta
+        }
+      });
+
+      // =======================
+      // Input editable
+      // =======================
+      const input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 1;
+      input.classList.add("attendance-input");
+      input.dataset.userId = student.userId;
+      input.dataset.date = date;
+      input.dataset.attendanceType = "physical_education";
+      input.value = code;
+      input.dataset.originalValue = input.value;
+
+      // Solo acepta P o A
+      input.addEventListener("input", () => {
+        const value = input.value.toUpperCase();
+        if (["P", "A"].includes(value)) {
+          td.classList.add("show-icon");
+        } else {
+          td.classList.remove("show-icon");
+        }
+
+        // Actualiza totales
+        recalculateRowTotalsED(tr);
+      });
+
+      input.addEventListener("focus", () => td.classList.add("show-icon"));
+      input.addEventListener("blur", () => td.classList.remove("show-icon"));
+
+      applyAttendanceStyle(input);
+      updateIconState(input);
+
+      // Icono de nota (opcional, aunque ED no requiere)
+      const icon = document.createElement("i");
+      icon.className = "edit-note-icon fa-solid fa-pencil";
+      icon.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openAttendanceDetailModal({
+          userId: input.dataset.userId,
+          date: input.dataset.date,
+          attendanceType: input.dataset.attendanceType,
+          input
+        });
+      });
+
+      td.appendChild(input);
+      td.appendChild(icon);
+      tr.appendChild(td);
+    });
+
+    // =======================
+    // Totales
+    // =======================
+    const tdTotalP = document.createElement("td");
+    tdTotalP.classList.add("total-col", "total-p");
+    tdTotalP.textContent = totalPresents;
+    tr.appendChild(tdTotalP);
+
+    const tdTotalA = document.createElement("td");
+    tdTotalA.classList.add("total-col", "total-a-ed");
+    tdTotalA.textContent = totalAbsents;
+    tr.appendChild(tdTotalA);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// =======================================================================================
 // 🟢 Funciones  Para el render - principal
 // =======================================================================================
 async function loadAndRenderAttendance() {
@@ -715,6 +981,25 @@ function recalculateRowTotals(tr) {
   if (tdA) tdA.textContent = totalAbsents;
   if (tdAGeneral) tdAGeneral.textContent = totalAbsents; // si no incluís ED acá
 
+}
+
+function recalculateRowTotalsED(tr) {
+  let totalPresents = 0;
+  let totalAbsents = 0;
+
+  const inputs = tr.querySelectorAll("input.attendance-input");
+
+  inputs.forEach(input => {
+    const value = input.value.toUpperCase();
+    if (value === "P") totalPresents++;
+    if (value === "A") totalAbsents += 0.5;
+  });
+
+  const tdP = tr.querySelector(".total-p");
+  const tdA = tr.querySelector(".total-a-ed");
+
+  if (tdP) tdP.textContent = totalPresents;
+  if (tdA) tdA.textContent = totalAbsents;
 }
 //createFooterRow alineado perfecto
 function createFooterRowByDay(tbody, label, valuesArray, monthDates, dayHasData) {
@@ -1176,6 +1461,7 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
     return null;
   }
 
+  console.log("selectedType",selectedType)
   try {
 
     const token = localStorage.getItem("token");
@@ -1190,7 +1476,7 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
         courseId,
         academicYear,
         trimester: Number(trimester),
-        attendanceType: "regular",
+        attendanceType: selectedType,
         changes: [...attendanceChanges.values()] // 🔥 convertimos Map → Array
       })
     });

@@ -226,6 +226,15 @@
                         </select>
                     </div>
 
+                    <div class="select-group">
+                        <label for="attendanceTypeSelect">Tipo</label>
+                        <select id="attendanceTypeSelect" class="attendance-select">
+                            <option selected value="regular">Clases normales</option>
+                            <option value="physical_education">Educación Física</option>
+                        </select>
+                    </div>
+                    
+
                     <div class="search-group">
                         <label for="attendanceSearch">Buscar alumno</label>
                         <div class="search-input-wrapper">
@@ -244,6 +253,7 @@
                 
                 </div>
             </div>
+
             <div class="preceptor-render-attendance">
     
                     <!-- Contenedor de asistencias -->
@@ -261,7 +271,7 @@
             </div>
 
                 <div class="container">
-             <!-- Acciones -->
+                    <!-- Acciones -->
                     <section class="grades-actions">
                         <div class="actions-content">
                             <h2>Acciones</h2>
@@ -274,6 +284,7 @@
                     </section>
 
                     </div>
+
         <div id="attendanceTooltip" class="custom-tooltip"></div>
 </main>
 

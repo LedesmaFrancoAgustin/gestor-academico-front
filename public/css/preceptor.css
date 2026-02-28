@@ -330,9 +330,10 @@
 /* Select */
 .attendance-select {
   appearance: none;
-  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  padding: 0.6rem 1rem 0.6rem 0.5rem;
   border-radius: 10px;
   border: 1px solid rgba(59, 130, 246, 0.35);
+  font-size: 0.8rem;
 }
 
 /* =========================
@@ -377,7 +378,7 @@
 
 /* Input */
 .attendance-search {
-  width: 300px;
+  width: 260px;
   padding: 0.6rem 2.4rem 0.6rem 0.75rem;
   border-radius: 10px;
   border: 1px solid rgba(59, 130, 246, 0.35);
@@ -510,6 +511,28 @@
 #preceptorAttendanceTable tbody tr:hover .sticky-col {
   background-color: #e8f0ff; /* mismo color que la fila */
   transition: background-color 0.25s ease;
+}
+
+.fill-present-btn {
+  border: none;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.fill-present-btn i {
+  pointer-events: none;
+}
+
+.fill-present-btn:hover {
+  background: #a6dfb3;
 }
 
 /* ================= Celdas ================= */
@@ -681,7 +704,8 @@ input.modified {
 
 /* ================= Tooltip estilo moderno ================= */
 .attendance-input.has-note {
-  border-bottom: 2px solid #eeec6b;
+  border-bottom: 2px solid #070701;
+  border-right: 2px solid #070701;
   cursor: pointer;
 }
 
