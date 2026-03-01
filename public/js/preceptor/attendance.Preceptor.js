@@ -952,6 +952,9 @@ function renderTableInforme(studentsGrades = []) {
   const thead = table.querySelector("thead");
   const tbody = table.querySelector("tbody");
 
+   if (!table) {
+    return; // 🔥 no romper nunca en producción
+  }
   // 🔹 Calculamos datos
   const {
     totalAsistencias,
