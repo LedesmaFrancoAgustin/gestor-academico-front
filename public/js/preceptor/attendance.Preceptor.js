@@ -1046,13 +1046,8 @@ async function loadAndRenderAttendance() {
     // 4️⃣ Render
     renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
         // Solo renderizamos el informe si la tabla existe
-  const table = document.getElementById("preceptorAttendanceInformeTable");
-  if (table) {
     renderTableInforme(studentsGrades);
-  } else {
-    console.warn("⚠️ Tabla de informe no encontrada, no se renderiza");
-  }
-
+ 
   } catch (error) {
     console.error("Error cargando asistencia:", error);
   }
