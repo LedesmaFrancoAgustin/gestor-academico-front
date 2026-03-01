@@ -248,8 +248,6 @@ function renderAttendanceTable(studentsGrades, year, month) {
   renderBody(tbody, studentsGrades, currentMonthDates );
   renderFooterTotals(tbody, currentMonthDates );
 
-
-
   //updateTotals(tbody, monthDates);
 }
 
@@ -952,7 +950,7 @@ function renderTableInforme(studentsGrades = []) {
     if (!table) {
       return; // 🔥 no romper nunca en producción
     }
-
+    
   const thead = table.querySelector("thead");
   const tbody = table.querySelector("tbody");
 
@@ -1045,9 +1043,14 @@ async function loadAndRenderAttendance() {
 
     // 4️⃣ Render
     renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
-        // Solo renderizamos el informe si la tabla existe
+      // Solo renderizamos el informe si la tabla existe
+  const table = document.getElementById("preceptorAttendanceInformeTable");
+  if (table) {
     renderTableInforme(studentsGrades);
- 
+  } else {
+    console.warn("⚠️ Tabla de informe no encontrada, no se renderiza");
+  }
+
   } catch (error) {
     console.error("Error cargando asistencia:", error);
   }
