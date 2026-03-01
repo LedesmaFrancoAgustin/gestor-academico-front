@@ -18,6 +18,7 @@ let selectedType = "regular"          // Tipo de asistencia ED O Clase
 
 let studentsInfo = [];
 let studentsGrades = []  // Estudiante con informmacion y asistencia/ausentes
+//let attendancePreviousStudents = []  // Ausentes previuos del curso
 
 let currentMonthDates = [];
 
@@ -256,7 +257,7 @@ function renderHeader(thead, monthDates) {
   const groupRow = document.createElement("tr");
   groupRow.classList.add("tr-Header");
 
-  const totalCols = 3 + monthDates.length + 8; // columnas fijas + días + totales
+  const totalCols = 3 + monthDates.length + 9; // columnas fijas + días + totales
   const thTitle = document.createElement("th");
   thTitle.colSpan = totalCols;
   thTitle.textContent = "Registro de asistencia de clases";
@@ -309,7 +310,7 @@ function renderHeader(thead, monthDates) {
   thSpace.classList.add("total-col-space");
   headRow.appendChild(thSpace);
 
-  ["Asistencia", "", "J", "A", "EF", "", "TOTAL"].forEach(text => {
+  [ "Anterior","Asistencia", "", "J", "A", "EF", "", "TOTAL"].forEach(text => {
     const th = document.createElement("th");
     th.classList.add("total-col");
     th.textContent = text;
@@ -364,6 +365,7 @@ function renderBody(tbody, studentsGrades, monthDates) {
     let totalAbsents = 0;
     let totalAbsentsED = 0;
     let totalJustified = 0;
+    let tdTotalPrevious = 0;
 
     // ==================================================
     // 🟢 Columnas por día
@@ -529,6 +531,15 @@ function renderBody(tbody, studentsGrades, monthDates) {
     const tdSpace = document.createElement("td");
     tdSpace.classList.add("total-col-space");
     tr.appendChild(tdSpace);
+
+    // ==================================================
+    // 🟢 Totales Ausentes previos
+    // ==================================================
+
+    const tdTotalPre = document.createElement("td");
+    tdTotalPre.classList.add("total-col","total-previous");
+    tdTotalPre.textContent = student.totalWeightedAbsences ?? 0; // ← aquí
+    tr.appendChild(tdTotalPre);
 
      // ==================================================
     // 🟢 Totales Aistencias
@@ -913,9 +924,9 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
   });
 }
 
-// =======================================================================================
+// ======================================================================================================================
 // 🟢 Funciones  Para el render - principal
-// =======================================================================================
+// ======================================================================================================================
 async function loadAndRenderAttendance() {
 
   // 🔒 Validaciones
@@ -934,9 +945,24 @@ async function loadAndRenderAttendance() {
       selectedYear,
       selectedMonth
     );
+    // 3️⃣ Traer asistencia de meses anteriores
+    const attendancePreviousStudents = await fetchGetPreviousAttendance(
+      selectedCourse,
+      selectedYear,
+      selectedMonth
+    );
 
-    // 3️⃣ Mapear para la tabla
-    studentsGrades = mapStudentsForTable(studentsInfo, attendanceMonth);
+    console.log("attendancePreviousStudents,", attendancePreviousStudents)
+
+
+    // 4️⃣ Mapear para la tabla
+    studentsGrades = mapStudentsForTable(
+      studentsInfo,
+      attendanceMonth,
+      attendancePreviousStudents
+    );
+
+    console.log("studentsGrades,", studentsGrades)
 
     // 4️⃣ Render
     renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
@@ -1033,7 +1059,7 @@ function createFooterRowByDay(tbody, label, valuesArray, monthDates, dayHasData)
   });
 
   // 🔹 8 columnas finales vacías
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 9; i++) {
     tr.appendChild(document.createElement("td"));
   }
 
@@ -1057,7 +1083,7 @@ function createEmptyRow(tbody, monthDates) {
 
   tr.classList.add("footer-row");
 
-  td.colSpan = 3 + monthDates.length + 8;
+  td.colSpan = 3 + monthDates.length + 9;
   td.innerHTML = "&nbsp;";
 
   tr.appendChild(td);
@@ -1277,47 +1303,59 @@ function getDayOfWeek(dateString) {
   return new Date(year, month - 1, day).getDay();
 }
 // =======================================================================================
-// 🟢 Funciones 
+// 🟢 Funciones
 // =======================================================================================
-function mapStudentsForTable(studentsInfo = [], attendanceMonth = []) {
+function mapStudentsForTable(
+  studentsInfo = [],
+  attendanceMonth = [],
+  attendancePreviousStudents = []
+) {
+  if (!Array.isArray(studentsInfo)) return [];
 
-    if (!Array.isArray(studentsInfo)) return [];
+  // 1️⃣ Ordenamos A → Z por nombre
+  const sortedStudents = [...studentsInfo].sort((a, b) =>
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+  );
 
-    // 1️⃣ Ordenamos A → Z por nombre
-    const sortedStudents = [...studentsInfo].sort((a, b) =>
-        a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
-    );
+  // 2️⃣ Convertimos attendanceMonth en mapa por userId como string
+  const attendanceMap = new Map(
+    (attendanceMonth || []).map(a => [
+      String(a.userId || a._id),
+      a
+    ])
+  );
 
-    // 2️⃣ Convertimos attendanceMonth en mapa por ID
-    const attendanceMap = new Map(
-        (attendanceMonth || []).map(a => [
-            a.userId?.toString() || a._id?.toString(),
-            a
-        ])
-    );
+  // 3️⃣ Convertimos attendancePreviousStudents en mapa por userId como string
+  const previousMap = new Map(
+    (attendancePreviousStudents?.data || []).map(a => [
+      String(a.userId || a._id),
+      a
+    ])
+  );
 
-    // 3️⃣ Armamos estructura final
-    const studentsGrades = sortedStudents.map(student => {
+  // 4️⃣ Armamos estructura final
+  const studentsGrades = sortedStudents.map(student => {
+    const userIdStr = String(student._id);
 
-        const attendance = attendanceMap.get(student._id.toString());
+    const attendance = attendanceMap.get(userIdStr);
+    const previousAttendance = previousMap.get(userIdStr);
 
-        return {
-            userId: student._id,
-            dni: student.dni,
-            name: student.name,
-            email: student.email,
-            genero: student.genero,
-            status: student.status,
-            presents: attendance?.presents ?? 0,
-            absents: attendance?.absents ?? 0,
-            details: attendance?.details ?? []
-        };
-    });
+    return {
+      userId: student._id,
+      dni: student.dni,
+      name: student.name,
+      email: student.email,
+      genero: student.genero,
+      status: student.status,
+      presents: attendance?.presents ?? 0,
+      absents: attendance?.absents ?? 0,
+      details: attendance?.details ?? [],
+      totalWeightedAbsences: previousAttendance?.totalWeightedAbsences ?? 0
+    };
+  });
 
-    return studentsGrades;
+  return studentsGrades;
 }
-
-
 // =======================================================================================
 // 🟢 Fetch 
 // =======================================================================================
@@ -1449,6 +1487,48 @@ async function fetchGetAttendanceForMonth(courseId, year, month) {
     return []; // array vacío
   }
 }
+
+// =============================
+// 🟢 Fetch Buscar inasistencias acumuladas meses anteriores
+// =============================
+async function fetchGetPreviousAttendance(courseId, year, month) {
+  try {
+    const token = localStorage.getItem("token"); // asegurarse de tener token
+    if (!token) throw new Error("No se encontró token de autenticación");
+
+    const res = await fetch(
+      `${API_URL}/api/attendance/${courseId}/previous?year=${year}&month=${month}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      console.error(
+        "Error al traer las asistencias Previas:",
+        res.status,
+        res.statusText
+      );
+      uiToast("Error al traer las asistencias previas del curso", "error");
+      return [];
+    }
+
+    const data = await res.json();
+    const attendances = data || [];
+    return attendances; // siempre devolvemos un array
+  } catch (error) {
+    console.error("Error al conectar con el servidor:", error);
+    uiToast(
+      "Error al conectar con el servidor para traer las asistencias previas",
+      "error"
+    );
+    return [];
+  }
+}
+
 
 // =============================
 //  🟢 Fetch Cargar asistencias/inasistencias Masiva
