@@ -248,6 +248,9 @@ function renderAttendanceTable(studentsGrades, year, month) {
   renderBody(tbody, studentsGrades, currentMonthDates );
   renderFooterTotals(tbody, currentMonthDates );
 
+  console.log("studentsGrades ",studentsGrades)
+  renderTableInforme(studentsGrades);
+
   //updateTotals(tbody, monthDates);
 }
 
@@ -939,7 +942,63 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
     tbody.appendChild(tr);
   });
 }
+// =======================================================================================
+// 🟢 Render asistencias/Inasistencias Informe
+// =======================================================================================
 
+function renderTableInforme(studentsGrades = []) {
+
+  const table = document.getElementById("preceptorAttendanceInformeTable");
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+
+  // 🔹 Calculamos datos
+  const {
+    totalAsistencias,
+    totalInasistencias,
+    asistenciaMedia,
+    porcentajeAsistencia
+  } = calculateInformeFromStudents(studentsGrades);
+
+  // 🔹 Limpiar tabla
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  // =============================
+  // 🟢 Header
+  // =============================
+  thead.innerHTML = `
+    <tr>
+      <th class="informe-title">Asistencias / Inasistencias</th>
+      <th class="informe-total">Total</th>
+    </tr>
+  `;
+
+  // =============================
+  // 🟢 Body con datos reales
+  // =============================
+  tbody.innerHTML = `
+    <tr>
+      <td>Total de asistencias</td>
+      <td>${totalAsistencias}</td>
+    </tr>
+
+    <tr>
+      <td>Total de inasistencias</td>
+      <td>${totalInasistencias}</td>
+    </tr>
+
+    <tr>
+      <td>Asistencia media</td>
+      <td>${asistenciaMedia}</td>
+    </tr>
+
+    <tr class="informe-highlight">
+      <td>% de asistencia</td>
+      <td>${porcentajeAsistencia} %</td>
+    </tr>
+  `;
+}
 // ======================================================================================================================
 // 🟢 Funciones  Para el render - principal
 // ======================================================================================================================
@@ -1321,6 +1380,7 @@ function getDayOfWeek(dateString) {
 // =======================================================================================
 // 🟢 Funciones
 // =======================================================================================
+// mapear studetsGrade coninformacion y asistencias de alumnos
 function mapStudentsForTable(
   studentsInfo = [],
   attendanceMonth = [],
@@ -1372,7 +1432,7 @@ function mapStudentsForTable(
 
   return studentsGrades;
 }
-
+// actualizar studetsGrade al enviar al back 
 function applyAttendanceChanges() {
 
   attendanceChanges.forEach((change, key) => {
@@ -1413,6 +1473,61 @@ function applyAttendanceChanges() {
 
   });
 
+}
+// Calculo poara los informe
+function calculateInformeFromStudents(studentsGrades = []) {
+
+  let totalAsistencias = 0;
+  let totalInasistencias = 0;
+
+  // Para contar días hábiles únicos
+  const diasHabilesSet = new Set();
+
+  studentsGrades.forEach(student => {
+
+    const regularDetails = (student.details || []).filter(
+      d => d.attendanceType === "regular"
+    );
+
+    regularDetails.forEach(detail => {
+
+      // Guardamos la fecha como día hábil
+      diasHabilesSet.add(detail.date);
+
+      if (detail.status === "present") {
+        totalAsistencias++;
+      }
+
+      if (detail.status === "absent") {
+        totalInasistencias++;
+      }
+
+    });
+
+  });
+
+  const asistenciaIdeal = totalAsistencias + totalInasistencias;
+
+  const diasHabiles = diasHabilesSet.size;
+
+  const porcentajeAsistencia =
+    asistenciaIdeal > 0
+      ? ((totalAsistencias * 100) / asistenciaIdeal).toFixed(2)
+      : 0;
+
+  const asistenciaMedia =
+    diasHabiles > 0
+      ? (totalAsistencias / diasHabiles).toFixed(2)
+      : 0;
+
+  return {
+    totalAsistencias,
+    totalInasistencias,
+    asistenciaIdeal,
+    diasHabiles,
+    asistenciaMedia,
+    porcentajeAsistencia
+  };
 }
 // =======================================================================================
 // 🟢 Fetch 
