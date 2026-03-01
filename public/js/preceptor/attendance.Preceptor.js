@@ -948,12 +948,14 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
 function renderTableInforme(studentsGrades = []) {
 
   const table = document.getElementById("preceptorAttendanceInformeTable");
+
+    if (!table) {
+      return; // 🔥 no romper nunca en producción
+    }
+    
   const thead = table.querySelector("thead");
   const tbody = table.querySelector("tbody");
 
-   if (!table) {
-    return; // 🔥 no romper nunca en producción
-  }
   // 🔹 Calculamos datos
   const {
     totalAsistencias,
