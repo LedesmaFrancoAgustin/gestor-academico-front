@@ -248,8 +248,7 @@ function renderAttendanceTable(studentsGrades, year, month) {
   renderBody(tbody, studentsGrades, currentMonthDates );
   renderFooterTotals(tbody, currentMonthDates );
 
-  console.log("studentsGrades ",studentsGrades)
-  renderTableInforme(studentsGrades);
+
 
   //updateTotals(tbody, monthDates);
 }
@@ -1044,6 +1043,8 @@ async function loadAndRenderAttendance() {
 
     // 4️⃣ Render
     renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
+      console.log("studentsGrades ",studentsGrades)
+    renderTableInforme(studentsGrades);
 
   } catch (error) {
     console.error("Error cargando asistencia:", error);
