@@ -401,7 +401,10 @@ function renderBody(tbody, studentsGrades, monthDates) {
         if (record.attendanceType === "physical_education") {
 
           if (record.status === "absent") {
-            totalAbsentsED += 0.5; // media falta
+
+             if (!record.justification?.isJustified) {
+                totalAbsentsED += 0.5; // media falta
+            } 
           }
 
           return; // no mostrar nada en la celda
