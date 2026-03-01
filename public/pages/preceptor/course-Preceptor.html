@@ -181,23 +181,21 @@
 
             </div>
 
-
-            <div class="container preceptor-home-content">
-            
-                <div class="attendance-wrapper">
+            <div class="container-fluid students-page">
+                <div class="students-wrapper">
 
                     <!-- Header -->
-                    <section class="attendance-header">
-                        <h1>Asistencias</h1>
-                        <p>Seleccioná un curso para comenzar a ver/cargar las asistencias</p>
+                    <section class="students-header">
+                        <h1>Cursos</h1>
+                        <p>Seleccioná un curso para comenzar a ver Informacion</p>
                     </section>
 
                     <!-- Selector de curso -->
-                   <section class="attendance-selector">
+                   <section class="students-selector">
 
                      <div class="select-group">
                         <label for="academicYearSelect">Año</label>
-                        <select id="academicYearSelect" class="attendance-select">
+                        <select id="academicYearSelect" class="students-select">
                                             <option value="" selected disabled>Seleccione un año</option>
                                             <option value="2026">2026</option>
                                             <option value="2027">2027</option>
@@ -209,45 +207,18 @@
 
                     <div class="select-group">
                         <label for="courseSelect">Curso</label>
-                        <select id="courseSelect" class="attendance-select" disabled>
+                        <select id="courseSelect" class="students-select" disabled>
                         <option value="">Seleccionar un curso</option>
                         </select>
                     </div>
 
-                   
-                    <div class="select-group">
-                        <label for="monthSelect">Mes</label>
-                        <select id="monthSelect" class="attendance-select" disabled>
-                                 <option value="" selected disabled> Seleccione un mes </option>
-                                 <option value="03">Marzo</option>
-                                 <option value="04">Abril</option>
-                                 <option value="05">Mayo</option>
-                                 <option value="06">Junio</option>
-                                 <option value="07">Julio</option>
-                                 <option value="08">Agosto</option>
-                                 <option value="09">Septiembre</option>
-                                 <option value="10">Octubre</option>
-                                 <option value="11">Noviembre</option>
-                                 <option value="12">Diciembre</option>
-                        </select>
-                    </div>
-
-                    <div class="select-group">
-                        <label for="attendanceTypeSelect">Tipo</label>
-                        <select id="attendanceTypeSelect" class="attendance-select">
-                            <option selected value="regular">Clases normales</option>
-                            <option value="physical_education">Educación Física</option>
-                        </select>
-                    </div>
-                    
-
-                    <div class="search-group">
-                        <label for="attendanceSearch">Buscar alumno</label>
+                    <div class="search-group search-right">
+                        <label for="studentsSearch">Buscar alumno</label>
                         <div class="search-input-wrapper">
                             <input
                             type="text"
-                            id="attendanceSearch"
-                            class="attendance-search"
+                            id="studentsSearch"
+                            class="students-search"
                             placeholder="Nombre o DNI..."
                             autocomplete="off"
                             />
@@ -255,43 +226,25 @@
                         </div>
                     </div>
 
-                  </section>
-                
-                </div>
+                    </section>    
+                    
+                    
+                </div>               
             </div>
 
-            <div class="preceptor-render-attendance">
-    
-                    <!-- Contenedor de asistencias -->
-                    <section class="preceptor-attendance-content">
-
-                        <div class="preceptor-table-wrapper">
-                            <table id="preceptorAttendanceTable">
+              <!-- Contenedor de asistencias -->
+                    <section class="preceptor-students-content ">
+                        <div class="preceptor-table-students-wrapper">
+                            <table id="preceptorStudentsTable" class="students-table">
                                 <thead></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
-
                     </section>
 
-            </div>
 
-                <div class="container">
-                    <!-- Acciones -->
-                    <section class="grades-actions">
-                        <div class="actions-content">
-                            <h2>Acciones</h2>
-                            <p>Guardá los cambios realizados en las asistencias</p>
 
-                            <button id="saveAttendanceBtn" class="btn btn-primary" disabled>
-                            Guardar asistencia
-                            </button>
-                        </div>
-                    </section>
-
-                    </div>
-
-        <div id="attendanceTooltip" class="custom-tooltip"></div>
+           
 </main>
 
     <footer id="footer">
@@ -304,7 +257,8 @@
 
     <script src="../../js/preceptor/preceptor.guard.js" ></script>
     <script src="../../js/preceptor/preceptor.global.js" ></script>
-    <script src="../../js/preceptor/attendance.Preceptor.js" ></script>
+    <script src="../../js/preceptor/course.Preceptor.js" ></script>
+    
 
     <script src="../../js/global.js" ></script>
     <script src="../../js/notifications.js"></script>

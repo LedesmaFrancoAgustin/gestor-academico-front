@@ -81,6 +81,11 @@ typeClassSelect.addEventListener("change", (e) => {
   const year = selectedYear;
   const month = selectedMonth;
 
+  //await loadAndRenderAttendance();
+
+
+  console.log("studentsGrades: ", studentsGrades)
+
   if (selectedType === "regular") {
     renderAttendanceTable(studentsGrades, year, month);
   } else if (selectedType === "physical_education") {
@@ -198,7 +203,7 @@ document.addEventListener("input", async (e) => {
       return;
     }
   } else if (selectedType === "physical_education") {
-    if (!["P", "A", ""].includes(value)) {
+    if (!["P", "A","J" ,""].includes(value)) {
       input.value = "";
       return;
     }
@@ -852,9 +857,17 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
           code = "P";
           totalPresents++;
         } else if (record.status === "absent") {
-          code = "A";
-          totalAbsents += 0.5; // media falta
-        }
+
+            if (record.justification?.isJustified) {
+              code = "J";
+            } else {
+              code = "A";
+              totalAbsents++;
+            }
+
+            
+          }
+
       });
 
       // =======================
@@ -873,7 +886,7 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
       // Solo acepta P o A
       input.addEventListener("input", () => {
         const value = input.value.toUpperCase();
-        if (["P", "A"].includes(value)) {
+        if (["P", "A" , "J"].includes(value)) {
           td.classList.add("show-icon");
         } else {
           td.classList.remove("show-icon");
@@ -952,7 +965,7 @@ async function loadAndRenderAttendance() {
       selectedMonth
     );
 
-    console.log("attendancePreviousStudents,", attendancePreviousStudents)
+    //console.log("attendancePreviousStudents,", attendancePreviousStudents)
 
 
     // 4️⃣ Mapear para la tabla
@@ -962,7 +975,7 @@ async function loadAndRenderAttendance() {
       attendancePreviousStudents
     );
 
-    console.log("studentsGrades,", studentsGrades)
+    //console.log("studentsGrades,", studentsGrades)
 
     // 4️⃣ Render
     renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
@@ -1356,6 +1369,48 @@ function mapStudentsForTable(
 
   return studentsGrades;
 }
+
+function applyAttendanceChanges() {
+
+  attendanceChanges.forEach((change, key) => {
+
+    const parts = key.split("_");
+
+    const userId = parts[0];
+    const date = parts[1];
+    const attendanceType = parts.slice(2).join("_");
+
+    const student = studentsGrades.find(s => s.userId === userId);
+    if (!student) return;
+
+    const existingIndex = student.details.findIndex(d =>
+      d.date === date && d.attendanceType === attendanceType
+    );
+
+    const normalizedDetail = {
+      date,
+      attendanceType,
+      trimester: change.trimester,
+      status: change.attendanceStatus, // 🔥 siempre usar status
+      notes: change.notes || "",
+      late: change.late || { isLate: false },
+      justification: change.justification || { isJustified: false }
+    };
+
+    if (existingIndex !== -1) {
+      // 🔁 Reemplazo limpio
+      student.details[existingIndex] = {
+        ...student.details[existingIndex],
+        ...normalizedDetail
+      };
+    } else {
+      // ➕ Nuevo
+      student.details.push(normalizedDetail);
+    }
+
+  });
+
+}
 // =======================================================================================
 // 🟢 Fetch 
 // =======================================================================================
@@ -1540,8 +1595,7 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
     uiToast("No hay cambios para guardar", "info");
     return null;
   }
-
-  console.log("selectedType",selectedType)
+  
   try {
 
     const token = localStorage.getItem("token");
@@ -1569,6 +1623,8 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
     }
 
     uiToast("Asistencias guardadas correctamente", "success");
+
+    applyAttendanceChanges()
 
     // 🔥 limpiar buffer
     attendanceChanges.clear();
