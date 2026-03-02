@@ -191,61 +191,70 @@ window.addEventListener("beforeunload", function (e) {
 // ===========================================================================
 
 // ===========================================================================
-//  Presente a todos los alumnos por fecha
+//  Presente a todos los alumnos por fecha (desktop + mobile)
 // ===========================================================================
 document.addEventListener("click", (e) => {
-  if (!e.target.closest(".fill-present-btn")) return;
-
   const btn = e.target.closest(".fill-present-btn");
+
+  if (!btn) return;
+
   const date = btn.dataset.date;
 
-  const inputs = document.querySelectorAll(`.attendance-input[data-date="${date}"]`);
+  // ⚡ Selecciona todos los inputs de ese día, desktop y mobile
+  const inputs = document.querySelectorAll(`
+    .attendance-input[data-date="${date}"]
+  `);
 
   inputs.forEach(input => {
-    if (input.value === "") {
+    // Solo si está vacío
+    if (!input.value) {
       input.value = "P";
       applyAttendanceStyle(input);
       updateIconState(input);
 
+      // Guardar cambios
       const key = `${input.dataset.userId}_${input.dataset.date}_${input.dataset.attendanceType}`;
       const payload = buildAttendancePayload(input);
       attendanceChanges.set(key, payload);
     }
   });
 
-  saveAttendanceBtn.disabled = attendanceChanges.size === 0 ? true : false;
-  //uiToast(`Todos los alumnos marcados como presentes el ${date}`, "success");
+  // 🔹 Habilitar botón guardar
+  saveAttendanceBtn.disabled = attendanceChanges.size === 0;
+  // uiToast(`Todos los alumnos marcados como presentes el ${date}`, "success");
 });
-
 // ===========================================================================
-//  Interacion con cada imput
+//  Interacción con cada input (desktop + mobile)
 // ===========================================================================
 document.addEventListener("input", async (e) => {
+  // ⚡ Soporta desktop y mobile
   if (!e.target.classList.contains("attendance-input")) return;
 
   const input = e.target;
-  //const type = input.dataset.attendanceType; // "regular" o "physical_education"
   let value = input.value.toUpperCase();
 
-  // Validación según tipo
+  // Validación según tipo de asistencia
   if (selectedType === "regular") {
     if (!["P", "T", "A", "J", ""].includes(value)) {
       input.value = "";
       return;
     }
   } else if (selectedType === "physical_education") {
-    if (!["P", "A","J" ,""].includes(value)) {
+    if (!["P", "A", "J", ""].includes(value)) {
       input.value = "";
       return;
     }
   }
 
   input.value = value;
+
+  // 🔹 Aplicar estilos y estado del ícono
   applyAttendanceStyle(input);
   updateIconState(input);
 
+  // 🔹 Registro de cambios
   const originalValue = input.dataset.originalValue || "";
-  const key = `${input.dataset.userId}_${input.dataset.date}_${selectedType}`; // 🔹 incluir tipo
+  const key = `${input.dataset.userId}_${input.dataset.date}_${selectedType}`;
 
   if (value === originalValue) {
     attendanceChanges.delete(key);
@@ -254,7 +263,7 @@ document.addEventListener("input", async (e) => {
     attendanceChanges.set(key, payload);
   }
 
-  saveAttendanceBtn.disabled = attendanceChanges.size === 0 ? true : false;
+  saveAttendanceBtn.disabled = attendanceChanges.size === 0;
 });
 
 
@@ -1125,7 +1134,7 @@ function renderMobileBody(tbody, studentsGrades, selectedDate) {
     const input = document.createElement("input");
     input.type = "text";
     input.maxLength = 1;
-    input.classList.add("attendance-input-mobile");
+    input.classList.add("attendance-input");
 
     input.dataset.userId = student.userId;
     input.dataset.date = selectedDate;
@@ -1423,7 +1432,7 @@ function renderPhysicalEducationMobile(tbody, studentsGrades, selectedDate) {
     const input = document.createElement("input");
     input.type = "text";
     input.maxLength = 1;
-    input.classList.add("attendance-input-mobile");
+    input.classList.add("attendance-input");
 
     input.dataset.userId = student.userId;
     input.dataset.date = selectedDate;

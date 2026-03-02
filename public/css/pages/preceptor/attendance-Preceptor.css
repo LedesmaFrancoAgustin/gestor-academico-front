@@ -1039,6 +1039,12 @@ Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
   .preceptor-render-attendance-mobile {
     min-height: auto;
   }
+  .attendance-input {
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    font-weight: 700;
+  }
 }
 @media (min-width: 769px) {
   .preceptor-render-attendance-mobile {
