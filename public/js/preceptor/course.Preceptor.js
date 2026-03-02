@@ -158,11 +158,21 @@ async function  loadAndRenderAttendance  (){
     
 }
 
-// utils.js o al inicio de tu script
-function formatDate(date) {
-  if (!date) return "-"; // null o undefined
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "-" : d.toLocaleDateString("es-AR");
+// =============================
+// 🔹 Formatear fecha igual que en MongoDB
+// =============================
+function formatDate(fechaNacimiento) {
+   console.log(fechaNacimiento)
+  if (!fechaNacimiento || fechaNacimiento == "-") return "-";
+  // Si viene como objeto {$date: "..."} usamos .$date
+  const dateStr = fechaNacimiento.$date || fechaNacimiento;
+  const d = new Date(dateStr);
+
+  const day = d.getUTCDate().toString().padStart(2, "0");
+  const month = (d.getUTCMonth() + 1).toString().padStart(2, "0");
+  const year = d.getUTCFullYear();
+
+  return `${day}/${month}/${year}`;
 }
 
 

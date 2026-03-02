@@ -81,10 +81,6 @@ typeClassSelect.addEventListener("change", (e) => {
   const year = selectedYear;
   const month = selectedMonth;
 
-  //await loadAndRenderAttendance();
-
-
-  console.log("studentsGrades: ", studentsGrades)
 
   if (selectedType === "regular") {
     renderAttendanceTable(studentsGrades, year, month);
@@ -315,7 +311,7 @@ function renderHeader(thead, monthDates) {
   thSpace.classList.add("total-col-space");
   headRow.appendChild(thSpace);
 
-  [ "Anterior","Asistencia", "", "J", "A", "EF", "", "TOTAL"].forEach(text => {
+  [ "Anterior","Asistencia", "", "J", "A", "EF", "", "T/General "].forEach(text => {
     const th = document.createElement("th");
     th.classList.add("total-col");
     th.textContent = text;
@@ -1041,12 +1037,16 @@ async function loadAndRenderAttendance() {
 
     //console.log("studentsGrades,", studentsGrades)
 
-    // 4️⃣ Render
-    renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
-      // Solo renderizamos el informe si la tabla existe
+     if (selectedType === "regular") {
+      renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
+    } else if (selectedType === "physical_education") {
+      renderPhysicalEducationTable(studentsGrades, selectedYear, selectedMonth);
+    }
+   
 
     renderTableInforme(studentsGrades);
  
+
   } catch (error) {
     console.error("Error cargando asistencia:", error);
   }

@@ -714,6 +714,11 @@ input.modified {
 /* ========================================================================
 Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
 ========================================================================*/
+.preceptor-attendance-informe-content{
+  max-width: 1200px;
+  width: 60%;
+  padding: 1rem 1rem;
+}
 
 .preceptor-table-wrapper {
   width: 100%;
@@ -738,8 +743,9 @@ Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
 
 #preceptorAttendanceInformeTable th,
 #preceptorAttendanceInformeTable td {
-  padding: 14px 16px;
+  padding: 10px 12px;
   text-align: left;
+  font-size: 14px;
 }
 
 #preceptorAttendanceInformeTable th {
@@ -757,9 +763,13 @@ Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
 }
 
 #preceptorAttendanceInformeTable td:last-child {
-  text-align: right;
+  text-align: center;
   font-weight: 600;
   color: #2a5298;
+}
+
+.informe-total{
+  text-align: center !important;
 }
 
 .informe-highlight {
@@ -768,6 +778,6 @@ Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
 }
 
 .informe-highlight td:last-child {
-  font-size: 18px;
+  font-size: 15px;
   color: #1e3c72;
 }

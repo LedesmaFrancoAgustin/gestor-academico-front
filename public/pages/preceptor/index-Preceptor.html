@@ -95,13 +95,9 @@
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-end shadow">
+                    
                     <li>
-                    <a class="dropdown-item" href="./configurations-User.htm">
-                        <i class="bi bi-person me-2"></i> Perfil
-                    </a>
-                    </li>
-                    <li>
-                    <a class="dropdown-item" href="./configurations-User.htm">
+                    <a class="dropdown-item" href="./configurations-Preceptor.html">
                         <i class="bi bi-gear me-2"></i> Configuración
                     </a>
                     </li>
@@ -133,8 +129,8 @@
                         <i class="fa fa-user-circle"></i>
                     </div>
                     <div class="preceptor-sidebar-user-info">
-                        <h3 class="preceptor-sidebar-username" id="user-name">Preceptor</h3>
-                        <span class="preceptor-sidebar-role">Preceptor</span>
+                        <h3 class="preceptor-sidebar-username">Preceptor</h3>
+                        <span class="preceptor-sidebar-role" id="user-LastName"></span>
                     </div>
                 </div>
 
@@ -198,21 +194,17 @@
 
                     <div class="preceptor-stat-card">
                         <h3>Cursos</h3>
-                        <p class="preceptor-stat-number" id="stat-cursos">0</p>
+                        <p class="preceptor-stat-number" id="stat-cursos"></p>
                         <span class="text-muted">Activos</span>
                     </div>
 
                     <div class="preceptor-stat-card">
                         <h3>Alumnos</h3>
-                        <p class="preceptor-stat-number" id="stat-alumnos">0</p>
+                        <p class="preceptor-stat-number" id="stat-alumnos"></p>
                         <span class="text-muted">Totales</span>
                     </div>
 
-                    <div class="preceptor-stat-card stat-warning">
-                        <h3>Inasistencias</h3>
-                        <p class="preceptor-stat-number" id="stat-inasistencias">0</p>
-                        <span class="text-muted">Pendientes</span>
-                    </div>
+                  
 
                 </section>
 
@@ -229,7 +221,7 @@
                     <p>Ver notas</p>
                 </a>
 
-                <a href="" class="preceptor-action-card">
+                <a href="./course-Preceptor.html" class="preceptor-action-card">
                     <i class="bi bi-people"></i>
                     <p>Dato de alumnos</p>
                 </a>
@@ -254,6 +246,7 @@
 
     <script src="../../js/preceptor/preceptor.guard.js" ></script>
     <script src="../../js/preceptor/preceptor.global.js" ></script>
+    <script src="../../js/preceptor/index.Preceptor.js" ></script>
 
     <script src="../../js/global.js" ></script>
     <script src="../../js/notifications.js"></script>

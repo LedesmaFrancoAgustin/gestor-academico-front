@@ -296,12 +296,16 @@ function renderEmptyTable(tbody) {
 // =============================
 // 🔹 Función utilitaria para formatear fechas DD/MM/YYYY
 // =============================
+// =============================
+// 🔹 Formatear fecha igual que en MongoDB
+// =============================
 function formatDate(dateStr) {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
-  return `${d.getDate().toString().padStart(2,"0")}/${
-    (d.getMonth() + 1).toString().padStart(2,"0")
-  }/${d.getFullYear()}`;
+  const day = d.getUTCDate().toString().padStart(2,"0");
+  const month = (d.getUTCMonth() + 1).toString().padStart(2,"0");
+  const year = d.getUTCFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 // =============================

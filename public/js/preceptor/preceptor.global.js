@@ -3,6 +3,26 @@ const teacherSidebar = document.getElementById("preceptorSidebar");
 const teacherSidebarToggle = document.getElementById("preceptorSidebarToggle");
 
 // ==============================
+// Nombre del usuario
+// ==============================
+
+// Obtenemos el usuario de localStorage
+const storedUser = localStorage.getItem("user");
+
+if (storedUser) {
+  
+  try {
+    const user = JSON.parse(storedUser); // Convertimos de string a objeto
+    const nameElement = document.getElementById("user-LastName");
+
+    // Mostramos el nombre completo
+    nameElement.textContent = `${user.apellido} ${user.nombre}`;
+  } catch (e) {
+    console.error("Error al parsear el usuario:", e);
+  }
+}
+
+// ==============================
 // Restaurar estado al cargar
 // ==============================
 const isMobile = window.innerWidth <= 768;
