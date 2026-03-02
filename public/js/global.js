@@ -3,7 +3,6 @@ const API_URL = "https://gestor-academico-back.vercel.app";
 const token = localStorage.getItem("token");
 const WARNING_TIME = 60 * 1000;
 
-
 let limit = 15;
 let currentPage = 1;
 let sessionTimeoutId = null;
