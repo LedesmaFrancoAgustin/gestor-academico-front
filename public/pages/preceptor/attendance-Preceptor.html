@@ -215,16 +215,23 @@
                         <label for="monthSelect">Mes</label>
                         <select id="monthSelect" class="attendance-select" disabled>
                                  <option value="" selected disabled> Seleccione un mes </option>
-                                 <option value="03">Marzo</option>
-                                 <option value="04">Abril</option>
-                                 <option value="05">Mayo</option>
-                                 <option value="06">Junio</option>
-                                 <option value="07">Julio</option>
-                                 <option value="08">Agosto</option>
-                                 <option value="09">Septiembre</option>
+                                 <option value="3">Marzo</option>
+                                 <option value="4">Abril</option>
+                                 <option value="5">Mayo</option>
+                                 <option value="6">Junio</option>
+                                 <option value="7">Julio</option>
+                                 <option value="8">Agosto</option>
+                                 <option value="9">Septiembre</option>
                                  <option value="10">Octubre</option>
                                  <option value="11">Noviembre</option>
                                  <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="select-group select-date">
+                        <label for="attendanceDateSelect">Dia</label>
+                        <select id="attendanceDateSelect" class="attendance-select" disabled>
+                            <option value="" selected disabled> Seleccione un dia </option>
                         </select>
                     </div>
 
@@ -256,7 +263,7 @@
                 </div>
             </div>
 
-            <div class="preceptor-render-attendance">
+            <div class="preceptor-render-attendance ">
     
                     <!-- Contenedor de asistencias -->
                     <section class="preceptor-attendance-content">
@@ -270,7 +277,7 @@
 
                     </section>
 
-                    <!-- Contenedor de asistencias/Inasistencias IOnforme -->
+                    <!-- Contenedor de asistencias/Inasistencias Informe -->
                     <section class="preceptor-attendance-informe-content ">
 
                         <div class="preceptor-table-wrapper">
@@ -282,6 +289,18 @@
 
                     </section>
 
+            </div>
+
+            <div class="preceptor-render-attendance-mobile" id="mobileAttendanceContainer"> 
+                    <!-- Contenedor de asistencias -->
+                    <section class="preceptor-attendance-content-mobile">
+                        <div class="preceptor-table-wrapper-mobile">
+                            <table id="preceptorAttendanceMobileTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </section>        
             </div>
 
                 <div class="container">

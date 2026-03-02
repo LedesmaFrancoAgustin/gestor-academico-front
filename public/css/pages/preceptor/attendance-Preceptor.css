@@ -137,9 +137,28 @@
   .attendance-search {
     width: 100%;
   }
+  /* Contenedor general */
+  .attendance-selector {
+    width: 100%;
+    gap: 0.8rem;
+  }
+  .select-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .select-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .attendance-select {
+    width: 80%;
+  }
 }
 /* =========================
-   TABLA PRECEPTOR PRO
+   TABLA PRECEPTOR PRO - Escritorio
 ========================= */
 .preceptor-render-attendance {
   display: flex;
@@ -150,9 +169,10 @@
 }
 
 .preceptor-attendance-content {
-  width: 80%;
+  width: 90%;
   max-height: 800px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* ================= Tabla General ================= */
@@ -365,6 +385,14 @@ input.modified {
   }
   100% {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+  }
+}
+/* =========================
+   Ocultar tabla de escritorio
+========================= */
+@media (max-width: 768px) {
+  .preceptor-render-attendance {
+    display: none;
   }
 }
 /* =========================
@@ -759,6 +787,266 @@ Contenedor general de la tabla  - render de tabla aistencia/inasistencia Informe
 .informe-highlight td:last-child {
   font-size: 15px;
   color: #1e3c72;
+}
+
+/* =========================
+   TABLA PRECEPTOR PRO - Mobile
+========================= */
+.preceptor-render-attendance-mobile {
+  display: none;
+  padding: 12px;
+  background: #f4f6f9;
+  min-height: 100vh;
+}
+
+.preceptor-attendance-content-mobile {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.preceptor-table-wrapper-mobile {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+#preceptorAttendanceMobileTable {
+  width: 100%;
+  border-collapse: separate; /* IMPORTANTE */
+  border-spacing: 0 8px; /* 8px entre filas */
+  font-family: "Inter", sans-serif;
+}
+
+#preceptorAttendanceMobileTable tbody tr td {
+  background: #ffffff;
+  padding: 2px 6px;
+}
+
+#preceptorAttendanceMobileTable tbody tr td:first-child {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+#preceptorAttendanceMobileTable tbody tr td:last-child {
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+#preceptorAttendanceMobileTable thead tr:first-child th {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: white;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+#preceptorAttendanceMobileTable thead tr:nth-child(2) th {
+  background: #f9fafb;
+  padding: 10px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+#preceptorAttendanceMobileTable tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+  padding: 6px 8px !important; /* vertical | horizontal */
+}
+
+#preceptorAttendanceMobileTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+#preceptorAttendanceMobileTable td:nth-child(2) {
+  font-weight: 600;
+  color: #111827;
+  font-size: 12px;
+}
+
+#preceptorAttendanceMobileTable td:nth-child(3) {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* =========================
+   TABLA PRECEPTOR PRO - Mobile ED
+========================= */
+.attendance-title-mobile {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: white;
+  padding: 14px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+}
+
+#preceptorAttendanceMobileTable thead tr:nth-child(2) th {
+  background: #f3f4f6;
+  font-size: 12px;
+  padding: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* =========================
+   TABLA PRECEPTOR PRO - Mobile
+========================= */
+.attendance-input-mobile {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db; /* gris suave */
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.attendance-input-mobile[value=P] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.attendance-input-mobile[value=A] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.attendance-input-mobile[value=T] {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.attendance-input-mobile[value=J] {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.has-note {
+  border-bottom: 2px solid #070701;
+  border-right: 2px solid #070701;
+  cursor: pointer;
+}
+
+.mobile-footer-totals {
+  background: #111827;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
+.mobile-stats {
+  display: flex;
+  justify-content: space-around;
+  padding: 14px 0;
+  background: #0f172a;
+  color: white;
+  font-weight: 600;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-stats div {
+  text-align: center;
+}
+
+.mobile-stats span {
+  display: block;
+  font-size: 18px;
+}
+
+.mobile-status-cell {
+  position: relative;
+  text-align: center;
+}
+
+.total-a-ed {
+  text-align: center;
+}
+
+/* =========================
+  Render Mobile - Footer
+========================= */
+.mobile-footer-row td {
+  background: #f9fafb;
+  font-size: 13px;
+  padding: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mobile-footer-separator td {
+  height: 12px;
+  background: transparent;
+}
+
+/* =========================
+  Render Mobile - Tabla vacia
+========================= */
+.mobile-empty-state {
+  padding: 40px 10px;
+  text-align: center;
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.empty-icon {
+  font-size: 26px;
+  opacity: 0.6;
+}
+
+/* =========================
+   Ícono Flotante de edicion
+========================= */
+.floating-edit-icon {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  transform: translateY(-50%);
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 60;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Cuando el input está activo */
+.mobile-status-cell.active .floating-edit-icon {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.floating-edit-icon:hover {
+  color: #3b82f6;
+}
+
+/* =========================
+    Ocultar tabla  Mobile
+========================= */
+@media (max-width: 768px) {
+  .preceptor-render-attendance-mobile {
+    min-height: auto;
+  }
+}
+@media (min-width: 769px) {
+  .preceptor-render-attendance-mobile {
+    display: none;
+  }
+  .select-date {
+    display: none;
+  }
 }
 
 /*# sourceMappingURL=attendance-Preceptor.css.map */

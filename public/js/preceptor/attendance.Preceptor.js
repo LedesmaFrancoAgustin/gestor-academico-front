@@ -5,8 +5,10 @@ const academicYearSelect = document.getElementById("academicYearSelect");
 const courseSelect = document.getElementById("courseSelect");
 const monthSelect = document.getElementById("monthSelect");
 const typeClassSelect = document.getElementById("attendanceTypeSelect")
+const dateSelect = document.getElementById("attendanceDateSelect");
 const searchInput = document.getElementById("attendanceSearch");
 
+attendanceDateSelect
 
 const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
 
@@ -15,6 +17,8 @@ let selectedCourse = null
 let selectedMonth = null
 let selectedSearchInput = null
 let selectedType = "regular"          // Tipo de asistencia ED O Clase
+
+let selectedDate = null;    //fecha seleccionada
 
 let studentsInfo = [];
 let studentsGrades = []  // Estudiante con informmacion y asistencia/ausentes
@@ -52,6 +56,7 @@ academicYearSelect.addEventListener("change", async () => {
     courseSelect.appendChild(option);
   });
 
+  loadBusinessDaysInSelect(selectedYear, selectedMonth);
   courseSelect.disabled = false;
 });
 
@@ -69,43 +74,60 @@ courseSelect.addEventListener("change", async () => {
 monthSelect.addEventListener("change", async () => {
   selectedMonth = monthSelect.value;
   searchInput.value = "";
+  selectedDate = null;
+  loadBusinessDaysInSelect(selectedYear, selectedMonth);
   await loadAndRenderAttendance();
-});
 
+  dateSelect.disabled = false;
+});
+// =============================
+//  Selector de dia
+// =============================
+dateSelect.addEventListener("change", () => {
+  selectedDate = dateSelect.value;
+  renderByTypeAndDevice();
+});
 // =======================================================================================
 // 🔹 Select para cambiar tipo de asistencia
 // =======================================================================================
 
 typeClassSelect.addEventListener("change", (e) => {
   selectedType = e.target.value;
-  const year = selectedYear;
-  const month = selectedMonth;
+  
+  renderByTypeAndDevice();
 
-
-  if (selectedType === "regular") {
-    renderAttendanceTable(studentsGrades, year, month);
-  } else if (selectedType === "physical_education") {
-    renderPhysicalEducationTable(studentsGrades, year, month);
-  }
 });
 
 
 searchInput.addEventListener("input", () => {
-  const value = searchInput.value.trim().toLowerCase();
 
-  const tbody = document.querySelector("#preceptorAttendanceTable tbody");
-  const rows = tbody.querySelectorAll("tr");
+  const value = searchInput.value.trim().toLowerCase();
+  const isDesktop = window.innerWidth > 768;
+
+  // 🔎 Seleccionamos tabla según versión
+  const tableSelector = isDesktop
+    ? "#preceptorAttendanceTable"
+    : "#preceptorAttendanceMobileTable";
+
+  const tbody = document.querySelector(`${tableSelector} tbody`);
+  if (!tbody) return;
+
+  const rows = tbody.querySelectorAll("tr[data-user-id]"); 
+  // 🔥 IMPORTANTE: solo filas de alumnos (evita footer)
 
   rows.forEach(tr => {
+
     const name = tr.children[1]?.textContent.toLowerCase() || "";
-    const dni  = tr.children[2]?.textContent.toLowerCase() || "";
+
+    // 🔎 DNI puede no existir en mobile → lo buscamos seguro
+    const dniCell = tr.children[2];
+    const dni = dniCell?.textContent?.toLowerCase() || "";
 
     const match = name.includes(value) || dni.includes(value);
+
     tr.style.display = match ? "" : "none";
   });
 
-  // 🔥 opcional: recalcular totales solo visibles
-  //recalculateFooter(tbody, getCurrentMonthDates());
 });
 
 // =============================
@@ -144,12 +166,25 @@ saveAttendanceBtn.addEventListener("click", async () => {
       });
     }
   });
-
+ //console.log("monthSelect: ",selectedMonth)
   // 🔥 Guardar en el backend
-  await fetchPostAttendanceForMonth(selectedCourse, selectedYear, trimester, attendanceChanges);
+  await fetchPostAttendanceForMonth(selectedCourse, selectedYear, selectedMonth , attendanceChanges);
 });
 
+// =============================
+//  Mensaje de avisar para guardar cambios
+// =============================
+window.addEventListener("beforeunload", function (e) {
 
+  // Si el botón está habilitado → hay cambios sin guardar
+  if (!saveAttendanceBtn.disabled) {
+
+    e.preventDefault();
+    e.returnValue = ""; // requerido por navegadores modernos
+
+  }
+
+});
 
 // ===========================================================================
 // 🟢 Event listeners - Para Render
@@ -223,9 +258,9 @@ document.addEventListener("input", async (e) => {
 });
 
 
-// =======================================================================================
-// 🟢 Render 
-// =======================================================================================
+// ==============================================================================================================================================================
+// 🟢 Render  - Escritorio
+// =============================================================================================================================================================
 function renderAttendanceTable(studentsGrades, year, month) {
 
   if (!month || !year) {
@@ -258,7 +293,7 @@ function renderHeader(thead, monthDates) {
   const groupRow = document.createElement("tr");
   groupRow.classList.add("tr-Header");
 
-  const totalCols = 3 + monthDates.length + 9; // columnas fijas + días + totales
+  const totalCols = 3 + monthDates.length + 10; // columnas fijas + días + totales
   const thTitle = document.createElement("th");
   thTitle.colSpan = totalCols;
   thTitle.textContent = "Registro de asistencia de clases";
@@ -311,7 +346,7 @@ function renderHeader(thead, monthDates) {
   thSpace.classList.add("total-col-space");
   headRow.appendChild(thSpace);
 
-  [ "Anterior","Asistencia", "", "J", "A", "EF", "", "T/General "].forEach(text => {
+  [ "Anterior","Asistencia", "", "J", "A", "EF", "", "A / Mes ","A / General "].forEach(text => {
     const th = document.createElement("th");
     th.classList.add("total-col");
     th.textContent = text;
@@ -327,8 +362,8 @@ function renderBody(tbody, studentsGrades, monthDates) {
 
     const tr = document.createElement("tr");
 
-      tr.dataset.userId = student.userId;
-      tr.dataset.gender = student.genero?.toLowerCase() || "";
+    tr.dataset.userId = student.userId;
+    tr.dataset.gender = student.genero?.toLowerCase() || "";
 
     // ==================================================
     // 🟢 Columnas fijas
@@ -350,23 +385,31 @@ function renderBody(tbody, studentsGrades, monthDates) {
     tr.appendChild(tdDni);
 
     // ==================================================
-    // 🟢 Crear mapa rápido por fecha
+    // 🟢 Crear mapa rápido por fecha a partir de student.records
     // ==================================================
 
     const detailsMap = new Map();
 
-    (student.details || []).forEach(d => {
-      if (!detailsMap.has(d.date)) {
-        detailsMap.set(d.date, []);
-      }
-      detailsMap.get(d.date).push(d);
+    Object.entries(student.records || {}).forEach(([key, record]) => {
+      //const [dayStr, attendanceType] = key.split("_");
+      //const date = parseInt(dayStr, 10); // día como número
+
+      const [dayStr, ...typeParts] = key.split("_");
+      const attendanceType = typeParts.join("_"); // ← CORRECCIÓN
+      const date = parseInt(dayStr, 10); // día como número
+
+      if (!detailsMap.has(date)) detailsMap.set(date, []);
+      detailsMap.get(date).push({
+        ...record,
+        attendanceType,
+        date
+      });
     });
 
     let totalPresents = 0;
     let totalAbsents = 0;
     let totalAbsentsED = 0;
     let totalJustified = 0;
-    let tdTotalPrevious = 0;
 
     // ==================================================
     // 🟢 Columnas por día
@@ -386,7 +429,10 @@ function renderBody(tbody, studentsGrades, monthDates) {
         return;
       }
 
-      const records = detailsMap.get(date) || [];
+       // 🔹 Aquí el fix: obtener el día del mes
+      const day = parseInt(date.split("-")[2], 10); // "2026-03-02" → 2
+      const records = detailsMap.get(day) || [];
+
 
       let code = "";
       let noteText = "";
@@ -396,11 +442,8 @@ function renderBody(tbody, studentsGrades, monthDates) {
         // 🚫 EDUCACIÓN FÍSICA → NO SE MUESTRA
         if (record.attendanceType === "physical_education") {
 
-          if (record.status === "absent") {
-
-             if (!record.justification?.isJustified) {
-                totalAbsentsED += 0.5; // media falta
-            } 
+          if (record.status === "absent" && !record.justified?.isJustified) {
+            totalAbsentsED += 0.5; // media falta
           }
 
           return; // no mostrar nada en la celda
@@ -426,184 +469,132 @@ function renderBody(tbody, studentsGrades, monthDates) {
 
           } else if (record.status === "absent") {
 
-            if (record.justification?.isJustified) {
+            if (record.justified?.isJustified) {
               code = "J";
               totalJustified++;
             } else {
               code = "A";
               totalAbsents++;
             }
-
-            
           }
         }
 
       });
 
+      // ==================================================
+      // 🔹 Crear input + icon dentro del td
+      // ==================================================
       const input = document.createElement("input");
       input.type = "text";
       input.maxLength = 1;
       input.classList.add("attendance-input");
-        input.dataset.userId = student.userId;
-        input.dataset.date = date;
-        input.dataset.attendanceType = "regular";
-      input.value = code || ""; // ← si tenía P/A/T/J lo carga
+      input.dataset.userId = student.userId;
+      input.dataset.date = date;
+      input.dataset.attendanceType = "regular";
+      input.value = code || "";
       input.dataset.originalValue = input.value || "";
 
-          // Mostrar icono al enfocar si el valor es válido
-          input.addEventListener("focus", () => {
-            const td = input.closest("td.attendance-cell");
-            if (!td) return;
+      input.addEventListener("focus", () => {
+        const td = input.closest("td.attendance-cell");
+        if (!td) return;
+        if (["P", "A", "T", "J"].includes(input.value.toUpperCase())) td.classList.add("show-icon");
+      });
+      input.addEventListener("blur", () => {
+        const td = input.closest("td.attendance-cell");
+        if (!td) return;
+        td.classList.remove("show-icon");
+      });
+      input.addEventListener("input", () => {
+        const td = input.closest("td.attendance-cell");
+        if (!td) return;
+        const value = input.value.toUpperCase();
+        if (["P", "A", "T", "J"].includes(value)) td.classList.add("show-icon");
+        else td.classList.remove("show-icon");
+        const tr = input.closest("tr");
+        recalculateRowTotals(tr);
+        recalculateFooter(tbody, monthDates);
+      });
 
-            if (["P", "A", "T", "J"].includes(input.value.toUpperCase())) {
-              td.classList.add("show-icon");
-            }
-          });
-
-          // Ocultar al salir
-          input.addEventListener("blur", () => {
-            const td = input.closest("td.attendance-cell");
-            if (!td) return;
-
-            td.classList.remove("show-icon");
-          });
-
-          // 🔥 CLAVE: reaccionar cuando escribe
-          input.addEventListener("input", () => {
-            const td = input.closest("td.attendance-cell");
-            if (!td) return;
-
-            const value = input.value.toUpperCase();
-
-            if (["P", "A", "T", "J"].includes(value)) {
-              td.classList.add("show-icon");
-            } else {
-              td.classList.remove("show-icon");
-            }
-
-            // 🔥 Actualiza solo esta fila
-            const tr = input.closest("tr");
-            recalculateRowTotals(tr);
-            // 🔥 ACTUALIZA TOTALES
-            recalculateFooter(tbody, monthDates);
-     
-          });
-
-      applyAttendanceStyle(input);  // Apñcar estilo de colores
-
-      updateIconState(input); // Apñcar el icono cuando es valido
+      applyAttendanceStyle(input);
+      updateIconState(input);
 
       const icon = document.createElement("i");
       icon.className = "edit-note-icon fa-solid fa-pencil";
 
-          if (noteText) {
+      if (noteText) {
+        input.dataset.note = noteText;
+        input.classList.add("has-note");
 
-            input.dataset.note = noteText;
-            input.classList.add("has-note");
+        const tooltip = document.createElement("div");
+        tooltip.className = "attendance-tooltip";
+        tooltip.textContent = noteText;
 
-            const tooltip = document.createElement("div");
-            tooltip.className = "attendance-tooltip";
-            tooltip.textContent = noteText;
+        td.appendChild(tooltip);
+        td.classList.add("has-tooltip");
+      }
 
-            td.appendChild(tooltip);
-            td.classList.add("has-tooltip");
-          }
+      icon.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openAttendanceDetailModal({
+          userId: input.dataset.userId,
+          date: input.dataset.date,
+          attendanceType: input.dataset.attendanceType,
+          input
+        });
+      });
 
-        // Mostrar modal para notes
-          icon.addEventListener("click", (e) => {
-            e.stopPropagation();
-            console.log("click")
-            openAttendanceDetailModal({
-              userId: input.dataset.userId,
-              date: input.dataset.date,
-              attendanceType: input.dataset.attendanceType,
-              input // 👈 PASAMOS EL INPUT REAL
-            });
-          });
-
-      // 🔹 Agregamos input + icon dentro del td
       td.appendChild(input);
       td.appendChild(icon);
-
       tr.appendChild(td);
     });
 
     // ==================================================
-    // 🟢 Espacio visual
+    // 🟢 Espacios y totales
     // ==================================================
-
-    const tdSpace = document.createElement("td");
-    tdSpace.classList.add("total-col-space");
-    tr.appendChild(tdSpace);
-
-    // ==================================================
-    // 🟢 Totales Ausentes previos
-    // ==================================================
+    const tdSpace = document.createElement("td"); tdSpace.classList.add("total-col-space"); tr.appendChild(tdSpace);
 
     const tdTotalPre = document.createElement("td");
     tdTotalPre.classList.add("total-col","total-previous");
-    tdTotalPre.textContent = student.totalWeightedAbsences ?? 0; // ← aquí
+    tdTotalPre.textContent = student.totalWeightedAbsences ?? 0;
     tr.appendChild(tdTotalPre);
 
-     // ==================================================
-    // 🟢 Totales Aistencias
-    // ==================================================
-
-     const tdTotalP = document.createElement("td");
+    const tdTotalP = document.createElement("td");
     tdTotalP.classList.add("total-col","total-p");
     tdTotalP.textContent = totalPresents;
     tr.appendChild(tdTotalP);
 
-    // ==================================================
-    // 🟢 Espacio visual
-    // ==================================================
-
-    const tdSpace1 = document.createElement("td");
-    tdSpace1.classList.add("total-col-space");
-    tr.appendChild(tdSpace1);
-
-     // ==================================================
-    // 🟢 Totales Justificados
-    // ==================================================
+    const tdSpace1 = document.createElement("td"); tdSpace1.classList.add("total-col-space"); tr.appendChild(tdSpace1);
 
     const tdTotalJ = document.createElement("td");
     tdTotalJ.classList.add("total-col","total-j");
     tdTotalJ.textContent = totalJustified;
     tr.appendChild(tdTotalJ);
 
-    // ==================================================
-    // 🟢 Totales Ausentes
-    // ==================================================
-
     const tdTotalA = document.createElement("td");
     tdTotalA.classList.add("total-col","total-a");
     tdTotalA.textContent = totalAbsents;
     tr.appendChild(tdTotalA);
 
-    // ==================================================
-    // 🟢 Totales ED
-    // ==================================================
     const tdTotalAED = document.createElement("td");
     tdTotalAED.classList.add("total-col","total-aed");
     tdTotalAED.textContent = totalAbsentsED;
     tr.appendChild(tdTotalAED);
 
-    // ==================================================
-    // 🟢 Espacio visual
-    // ==================================================
-    const tdSpace3 = document.createElement("td");
-    tdSpace3.classList.add("total-col-space");
-    tr.appendChild(tdSpace3);
+    const tdSpace3 = document.createElement("td"); tdSpace3.classList.add("total-col-space"); tr.appendChild(tdSpace3);
+
+    const tdTotalAMonth = document.createElement("td");
+    tdTotalAMonth.classList.add("total-col","total-a-general");
+    tdTotalAMonth.textContent = totalAbsents + totalAbsentsED ;
+    tr.appendChild(tdTotalAMonth);
 
     const tdTotalAGeneral = document.createElement("td");
     tdTotalAGeneral.classList.add("total-col","total-a-general");
-    tdTotalAGeneral.textContent = totalAbsents + totalAbsentsED ;
+    tdTotalAGeneral.textContent = totalAbsents + totalAbsentsED + student.totalWeightedAbsences ?? 0;
     tr.appendChild(tdTotalAGeneral);
 
     tbody.appendChild(tr);
   });
 }
-
 function renderFooterTotals(tbody, monthDates) {
 
   const dateIndexMap = {};
@@ -710,9 +701,8 @@ function renderFooterTotals(tbody, monthDates) {
 }
 
 // =======================================================================================
-// 🟢 Render  Educacion fisica
+// 🟢 Render  Educacion fisica - Escritorio
 // =======================================================================================
-
 // =======================================================================================
 // Render  Educacion fisica -Hender
 // =======================================================================================
@@ -783,7 +773,7 @@ function renderHeaderED(thead, monthDates) {
   thead.appendChild(tr);
 }
 // =======================================================================================
-// 🟢 Render body Educación Física
+// 🟢 Render body Educación Física adaptado a student.records
 // =======================================================================================
 function renderPhysicalEducationTable(studentsGrades, year, month) {
   if (!month || !year) return;
@@ -824,14 +814,22 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
     tr.appendChild(tdDni);
 
     // =======================
-    // Mapa de detalles por fecha (solo ED)
+    // Mapa de detalles por día (solo ED)
     // =======================
     const detailsMap = new Map();
-    (student.details || []).forEach(d => {
-      if (d.attendanceType === "physical_education") {
-        if (!detailsMap.has(d.date)) detailsMap.set(d.date, []);
-        detailsMap.get(d.date).push(d);
-      }
+    Object.entries(student.records || {}).forEach(([key, record]) => {
+      const [dayStr, ...typeParts] = key.split("_");
+      const attendanceType = typeParts.join("_"); // ← CORRECCIÓN
+
+      if (attendanceType !== "physical_education") return;
+
+      const day = parseInt(dayStr, 10); // día del mes
+      if (!detailsMap.has(day)) detailsMap.set(day, []);
+      detailsMap.get(day).push({
+        ...record,
+        attendanceType,
+        date: day
+      });
     });
 
     let totalPresents = 0;
@@ -848,7 +846,8 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
         return;
       }
 
-      const records = detailsMap.get(date) || [];
+      const day = parseInt(date.split("-")[2], 10); // día del mes
+      const records = detailsMap.get(day) || [];
       let code = "";
 
       records.forEach(record => {
@@ -856,17 +855,13 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
           code = "P";
           totalPresents++;
         } else if (record.status === "absent") {
-
-            if (record.justification?.isJustified) {
-              code = "J";
-            } else {
-              code = "A";
-              totalAbsents++;
-            }
-
-            
+          if (record.justified?.isJustified) {
+            code = "J";
+          } else {
+            code = "A";
+            totalAbsents++;
           }
-
+        }
       });
 
       // =======================
@@ -882,26 +877,19 @@ function renderPhysicalEducationTable(studentsGrades, year, month) {
       input.value = code;
       input.dataset.originalValue = input.value;
 
-      // Solo acepta P o A
       input.addEventListener("input", () => {
         const value = input.value.toUpperCase();
-        if (["P", "A" , "J"].includes(value)) {
-          td.classList.add("show-icon");
-        } else {
-          td.classList.remove("show-icon");
-        }
-
-        // Actualiza totales
+        if (["P", "A", "J"].includes(value)) td.classList.add("show-icon");
+        else td.classList.remove("show-icon");
         recalculateRowTotalsED(tr);
       });
-
       input.addEventListener("focus", () => td.classList.add("show-icon"));
       input.addEventListener("blur", () => td.classList.remove("show-icon"));
 
       applyAttendanceStyle(input);
       updateIconState(input);
 
-      // Icono de nota (opcional, aunque ED no requiere)
+      // Icono de nota opcional
       const icon = document.createElement("i");
       icon.className = "edit-note-icon fa-solid fa-pencil";
       icon.addEventListener("click", (e) => {
@@ -997,6 +985,531 @@ function renderTableInforme(studentsGrades = []) {
     </tr>
   `;
 }
+// ==============================================================================================================================================================
+// 🟢 Render  - Mobile
+// =============================================================================================================================================================
+function renderAttendanceMobile(studentsGrades, selectedDate) {
+
+  const wrapper = document.getElementById("mobileAttendanceContainer");
+  const table = document.getElementById("preceptorAttendanceMobileTable");
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+
+  wrapper.style.display = "block";
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  // 🚨 Caso 1: No hay día seleccionado
+    if (!selectedDate) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  // 🚨 Caso 2: No hay alumnos
+  if (!studentsGrades || studentsGrades.length === 0) {
+    renderMobileEmptyState(tbody, "No hay alumnos para mostrar");
+    return;
+  }
+
+  // ✅ Render normal
+  renderMobileHeader(thead, selectedDate);
+  renderMobileBody(tbody, studentsGrades, selectedDate);
+  renderMobileFooter(tbody, studentsGrades, selectedDate);
+}
+
+//Render Header - Mobile
+function renderMobileHeader(thead, selectedDate) {
+
+  const [year, month, day] = selectedDate.split("-");
+  const formattedDate = `${day}/${month}`;
+
+  const trTitle = document.createElement("tr");
+  const thTitle = document.createElement("th");
+  thTitle.colSpan = 5;
+  thTitle.textContent = `Registro de clase - Fecha ${formattedDate}`;
+  thTitle.classList.add("text-center");
+  trTitle.appendChild(thTitle);
+  thead.appendChild(trTitle);
+
+  const tr = document.createElement("tr");
+
+  ["#", "Alumno", "Estado", ""].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    tr.appendChild(th);
+  });
+
+  thead.appendChild(tr);
+}
+//Render body - Mobile
+function renderMobileBody(tbody, studentsGrades, selectedDate) {
+
+  const selectedDay = parseInt(selectedDate.split("-")[2], 10);
+
+  studentsGrades.forEach((student, index) => {
+
+    const tr = document.createElement("tr");
+    tr.dataset.userId = student.userId;
+    tr.dataset.gender = student.genero?.toLowerCase() || "";
+
+    // ============================
+    // 🟢 Columna #
+    // ============================
+
+    const tdIndex = document.createElement("td");
+    tdIndex.textContent = index + 1;
+    tr.appendChild(tdIndex);
+
+    // ============================
+    // 🟢 Nombre + DNI compacto
+    // ============================
+
+    const tdName = document.createElement("td");
+    tdName.textContent = student.name; 
+
+    tr.appendChild(tdName);
+
+    
+
+    // ============================
+    // 🧠 MAPA DE RECORDS
+    // ============================
+
+    const detailsMap = new Map();
+
+    Object.entries(student.records || {}).forEach(([key, record]) => {
+
+      const [dayStr, ...typeParts] = key.split("_");
+      const attendanceType = typeParts.join("_");
+      const day = parseInt(dayStr, 10);
+
+      if (!detailsMap.has(day)) detailsMap.set(day, []);
+      detailsMap.get(day).push({
+        ...record,
+        attendanceType,
+        day
+      });
+
+    });
+
+    const records = detailsMap.get(selectedDay) || [];
+
+    let code = "";
+    let noteText = "";
+
+    records.forEach(record => {
+
+      if (record.attendanceType !== "regular") return;
+
+      if (record.notes?.trim()) {
+        noteText = record.notes;
+      }
+
+      if (record.status === "present") {
+        code = record.late?.isLate ? "T" : "P";
+      }
+
+      if (record.status === "absent") {
+        code = record.justified?.isJustified ? "J" : "A";
+      }
+
+    });
+
+    // ============================
+    // 🟢 Estado editable (SIN td icon extra)
+    // ============================
+
+    const tdStatus = document.createElement("td");
+    tdStatus.classList.add("mobile-status-cell");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 1;
+    input.classList.add("attendance-input-mobile");
+
+    input.dataset.userId = student.userId;
+    input.dataset.date = selectedDate;
+    input.dataset.attendanceType = "regular";
+
+    input.value = code;
+    input.dataset.originalValue = code;
+
+    if (noteText) {
+      input.dataset.note = noteText;
+      input.classList.add("has-note");
+    }
+
+    // 🎯 INPUT EVENTS
+    input.addEventListener("focus", () => {
+      tdStatus.classList.add("active");
+    });
+
+    input.addEventListener("blur", () => {
+      tdStatus.classList.remove("active");
+    });
+
+    input.addEventListener("input", () => {
+      applyAttendanceStyle(input);
+      renderMobileFooter(tbody, studentsGrades, selectedDate);
+    });
+
+    applyAttendanceStyle(input);
+
+    // ============================
+    // ✏️ ÍCONO FLOTANTE
+    // ============================
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-pencil floating-edit-icon";
+
+    icon.addEventListener("click", () => {
+      openAttendanceDetailModal({
+        userId: input.dataset.userId,
+        date: input.dataset.date,
+        attendanceType: input.dataset.attendanceType,
+        input
+      });
+    });
+
+    tdStatus.appendChild(input);
+    tdStatus.appendChild(icon);
+    tr.appendChild(tdStatus);
+
+    tbody.appendChild(tr);
+  });
+}
+//Render Footer - Mobile
+// Render Footer - Mobile (igual que escritorio pero por día seleccionado)
+function renderMobileFooter(tbody) {
+
+  // 🔥 Eliminar footer anterior si existe
+  const oldFooter = tbody.querySelectorAll(".mobile-footer-row, .mobile-footer-separator");
+  oldFooter.forEach(row => row.remove());
+
+  const rows = tbody.querySelectorAll("tr[data-user-id]");
+
+  const totals = {
+    masculino: { P: 0, A: 0, COUNT: 0 },
+    femenino: { P: 0, A: 0, COUNT: 0 }
+  };
+
+  rows.forEach(tr => {
+
+    const gender = tr.dataset.gender;
+    if (!totals[gender]) return;
+
+    totals[gender].COUNT++;
+
+    const input = tr.querySelector("input.attendance-input-mobile");
+    if (!input) return;
+
+    const value = input.value.toUpperCase();
+
+    if (value === "P" || value === "T") {
+      totals[gender].P++;
+    }
+
+    if (value === "A" || value === "J") {
+      totals[gender].A++;
+    }
+
+  });
+
+  const totalPresentes =
+    totals.masculino.P + totals.femenino.P;
+
+  const totalAusentes =
+    totals.masculino.A + totals.femenino.A;
+
+  const totalInscriptos =
+    totals.masculino.COUNT + totals.femenino.COUNT;
+
+  // =========================
+  // 🔹 Separador
+  // =========================
+
+  const separator = document.createElement("tr");
+  separator.classList.add("mobile-footer-separator");
+  separator.innerHTML = `<td colspan="3"></td>`;
+  tbody.appendChild(separator);
+
+  // =========================
+  // 🔹 Helper para crear fila
+  // =========================
+
+  function createFooterRow(label, value) {
+    const tr = document.createElement("tr");
+    tr.classList.add("mobile-footer-row");
+
+    tr.innerHTML = `
+      <td colspan="2"><strong>${label}</strong></td>
+      <td style="text-align:center;"><strong>${value}</strong></td>
+    `;
+
+    tbody.appendChild(tr);
+  }
+
+  // =========================
+  // 🔹 VARONES
+  // =========================
+
+  createFooterRow("VARONES PRESENTES", totals.masculino.P);
+  createFooterRow("VARONES AUSENTES", totals.masculino.A);
+  createFooterRow("TOTAL VARONES", totals.masculino.COUNT);
+
+  // Espacio visual
+  createFooterRow(" ", " ");
+
+  // =========================
+  // 🔹 MUJERES
+  // =========================
+
+  createFooterRow("MUJERES PRESENTES", totals.femenino.P);
+  createFooterRow("MUJERES AUSENTES", totals.femenino.A);
+  createFooterRow("TOTAL MUJERES", totals.femenino.COUNT);
+
+  // Espacio visual
+  createFooterRow(" ", " ");
+
+  // =========================
+  // 🔹 TOTALES GENERALES
+  // =========================
+
+  createFooterRow("PRESENTES TOTALES", totalPresentes);
+  createFooterRow("AUSENTES TOTALES", totalAusentes);
+  createFooterRow("TOTAL INSCRIPTOS", totalInscriptos);
+
+}
+
+// =======================================================================================
+// 🟢 Render Educación Física - Mobile
+// =======================================================================================
+// =======================================================================================
+// 🟢 Render Header Educación Física - Mobile
+// =======================================================================================
+
+function renderAttendanceEDMobile(studentsGrades, selectedDate) {
+
+  const wrapper = document.getElementById("mobileAttendanceContainer");
+  const table = document.getElementById("preceptorAttendanceMobileTable");
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+
+  wrapper.style.display = "block";
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  // 🚨 Caso 1: No hay día seleccionado
+  if (!selectedDate) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  // 🚨 Caso 2: No hay alumnos
+  if (!studentsGrades || studentsGrades.length === 0) {
+    renderMobileEmptyState(tbody, "No hay alumnos para mostrar");
+    return;
+  }
+
+  // ✅ Render normal
+  renderHeaderEDMobile(thead, selectedDate);
+  renderPhysicalEducationMobile(tbody, studentsGrades, selectedDate);
+  renderPhysicalEducationMobileFooter(tbody);
+}
+// =======================================================================================
+// 🟢 Render Header Educación Física - Mobile (adaptado)
+// =======================================================================================
+function renderHeaderEDMobile(thead, selectedDate) {
+
+  if (!thead || !selectedDate) return;
+
+  thead.innerHTML = "";
+
+  const [year, month, day] = selectedDate.split("-");
+  const formattedDate = `${day}/${month}`;
+
+  // 🔹 Fila título
+  const trTitle = document.createElement("tr");
+
+  const thTitle = document.createElement("th");
+  thTitle.colSpan = 5;
+  thTitle.textContent = `Registro de E.F - Fecha ${formattedDate}`;
+  thTitle.classList.add("attendance-title-mobile");
+
+  trTitle.appendChild(thTitle);
+  thead.appendChild(trTitle);
+
+  // 🔹 Fila columnas
+  const trColumns = document.createElement("tr");
+
+  const columns = ["#", "Alumno", "Estado", "T/A"];
+
+  columns.forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    trColumns.appendChild(th);
+  });
+
+  thead.appendChild(trColumns);
+}
+function renderPhysicalEducationMobile(tbody, studentsGrades, selectedDate) {
+
+  if (!selectedDate || !studentsGrades || !tbody) return;
+
+  const selectedDay = parseInt(selectedDate.split("-")[2], 10);
+
+  studentsGrades.forEach((student, index) => {
+
+    const tr = document.createElement("tr");
+    tr.dataset.userId = student.userId;
+    tr.dataset.gender = student.genero?.toLowerCase() || "";
+
+    // #
+    const tdIndex = document.createElement("td");
+    tdIndex.textContent = index + 1;
+    tr.appendChild(tdIndex);
+
+    // Nombre
+    const tdName = document.createElement("td");
+    tdName.textContent = student.name;
+    tr.appendChild(tdName);
+
+    // =========================
+    // Map registros ED
+    // =========================
+    const detailsMap = new Map();
+
+    Object.entries(student.records || {}).forEach(([key, record]) => {
+
+      const [dayStr, ...typeParts] = key.split("_");
+      const attendanceType = typeParts.join("_");
+
+      if (attendanceType !== "physical_education") return;
+
+      const day = parseInt(dayStr, 10);
+      if (!detailsMap.has(day)) detailsMap.set(day, []);
+      detailsMap.get(day).push(record);
+
+    });
+
+    // Código día seleccionado
+    const recordsToday = detailsMap.get(selectedDay) || [];
+    let code = "";
+
+    recordsToday.forEach(record => {
+      if (record.status === "present") code = "P";
+      else if (record.status === "absent") {
+        code = record.justified?.isJustified ? "J" : "A";
+      }
+    });
+
+    // Totales mensuales
+    let totalP = 0;
+    let totalA = 0;
+
+    detailsMap.forEach(records => {
+      records.forEach(record => {
+        if (record.status === "present") totalP++;
+        if (record.status === "absent" && !record.justified?.isJustified) totalA++;
+      });
+    });
+
+    // =========================
+    // Celda editable
+    // =========================
+    const tdStatus = document.createElement("td");
+    tdStatus.classList.add("mobile-status-cell");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 1;
+    input.classList.add("attendance-input-mobile");
+
+    input.dataset.userId = student.userId;
+    input.dataset.date = selectedDate;
+    input.dataset.attendanceType = "physical_education";
+
+    input.value = code;
+    input.dataset.originalValue = code;
+
+    input.addEventListener("focus", () => tdStatus.classList.add("active"));
+    input.addEventListener("blur", () => tdStatus.classList.remove("active"));
+
+    input.addEventListener("input", () => {
+      applyAttendanceStyle(input);
+      renderPhysicalEducationMobileFooter(tbody);
+    });
+
+    applyAttendanceStyle(input);
+
+    // ✏️ Icono flotante
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-pencil floating-edit-icon";
+
+    icon.addEventListener("click", () => {
+      openAttendanceDetailModal({
+        userId: input.dataset.userId,
+        date: input.dataset.date,
+        attendanceType: input.dataset.attendanceType,
+        input
+      });
+    });
+
+    tdStatus.appendChild(input);
+    tdStatus.appendChild(icon);
+    tr.appendChild(tdStatus);
+
+    const tdTotalA = document.createElement("td");
+    tdTotalA.textContent = totalA;
+    tdTotalA.classList.add("total-a-ed");
+    tr.appendChild(tdTotalA);
+
+    tbody.appendChild(tr);
+  });
+}
+function renderPhysicalEducationMobileFooter(tbody) {
+
+  if (!tbody) return;
+
+  const old = tbody.querySelectorAll(".mobile-footer-row, .mobile-footer-separator");
+  old.forEach(el => el.remove());
+
+  const rows = tbody.querySelectorAll("tr[data-user-id]");
+
+  let totalPresentes = 0;
+  let totalAusentes = 0;
+
+  rows.forEach(tr => {
+    const input = tr.querySelector("input.attendance-input-mobile");
+    if (!input) return;
+
+    const value = input.value.toUpperCase();
+
+    if (value === "P") totalPresentes++;
+    if (value === "A") totalAusentes++;
+  });
+
+  const separator = document.createElement("tr");
+  separator.classList.add("mobile-footer-separator");
+  separator.innerHTML = `<td colspan="5"></td>`;
+  tbody.appendChild(separator);
+
+  function createRow(label, value) {
+    const tr = document.createElement("tr");
+    tr.classList.add("mobile-footer-row");
+
+    tr.innerHTML = `
+      <td colspan="3"><strong>${label}</strong></td>
+      <td colspan="2" style="text-align:center;"><strong>${value}</strong></td>
+    `;
+
+    tbody.appendChild(tr);
+  }
+
+  createRow("PRESENTES TOTALES ED", totalPresentes);
+  createRow("AUSENTES TOTALES ED", totalAusentes);
+}
+// =======================================================================================
 // ======================================================================================================================
 // 🟢 Funciones  Para el render - principal
 // ======================================================================================================================
@@ -1012,12 +1525,16 @@ async function loadAndRenderAttendance() {
     // 1️⃣ Traer alumnos del curso
     studentsInfo = await fetchGetStudentsByCourse(selectedCourse);
 
+    //console.log("studentsInfo: ",studentsInfo)
+
     // 2️⃣ Traer asistencia del mes
     const attendanceMonth = await fetchGetAttendanceForMonth(
       selectedCourse,
       selectedYear,
       selectedMonth
     );
+
+    //console.log("attendanceMonth: ",attendanceMonth)
     // 3️⃣ Traer asistencia de meses anteriores
     const attendancePreviousStudents = await fetchGetPreviousAttendance(
       selectedCourse,
@@ -1027,7 +1544,6 @@ async function loadAndRenderAttendance() {
 
     //console.log("attendancePreviousStudents,", attendancePreviousStudents)
 
-
     // 4️⃣ Mapear para la tabla
     studentsGrades = mapStudentsForTable(
       studentsInfo,
@@ -1035,22 +1551,52 @@ async function loadAndRenderAttendance() {
       attendancePreviousStudents
     );
 
-    //console.log("studentsGrades,", studentsGrades)
-
-     if (selectedType === "regular") {
-      renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
-    } else if (selectedType === "physical_education") {
-      renderPhysicalEducationTable(studentsGrades, selectedYear, selectedMonth);
-    }
-   
-
-    renderTableInforme(studentsGrades);
- 
+   // console.log("studentsGrades,", studentsGrades)
+      renderByTypeAndDevice();
+      renderTableInforme(studentsGrades);
 
   } catch (error) {
     console.error("Error cargando asistencia:", error);
   }
 }
+//Función para decidir qué render usar
+function renderByTypeAndDevice() {
+  const isDesktop = window.innerWidth > 768;
+
+  if (isDesktop) {
+    if (selectedType === "regular") {
+      renderAttendanceTable(studentsGrades, selectedYear, selectedMonth);
+    } else if (selectedType === "physical_education") {
+      renderPhysicalEducationTable(studentsGrades, selectedYear, selectedMonth);
+    }
+  } else {
+    if (selectedType === "regular") {
+      renderAttendanceMobile(studentsGrades, selectedDate);
+    } else if (selectedType === "physical_education") {
+      renderAttendanceEDMobile(studentsGrades, selectedDate);
+    }
+  }
+}
+
+function renderMobileEmptyState(tbody, message) {
+
+  const tr = document.createElement("tr");
+
+  const td = document.createElement("td");
+  td.colSpan = 5; // importante que coincida con tus columnas
+  td.classList.add("mobile-empty-state");
+
+  td.innerHTML = `
+    <div class="empty-state-content">
+      <i class="fa-solid fa-calendar-days empty-icon"></i>
+      <p>${message}</p>
+    </div>
+  `;
+
+  tr.appendChild(td);
+  tbody.appendChild(tr);
+}
+
 // =======================================================================================
 // 🟢 Funciones  Para el render
 // =======================================================================================
@@ -1139,7 +1685,7 @@ function createFooterRowByDay(tbody, label, valuesArray, monthDates, dayHasData)
   });
 
   // 🔹 8 columnas finales vacías
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 10; i++) {
     tr.appendChild(document.createElement("td"));
   }
 
@@ -1163,7 +1709,7 @@ function createEmptyRow(tbody, monthDates) {
 
   tr.classList.add("footer-row");
 
-  td.colSpan = 3 + monthDates.length + 9;
+  td.colSpan = 3 + monthDates.length + 10;
   td.innerHTML = "&nbsp;";
 
   tr.appendChild(td);
@@ -1289,19 +1835,33 @@ function buildAttendancePayload(input, note = null) {
 
   const value = input.value.toUpperCase();
 
+  // 🔥 Extraer día seguro
+  const rawDate = input.dataset.date;
+
+  if (!rawDate || !rawDate.includes("-")) {
+    uiToast("Error: fecha inválida en la celda", "error");
+    return null;
+  }
+
+  const day = parseInt(rawDate.split("-")[2], 10);
+
+  if (!day || day < 1 || day > 31) {
+    uiToast("Error: día inválido detectado", "error");
+    return null;
+  }
+
   let attendanceStatus = null;
-  let late = { isLate: false };
-  let justification = { isJustified: false };
+  let late = { isLate: false, minutes: null };
+  let justified = { isJustified: false, certificateUrl: null };
 
   switch (value) {
-
     case "P":
       attendanceStatus = "present";
       break;
 
     case "T":
       attendanceStatus = "present";
-      late = { isLate: true };
+      late = { isLate: true, minutes: null };
       break;
 
     case "A":
@@ -1310,7 +1870,7 @@ function buildAttendancePayload(input, note = null) {
 
     case "J":
       attendanceStatus = "absent";
-      justification = { isJustified: true };
+      justified = { isJustified: true, certificateUrl: null };
       break;
 
     case "":
@@ -1319,15 +1879,12 @@ function buildAttendancePayload(input, note = null) {
   }
 
   return {
-    userId: input.dataset.userId,
-    courseId: selectedCourse,
-    academicYear: selectedYear,
-    trimester: Number(trimester),
-    date: input.dataset.date,
+    studentId: input.dataset.userId,
+    day,
     attendanceType: input.dataset.attendanceType,
     attendanceStatus,
     late,
-    justification,
+    justified,
     notes: note ?? ""
   };
 }
@@ -1385,7 +1942,7 @@ function getDayOfWeek(dateString) {
 // =======================================================================================
 // 🟢 Funciones
 // =======================================================================================
-// mapear studetsGrade coninformacion y asistencias de alumnos
+// mapear studentsGrades con información y asistencias de alumnos (solo mapping)
 function mapStudentsForTable(
   studentsInfo = [],
   attendanceMonth = [],
@@ -1398,28 +1955,22 @@ function mapStudentsForTable(
     a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
   );
 
-  // 2️⃣ Convertimos attendanceMonth en mapa por userId como string
+  // 2️⃣ Convertimos attendanceMonth en mapa por studentId
   const attendanceMap = new Map(
-    (attendanceMonth || []).map(a => [
-      String(a.userId || a._id),
-      a
-    ])
+    (attendanceMonth || []).map(a => [String(a.studentId), a])
   );
 
-  // 3️⃣ Convertimos attendancePreviousStudents en mapa por userId como string
+  // 3️⃣ Convertimos attendancePreviousStudents en mapa por studentId
   const previousMap = new Map(
-    (attendancePreviousStudents?.data || []).map(a => [
-      String(a.userId || a._id),
-      a
-    ])
+    (attendancePreviousStudents || []).map(a => [String(a.studentId), a])
   );
 
   // 4️⃣ Armamos estructura final
   const studentsGrades = sortedStudents.map(student => {
-    const userIdStr = String(student._id);
+    const studentIdStr = String(student._id);
 
-    const attendance = attendanceMap.get(userIdStr);
-    const previousAttendance = previousMap.get(userIdStr);
+    const attendance = attendanceMap.get(studentIdStr);
+    const previousAttendance = previousMap.get(studentIdStr);
 
     return {
       userId: student._id,
@@ -1428,9 +1979,8 @@ function mapStudentsForTable(
       email: student.email,
       genero: student.genero,
       status: student.status,
-      presents: attendance?.presents ?? 0,
-      absents: attendance?.absents ?? 0,
-      details: attendance?.details ?? [],
+      // 🔹 dejamos records tal cual para que otra función haga las sumas
+      records: attendance?.records ?? {},
       totalWeightedAbsences: previousAttendance?.totalWeightedAbsences ?? 0
     };
   });
@@ -1440,48 +1990,51 @@ function mapStudentsForTable(
 // actualizar studetsGrade al enviar al back 
 function applyAttendanceChanges() {
 
-  attendanceChanges.forEach((change, key) => {
+  attendanceChanges.forEach((change) => {
 
-    const parts = key.split("_");
+    const {
+      studentId,
+      day,
+      attendanceType,
+      attendanceStatus,
+      late,
+      justified,
+      notes
+    } = change;
 
-    const userId = parts[0];
-    const date = parts[1];
-    const attendanceType = parts.slice(2).join("_");
-
-    const student = studentsGrades.find(s => s.userId === userId);
+    const student = studentsGrades.find(s => s.userId === studentId);
     if (!student) return;
 
-    const existingIndex = student.details.findIndex(d =>
-      d.date === date && d.attendanceType === attendanceType
-    );
-
-    const normalizedDetail = {
-      date,
-      attendanceType,
-      trimester: change.trimester,
-      status: change.attendanceStatus, // 🔥 siempre usar status
-      notes: change.notes || "",
-      late: change.late || { isLate: false },
-      justification: change.justification || { isJustified: false }
-    };
-
-    if (existingIndex !== -1) {
-      // 🔁 Reemplazo limpio
-      student.details[existingIndex] = {
-        ...student.details[existingIndex],
-        ...normalizedDetail
-      };
-    } else {
-      // ➕ Nuevo
-      student.details.push(normalizedDetail);
+    // 🔥 Asegurar que exista records
+    if (!student.records) {
+      student.records = {};
     }
+
+    const recordKey = `${day}_${attendanceType}`;
+
+    // ========================
+    // DELETE
+    // ========================
+    if (!attendanceStatus) {
+      delete student.records[recordKey];
+      return;
+    }
+
+    // ========================
+    // UPSERT LOCAL
+    // ========================
+    student.records[recordKey] = {
+      status: attendanceStatus,
+      late: late || { isLate: false, minutes: null },
+      justified: justified || { isJustified: false, certificateUrl: null },
+      notes: notes || ""
+    };
 
   });
 
 }
 // Calculo poara los informe
 function calculateInformeFromStudents(studentsGrades = []) {
-
   let totalAsistencias = 0;
   let totalInasistencias = 0;
 
@@ -1490,29 +2043,23 @@ function calculateInformeFromStudents(studentsGrades = []) {
 
   studentsGrades.forEach(student => {
 
-    const regularDetails = (student.details || []).filter(
-      d => d.attendanceType === "regular"
-    );
+    // Recorremos todos los registros del alumno
+    Object.entries(student.records || {}).forEach(([key, record]) => {
+      const [dayStr, ...typeParts] = key.split("_");
+      const attendanceType = typeParts.join("_"); // "regular" o "physical_education"
 
-    regularDetails.forEach(detail => {
+      if (attendanceType !== "regular") return; // solo contar regular
 
-      // Guardamos la fecha como día hábil
-      diasHabilesSet.add(detail.date);
+      const day = parseInt(dayStr, 10);
+      diasHabilesSet.add(day); // guardamos como día hábil único
 
-      if (detail.status === "present") {
-        totalAsistencias++;
-      }
-
-      if (detail.status === "absent") {
-        totalInasistencias++;
-      }
-
+      if (record.status === "present") totalAsistencias++;
+      if (record.status === "absent") totalInasistencias++;
     });
 
   });
 
   const asistenciaIdeal = totalAsistencias + totalInasistencias;
-
   const diasHabiles = diasHabilesSet.size;
 
   const porcentajeAsistencia =
@@ -1533,6 +2080,70 @@ function calculateInformeFromStudents(studentsGrades = []) {
     asistenciaMedia,
     porcentajeAsistencia
   };
+}
+// Función para cargar días hábiles en el select
+function loadBusinessDaysInSelect(year, month) {
+
+  const select = document.getElementById("attendanceDateSelect");
+
+  if (!year || !month || !select) return;
+
+  // 1️⃣ Limpiar
+  select.innerHTML = `
+    <option value="" selected disabled>Seleccione un día</option>
+  `;
+
+  const monthDates = getMonthDays(year, month);
+  const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+  // 2️⃣ Crear opciones
+  monthDates.forEach(date => {
+
+    const dayOfWeek = getDayOfWeek(date);
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) return;
+
+    const option = document.createElement("option");
+    option.value = date;
+
+    const dayNumber = date.split("-")[2];
+    option.textContent = `${dayNames[dayOfWeek]} ${dayNumber}/${month}`;
+
+    select.appendChild(option);
+  });
+
+  // =====================================================
+  // 🔥 3️⃣ EXTRA PRO — AUTOSELECCIONAR SI ES MES ACTUAL
+  // =====================================================
+
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1;
+
+  if (Number(year) === todayYear && Number(month) === todayMonth) {
+
+    const todayFormatted =
+      `${todayYear}-${String(todayMonth).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+    const optionExists = dateSelect.querySelector(
+      `option[value="${todayFormatted}"]`
+    );
+
+    if (optionExists) {
+
+      // ✅ Selecciona visualmente
+      dateSelect.value = todayFormatted;
+
+      // ✅ Actualiza variable global
+      selectedDate = todayFormatted;
+
+      // ✅ Dispara evento change (más profesional que llamar render directo)
+      dateSelect.dispatchEvent(new Event("change"));
+
+    }
+
+  }
+
 }
 // =======================================================================================
 // 🟢 Fetch 
@@ -1656,7 +2267,7 @@ async function fetchGetAttendanceForMonth(courseId, year, month) {
     }
 
     const data = await res.json();
-    const attendances = data.data || [];
+    const attendances = Array.isArray(data.data) ? data.data : [];
 
     return attendances || []; // devolvemos siempre un array
   } catch (error) {
@@ -1695,7 +2306,7 @@ async function fetchGetPreviousAttendance(courseId, year, month) {
     }
 
     const data = await res.json();
-    const attendances = data || [];
+    const attendances = data.data || [];
     return attendances; // siempre devolvemos un array
   } catch (error) {
     console.error("Error al conectar con el servidor:", error);
@@ -1712,16 +2323,25 @@ async function fetchGetPreviousAttendance(courseId, year, month) {
 //  🟢 Fetch Cargar asistencias/inasistencias Masiva
 // =============================
 
-async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, attendanceChanges ) {
-
+async function fetchPostAttendanceForMonth(courseId, academicYear, month, attendanceChanges) {
   if (!attendanceChanges || attendanceChanges.size === 0) {
     uiToast("No hay cambios para guardar", "info");
     return null;
   }
-  
-  try {
 
+  try {
     const token = localStorage.getItem("token");
+
+    // 🔹 Convertimos Map → Array en el formato que espera el backend
+    const changes = [...attendanceChanges.values()].map(change => ({
+      studentId: change.studentId,
+      day: change.day,  // número del día
+      attendanceType: change.attendanceType, // "regular" | "physical_education"
+      attendanceStatus: change.attendanceStatus, // "present" | "absent"
+      late: change.late ?? { isLate: false, minutes: null },
+      justified: change.justified ?? { isJustified: false, certificateUrl: null },
+      notes: change.notes ?? ""
+    }));
 
     const response = await fetch(`${API_URL}/api/attendance/massive`, {
       method: "POST",
@@ -1729,13 +2349,7 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify({
-        courseId,
-        academicYear,
-        trimester: Number(trimester),
-        attendanceType: selectedType,
-        changes: [...attendanceChanges.values()] // 🔥 convertimos Map → Array
-      })
+      body: JSON.stringify({ courseId, academicYear, month, changes })
     });
 
     const data = await response.json();
@@ -1749,10 +2363,10 @@ async function fetchPostAttendanceForMonth(courseId, academicYear, trimester, at
 
     applyAttendanceChanges()
 
-    // 🔥 limpiar buffer
+    // Limpiar buffer
     attendanceChanges.clear();
 
-    // 🔥 actualizar valores originales
+    // Actualizar valores originales de los inputs
     document.querySelectorAll(".attendance-input").forEach(input => {
       input.dataset.originalValue = input.value;
     });
