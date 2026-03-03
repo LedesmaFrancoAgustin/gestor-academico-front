@@ -41,7 +41,7 @@
                     />
                 </div>
                 <div class="px-2 d-flex align-items-center">
-                     <h1 class="titleName text-center" id="name-institution">Colegio</h1>
+                     <h1 class="titleName text-center" id="name-institution"></h1>
                 </div>
                
             </div>
@@ -95,12 +95,7 @@
 
                 <ul class="dropdown-menu dropdown-menu-end shadow">
                     <li>
-                    <a class="dropdown-item" href="./configurations.html?tab=perfil">
-                        <i class="bi bi-person me-2"></i> Perfil
-                    </a>
-                    </li>
-                    <li>
-                    <a class="dropdown-item" href="./configurations.html?tab=preferencias">
+                    <a class="dropdown-item" href="./configurations-Students.html">
                         <i class="bi bi-gear me-2"></i> Configuración
                     </a>
                     </li>
@@ -131,7 +126,7 @@
                     </div>
                     <div class="student-sidebar-user-info">
                         <h3 class="student-sidebar-username" id="student-name">Alumno</h3>
-                        <span class="student-sidebar-role">Alumno</span>
+                        <span class="student-sidebar-role" id="user-LastName"></span>
                     </div>
                     </div>
 
@@ -140,31 +135,25 @@
 
                     <li class="nav-item ">
                         <a class="nav-link" href="./index-Students.html">
-                        <i class="fa fa-home"></i> Inicio
+                        <i class="fa fa-home"></i>Inicio
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="">
-                        <i class="fa fa-book"></i> Mis cursos
-                        </a>
-                    </li>
-
-                    <li class="nav-item ">
+                     <li class="nav-item ">
                         <a class="nav-link" href="./note-Students.html">
-                        <i class="fa fa-file-alt"></i> Mis notas
+                        <i class="fa fa-file-alt"></i>Notas
                         </a>
                     </li>
 
                     <li class="nav-item active">
                         <a class="nav-link" href="./attendance-Students.html">
-                        <i class="fa fa-calendar-check"></i> Asistencias
+                        <i class="fa fa-calendar-check"></i>Asistencias
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="">
-                        <i class="fa fa-cog"></i> Configuración
+                        <a class="nav-link" href="./configurations-Students.html">
+                        <i class="fa fa-cog"></i>Configuración
                         </a>
                     </li>
 
@@ -189,38 +178,54 @@
 
                     <!-- Selector de curso -->
                    <section class="attendance-selector">
+                    <div class="selectors-wrapper">
 
-                     <div class="select-group">
-                        <label for="academicYearSelect">Año</label>
-                        <select id="academicYearSelect" class="attendance-select">
-                                            <option value="" selected disabled>Seleccione un año</option>
-                                            <option value="2025">2025</option>
-                                            <option value="2026">2026</option>
-                                            <option value="2027">2027</option>
-                                            <option value="2028">2028</option>
-                                            <option value="2029">2029</option>
-                                            <option value="2030">2030</option>
-                        </select>
+                        <div class="select-group">
+                            <label for="academicYearSelect">Año</label>
+                            <select id="academicYearSelect" class="attendance-select">
+                                                <option value="" selected disabled>Seleccione un año</option>
+                                                <option value="2026">2026</option>
+                                                <option value="2027">2027</option>
+                            </select>
+                        </div>
+
+                    
+                        <div class="select-group">
+                            <label for="monthSelect">Mes</label>
+                            <select id="monthSelect" class="attendance-select" disabled>
+                                <option value="">Todos los meses</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
                     </div>
-
-                  
-                    <div class="select-group">
-                        <label for="monthSelect">Mes</label>
-                        <select id="monthSelect" class="attendance-select" disabled>
-                            <option value="">Todos los meses</option>
-                            <option value="03">Marzo</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Mayo</option>
-                            <option value="06">Junio</option>
-                            <option value="07">Julio</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                        </select>
+                    <!-- Cartel de info con iconos -->
+                    <div id="attendanceInfo" class="attendance-info">
+                        <span class="info-item absent">
+                            <i class="bi bi-person-x-fill"></i>
+                            Ausente: <strong>1</strong>
+                        </span>
+                        <span class="info-item late">
+                            <i class="bi bi-clock-fill"></i>
+                            Tarde: <strong>1/4</strong>
+                        </span>
+                        <span class="info-item ed">
+                            <i class="bi bi-journal-text"></i>
+                            ED: <strong>1/2</strong>
+                        </span>
+                        <span class="info-item justified">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Justificada: <strong>0</strong>
+                        </span>
                     </div>
-
                     </section>
 
                     <div class="absences-table-wrapper">

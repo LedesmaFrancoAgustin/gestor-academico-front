@@ -53,6 +53,8 @@
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   margin-bottom: 2rem;
+
+  justify-content: space-between;
 }
 
 /* Select */
@@ -78,6 +80,68 @@
   transition: all 0.25s ease;
 }
 
+/* Cartel Inforativo */
+/* Contenedor general del cartel */
+/* Contenedor principal */
+.attendance-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: linear-gradient(135deg, #f0f4ff, #d9e4ff);
+    padding: 12px 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-wrap: wrap;
+}
+
+/* Cada ítem */
+.attendance-info .info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    min-width: 100px;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+}
+
+/* Hover ligero */
+.attendance-info .info-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Iconos */
+.attendance-info .info-item i {
+    font-size: 16px;
+}
+
+/* Colores por tipo */
+.info-item.absent { background-color: #e53e3e; }       /* rojo */
+.info-item.late { background-color: #d69e2e; }         /* amarillo/naranja */
+.info-item.ed { background-color: #3182ce; }           /* azul */
+.info-item.justified { background-color: #38a169; }    /* verde */
+
+/* Wrapper de selects */
+.selectors-wrapper {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Wrapper del cartel de info */
+.info-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
 
 /*=====================================================
      Render Tablas 
@@ -134,7 +198,7 @@
   color: #94a3b8;
 }
 .absences-table .late {
-  color: #b45309;
+  color: #ac6e3e;
   font-weight: 500;
 }
 .absences-table .obs {
@@ -252,60 +316,161 @@ Mobile - Render
   .mobile-only { display: block; }
  
 
-  .absence-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.06);
-  }
+/*=======================================================
+Mobile - Render -Card
+========================================================*/
+/* Card Container */
+.absence-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-  .absence-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
+.absence-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
 
-  .absence-header .date {
-    font-weight: 600;
-  }
+/* Header: Fecha, Tipo, Trim */
+.absence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #1e3a8a;
+}
 
-  .absence-header .trim {
-    font-size: 13px;
-    color: #777;
-  }
+/* Badges */
+.absence-badges {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 
-  .absence-badges {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-  }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  font-weight: 500;
+}
 
-  .badge {
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: #f1f3f5;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+.badge.ok {
+  background-color: #d1fae5;
+  color: #059669;
+}
 
-  .badge.ok { color: #2ecc71; }
-  .badge.no { color: #e74c3c; }
-  .badge.late { color: #f39c12; }
+.badge.late {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
 
-  .absence-notes {
-    font-size: 13px;
-    color: #555;
-    display: flex;
-    gap: 6px;
-  }
+/* Observaciones */
+.absence-notes {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-  .mobile-empty {
-    text-align: center;
-    padding: 24px;
-    color: #777;
-  }
+/* Empty State */
+.mobile-empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px;
+  font-size: 14px;
+}
+}
+
+/*=====================================================
+     Render Tablas - Totales
+========================================================*/
+
+/* ==== Responsive: Mobile ==== */
+@media (max-width: 600px) {
+      /* Contenedor principal de totales */
+    .absences-totals {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Cada fila de totales */
+    .totals-row {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap; /* permite que se rompa en varias líneas si falta espacio */
+    }
+
+    /* Tarjeta individual */
+    .total-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        color: #1e3a8a;
+        padding: 12px 16px;
+        border-radius: 12px;
+        min-width: 100px;
+        font-weight: 600;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s;
+        text-align: center;
+    }
+
+    /* Hover sutil */
+    .total-card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Icono dentro de la tarjeta */
+    .total-card i {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    /* Diferentes colores opcionales */
+    .total-card.ok { color: #16a34a; }
+    .total-card.no { color: #dc2626; }
+    .total-card.late { color: #d8a05f; }
+
+    /* Label y valor */
+    .total-card .label {
+        font-size: 13px;
+        color: #1e3a8a;
+    }
+    .total-card .value {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .totals-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .total-card {
+        width: 100%;      /* ocupa casi todo el ancho */
+        min-width: unset;
+    }
+
+    /* Contenedor general */
+    .attendance-selector {
+      margin-bottom: 0rem;
+    }
+    .absences-table-wrapper {
+      margin-top: 0rem;
+    }
 }

@@ -131,7 +131,7 @@
                     </div>
                     <div class="student-sidebar-user-info">
                         <h3 class="student-sidebar-username" id="student-name">Alumno</h3>
-                        <span class="student-sidebar-role">Alumno</span>
+                        <span class="student-sidebar-role" id="user-LastName"></span>
                     </div>
                     </div>
 
@@ -145,14 +145,8 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="">
-                        <i class="fa fa-book"></i> Mis cursos
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
                         <a class="nav-link" href="./note-Students.html">
-                        <i class="fa fa-file-alt"></i> Mis notas
+                        <i class="fa fa-file-alt"></i> Notas
                         </a>
                     </li>
 
@@ -163,7 +157,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="./configurations-Students.html">
                         <i class="fa fa-cog"></i> Configuración
                         </a>
                     </li>
@@ -189,53 +183,30 @@
                         </p>
                     </section>
 
-                    <!-- Estadísticas -->
-                    <section class="alumno-stats d-flex gap-3 flex-wrap mb-4">
-                        <div class="alumno-stat-card">
-                            <h3>Materias</h3>
-                            <p class="alumno-stat-number" id="stat-materias">0</p>
-                            <span class="text-muted">Asignadas</span>
-                        </div>
-
-                        <div class="alumno-stat-card">
-                            <h3>Trimestres</h3>
-                            <p class="alumno-stat-number" id="stat-trimestres">0</p>
-                            <span class="text-muted">Completados</span>
-                        </div>
-
-                        <div class="alumno-stat-card">
-                            <h3>Notas</h3>
-                            <p class="alumno-stat-number" id="stat-notas">0</p>
-                            <span class="text-muted">Registradas</span>
-                        </div>
-
-                        <div class="alumno-stat-card stat-warning">
-                            <h3>Pendientes</h3>
-                            <p class="alumno-stat-number" id="stat-pendientes">0</p>
-                            <span class="text-muted">Tareas / Evaluaciones</span>
-                        </div>
-                    </section>
-
                     <!-- Acciones rápidas -->
                     <section class="alumno-actions mb-4 d-flex gap-3 flex-wrap">
+
+                         <a href="./attendance-Students.html" class="alumno-action-card">
+                            <i class="bi bi-calendar-check"></i>
+                            <p>Ver asistencias</p>
+                        </a>
+
                         <a href="./grades.html" class="alumno-action-card">
                             <i class="bi bi-card-checklist"></i>
                             <p>Ver notas</p>
                         </a>
 
-                        <a href="./courses.html" class="alumno-action-card">
-                            <i class="bi bi-book"></i>
-                            <p>Mis cursos</p>
+                    </section>
+                     <!-- Acciones rápidas -->
+                    <section class="alumno-actions mb-4 d-flex gap-3 flex-wrap">
+                        <a href="" class="alumno-action-card">
+                            <i class="bi bi-clock"></i>
+                            <p>Ver horarios</p>
                         </a>
 
-                        <a href="./averages.html" class="alumno-action-card">
-                            <i class="bi bi-bar-chart-line"></i>
-                            <p>Promedios</p>
-                        </a>
-
-                        <a href="./notices.html" class="alumno-action-card">
-                            <i class="bi bi-exclamation-circle"></i>
-                            <p>Pendientes</p>
+                        <a href="" class="alumno-action-card">
+                            <i class="bi bi-file-text"></i>
+                            <p>Ver documentos</p>
                         </a>
                     </section>
 
